@@ -7,6 +7,7 @@ public:
 	int id;
 	double ckins[CKINS];
 
+
 };
 
 
