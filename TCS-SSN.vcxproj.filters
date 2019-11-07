@@ -24,9 +24,4 @@
       <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\TCS-SSN Initial Data Genetator\V.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-  </ItemGroup>
 </Project>
