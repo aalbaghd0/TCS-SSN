@@ -128,6 +128,9 @@
   <ItemGroup>
     <ClInclude Include="vertex.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\TCS-SSN Initial Data Genetator\V.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
