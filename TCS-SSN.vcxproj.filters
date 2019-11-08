@@ -18,12 +18,24 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="heap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="readFiles.hpp">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="heap.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gendef.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>

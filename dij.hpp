@@ -1,31 +1,15 @@
-#include <iostream>
-#include "vertex.h"
-#include<fstream>
-#include"readFiles.hpp"
-#include <list>
+#ifndef DD
+#define DD
+
+
+#include<iostream>
+#include<list>
+#include"vertex.h"
 #include"heap.h"
-
-const int No_V = 100;
-const int No_E = 40000;
-char Vfile[10] = "V.txt";
-char Efile[10] = "E.txt";
-vertex *vrtx = new vertex[No_V];
-std::list<int> * e_list = new std::list<int>[No_E];
-
-void dij(std::list<int> edge[], int V_num, int src, int dst);
-
-void main(int args, char arg[]) {
-	read_vertices(vrtx, 10, Vfile);
-	read_edges(e_list, 10, Efile);
-	dij(e_list, No_V, 0, 10);
-	
-	
-};
 
 
 void dij(std::list<int> edge[], int V_num, int src, int dst) {
-	Heap* hp = new Heap();
-	
+	Heap* hp;
 	int* prev = new int[V_num];
 	int* dist = new int[V_num];
 
@@ -35,15 +19,13 @@ void dij(std::list<int> edge[], int V_num, int src, int dst) {
 	HeapEntry* he = new HeapEntry();
 	he->son1 = src;
 	he->key = 0;
-	he->level = 0;
 	dist[src] = 0;
-	hp->init(2);
 	hp->insert(he);
 	delete he;
 
 
 	while (hp->used > 0) {
-		HeapEntry* he = new HeapEntry;
+		HeapEntry *he = new HeapEntry;
 		hp->remove(he);
 		for (std::list<int>::iterator it = edge[he->son1].begin(); it != edge[he->son1].end(); ++it) {
 			HeapEntry* he2 = new HeapEntry();
@@ -59,4 +41,6 @@ void dij(std::list<int> edge[], int V_num, int src, int dst) {
 		}
 	}
 	delete hp;
+
 }
+#endif // !1

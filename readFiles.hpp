@@ -1,18 +1,19 @@
 #ifndef READ_FILES
 #define READ_FILES
 
+#define _CRT_SECURE_NO_DEPRECATE
+#pragma warning (disable : 4996)
+
 #include <iostream>
 #include "vertex.h"
 #include<fstream>
 #include<list>
 
-#pragma warning(disable:4996)
 
 void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 	FILE* file = fopen(Vfile, "r");
 	int v_id, i, j, r, f = 0;
 	j = 0;
-
 	if (file == NULL) {
 		std::cerr << "could not open the file to read vertices";
 		return;
@@ -26,7 +27,6 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 			fscanf(file, "%lf", &vrtx[v_id].ckins[j]);
 			j++;
 		}
-		std::cerr << std::endl;
 		for (i = 1; i <= 5; i++) {
 			fscanf(file, "%d", &r);
 			vrtx[v_id].key[r] = 1;
@@ -52,20 +52,23 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 
 void read_edges(std::list<int> edge[], int size, char Efile[]) {
 	FILE* file = fopen(Efile, "r");
-	
+	int from, to;
+	int max = 0;
+
 	if (file == NULL) {
 		std::cout << "The edge file cannot be open";
 		return;
 	}
-	int from, to;
-	int f = 0;
-	while (f<100) {
-		++f;
+	
+	while (!feof(file)) {
 		fscanf(file, "%d %d", &from, &to);
 		edge[from].push_back(to);
 		edge[to].push_back(from);
+		if (max < from)
+			max = from;
+		if (max < to)
+			max = to;
 	}
-
 	/*
 	// test the edge list
 	for (int i = 0; i < 10; i++) {

@@ -17,8 +17,10 @@ public:
 
 class edges {
 public:
-	int from;
-	int to;
+	int id;
+	int from = 0;
+	int to = 0;
+	int weight = 1;
 };
 
 
