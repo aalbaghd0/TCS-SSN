@@ -41,5 +41,8 @@
     <ClInclude Include="dij.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="parameterSettings.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

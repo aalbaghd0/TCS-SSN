@@ -81,7 +81,7 @@ double rn_Dij(std::list<int> graph[], edges edge[],int V_num, int src, int dst) 
 
 
 
-double sn_Dij(std::list<int> graph[], int E_numm, int V_num,int src, int dst) {
+double sn_Dij(std::list<int> graph[], int V_num, int src, int dst) {
 	//initialise all vertices as unexplored 
 	int * dist = new int[V_num];
 	int *parent = new int[V_num];

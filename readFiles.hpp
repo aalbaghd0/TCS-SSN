@@ -18,6 +18,9 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 		std::cout << "could not open the file to read social network vertices";
 		return;
 	}
+	// get ride of the number of lines in the file
+	int getRide;
+	fscanf(file, "%d", &getRide);
 
 	while (!feof(file)) {
 		fscanf(file, "%d", &v_id);
@@ -62,6 +65,9 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		std::cout << "The edge file cannot be open";
 		return;
 	}
+	// get ride of the number of lines in the file
+	int getRide;
+	fscanf(file, "%d", &getRide);
 	
 	while (!feof(file)) {
 		fscanf(file, "%d %d", &from, &to);
@@ -79,6 +85,10 @@ void rn_read_edges(std::list<int> graph[], edges edge[], int E_num,int size, cha
 		std::cout << "The edge file cannot be open";
 		return;
 	}
+	// get ride of the number of lines in the file
+	int getRide;
+	fscanf(file, "%d", &getRide);
+
 
 	while (!feof(file)) {
 		fscanf(file, "%d %d %d %lf", &id, &from, &to, &w);

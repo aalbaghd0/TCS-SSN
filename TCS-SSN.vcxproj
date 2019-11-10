@@ -132,6 +132,7 @@
     <ClInclude Include="dij.hpp" />
     <ClInclude Include="gendef.h" />
     <ClInclude Include="heap.h" />
+    <ClInclude Include="parameterSettings.h" />
     <ClInclude Include="readFiles.hpp" />
     <ClInclude Include="vertex.h" />
   </ItemGroup>
