@@ -129,6 +129,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dij.hpp" />
     <ClInclude Include="gendef.h" />
     <ClInclude Include="heap.h" />
     <ClInclude Include="readFiles.hpp" />

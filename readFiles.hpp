@@ -12,29 +12,33 @@
 
 void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 	FILE* file = fopen(Vfile, "r");
-	int v_id, i, j, r, f = 0;
+	int v_id, i, j, r, f = 0, r1;
 	j = 0;
 	if (file == NULL) {
-		std::cerr << "could not open the file to read vertices";
+		std::cout << "could not open the file to read social network vertices";
 		return;
 	}
 
-	while (f < 100) {
-		++f;
+	while (!feof(file)) {
 		fscanf(file, "%d", &v_id);
 		j = 0;
+		//std::cerr << v_id << " ";
 		for (i = 1; i <= 12; i++) {
 			fscanf(file, "%lf", &vrtx[v_id].ckins[j]);
+			//std::cerr << vrtx[v_id].ckins[j] << " ";
 			j++;
 		}
 		for (i = 1; i <= 5; i++) {
 			fscanf(file, "%d", &r);
 			vrtx[v_id].key[r] = 1;
+			//std::cerr << r << " ";
 		}
 		for (i = 1; i <= 5; i++) {
 			fscanf(file, "%d", &r);
 			vrtx[v_id].topic[r] = 1;
+			//std::cerr << r << " ";
 		}
+		//std::cerr << " \n";
 	}
 	/*
 	// print the vrtx array for checking
@@ -50,10 +54,9 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 	*/
 };
 
-void read_edges(std::list<int> edge[], int size, char Efile[]) {
+void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	FILE* file = fopen(Efile, "r");
 	int from, to;
-	int max = 0;
 
 	if (file == NULL) {
 		std::cout << "The edge file cannot be open";
@@ -64,6 +67,25 @@ void read_edges(std::list<int> edge[], int size, char Efile[]) {
 		fscanf(file, "%d %d", &from, &to);
 		edge[from].push_back(to);
 		edge[to].push_back(from);
+	}
+}
+
+void rn_read_edges(std::list<int> graph[], edges edge[], int E_num,int size, char Efile[]) {
+	FILE* file = fopen(Efile, "r");
+	int from, to, id;
+	int max = 0;
+	double w = 0;
+	if (file == NULL) {
+		std::cout << "The edge file cannot be open";
+		return;
+	}
+
+	while (!feof(file)) {
+		fscanf(file, "%d %d %d %lf", &id, &from, &to, &w);
+		edge[id].weight = w;
+		edge[(E_num / 2) + id].weight = w;
+		graph[from].push_back(to);
+		graph[to].push_back(from);
 		if (max < from)
 			max = from;
 		if (max < to)

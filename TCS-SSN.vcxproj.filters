@@ -38,5 +38,8 @@
     <ClInclude Include="gendef.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="dij.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

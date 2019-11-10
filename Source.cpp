@@ -4,59 +4,41 @@
 #include"readFiles.hpp"
 #include <list>
 #include"heap.h"
+#include "dij.hpp"
 
-const int No_V = 100;
-const int No_E = 40000;
-char Vfile[10] = "V.txt";
-char Efile[10] = "E.txt";
-vertex *vrtx = new vertex[No_V];
-std::list<int> * e_list = new std::list<int>[No_E];
 
-void dij(std::list<int> edge[], int V_num, int src, int dst);
+#define min					(a, b) (((a) < (b))? (a) : (b)  )
+#define max					(a, b) (((a) > (b))? (a) : (b)  )
 
+// file sizes
+#define	No_sn_V				40000
+#define No_sn_E				604304 * 2
+#define No_rn_V				6105
+#define No_rn_E				7035 * 2
+// file names
+char sn_V_file[20] =		"../SN_vertices.txt";
+char sn_E_file[20] =		"../SN_edges.txt";
+char rn_V_file[20] =		"../RN_vertices.txt";
+char rn_E_file[20] =		"../RN_edges.txt";
+
+// define arrays
+vertex *sn_vrtx = new vertex[No_sn_V];
+vertex* rn_vrtx = new vertex[No_rn_V];
+
+std::list<int> * snGraph = new std::list<int>[No_sn_V];
+std::list<int>* rnGraph = new std::list<int>[No_rn_V];
+
+edges *snEdges = new edges[No_sn_E];
+edges* rnEdges = new edges[No_rn_E];
+
+
+// the main function
 void main(int args, char arg[]) {
-	read_vertices(vrtx, 10, Vfile);
-	read_edges(e_list, 10, Efile);
-	dij(e_list, No_V, 0, 10);
-	
-	
+	read_vertices(sn_vrtx, 10, sn_V_file);
+	sn_read_edges(snGraph, sn_E_file);
+	rn_read_edges(rnGraph, rnEdges, No_rn_E,10, rn_E_file);
+	double cost = rn_Dij(rnGraph, rnEdges, No_rn_V, 0, 9);
 };
 
 
-void dij(std::list<int> edge[], int V_num, int src, int dst) {
-	Heap* hp = new Heap();
-	
-	int* prev = new int[V_num];
-	int* dist = new int[V_num];
 
-	for (int v = 0; v < V_num; v++) {
-		prev[v] = -1;
-	}
-	HeapEntry* he = new HeapEntry();
-	he->son1 = src;
-	he->key = 0;
-	he->level = 0;
-	dist[src] = 0;
-	hp->init(2);
-	hp->insert(he);
-	delete he;
-
-
-	while (hp->used > 0) {
-		HeapEntry* he = new HeapEntry;
-		hp->remove(he);
-		for (std::list<int>::iterator it = edge[he->son1].begin(); it != edge[he->son1].end(); ++it) {
-			HeapEntry* he2 = new HeapEntry();
-			he2->son1 = *it;
-			he2->key = dist[he->son1] + 1;
-			if (he2->key < dist[*it]) {
-				dist[*it] = he2->key;
-				prev[*it] = he->son1;
-				hp->insert(he2);
-				delete he2;
-			}
-
-		}
-	}
-	delete hp;
-}
