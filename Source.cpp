@@ -1,11 +1,11 @@
 #include <iostream>
-#include "vertex.h"
+#include "tcs_ssn_h/vertex.h"
 #include<fstream>
-#include"readFiles.hpp"
+#include"tcs_ssn_h/readFiles.hpp"
 #include <list>
-#include"heap.h"
-#include "dij.hpp"
-#include"parameterSettings.h"
+#include"tcs_ssn_h/heap.h"
+#include "tcs_ssn_h/dij.hpp"
+#include"tcs_ssn_h/parameterSettings.h"
 
 
 
@@ -25,9 +25,8 @@ void main(int args, char arg[]) {
 	read_vertices(sn_vrtx, 10, sn_V_file);
 	sn_read_edges(snGraph, sn_E_file);
 	rn_read_edges(rnGraph, rnEdges, No_rn_E,10, rn_E_file);
-	double cost = rn_Dij(rnGraph, rnEdges, No_rn_V, 0, 9);
-	sn_Dij(snGraph, No_sn_V, 0, 876);
-
+	std::cerr<< "\n"<< rn_Dij(rnGraph, rnEdges, No_rn_V, 0, 200)<< "\n";
+	std::cerr << "\n"<< sn_Dij(snGraph, No_sn_V, 0, 2764)<< "\n";
 };
 
 

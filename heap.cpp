@@ -1,7 +1,7 @@
 /* this file implements the class Heap */
 
-#include "heap.h"
-#include "gendef.h"
+#include "tcs_ssn_h/heap.h"
+#include "tcs_ssn_h/gendef.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

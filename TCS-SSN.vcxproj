@@ -127,14 +127,17 @@
     <ClCompile Include="functions.cpp" />
     <ClCompile Include="heap.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="tcs_ssn_h\functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dij.hpp" />
-    <ClInclude Include="gendef.h" />
-    <ClInclude Include="heap.h" />
-    <ClInclude Include="parameterSettings.h" />
     <ClInclude Include="readFiles.hpp" />
-    <ClInclude Include="vertex.h" />
+    <ClInclude Include="tcs_ssn_h\dij.hpp" />
+    <ClInclude Include="tcs_ssn_h\gendef.h" />
+    <ClInclude Include="tcs_ssn_h\heap.h" />
+    <ClInclude Include="tcs_ssn_h\parameterSettings.h" />
+    <ClInclude Include="tcs_ssn_h\readFiles.hpp" />
+    <ClInclude Include="tcs_ssn_h\vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

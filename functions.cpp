@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "gendef.h"
+#include "tcs_ssn_h/gendef.h"
 #include<iostream>
 //////////////////////////////////////////////////////////////////////////////
 // globals

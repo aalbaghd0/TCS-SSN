@@ -24,24 +24,33 @@
     <ClCompile Include="functions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tcs_ssn_h\functions.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="vertex.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="readFiles.hpp">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="heap.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="gendef.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
     <ClInclude Include="dij.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="parameterSettings.h">
+    <ClInclude Include="readFiles.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcs_ssn_h\dij.hpp">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcs_ssn_h\gendef.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcs_ssn_h\heap.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcs_ssn_h\parameterSettings.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcs_ssn_h\vertex.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcs_ssn_h\readFiles.hpp">
       <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
