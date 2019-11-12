@@ -31,6 +31,9 @@ int set_parameters(char filename[]) {
 #define No_sn_E				set_parameters(sn_E_file) * 2
 #define No_rn_V				set_parameters(rn_V_file)
 #define No_rn_E				set_parameters(rn_E_file) * 2
+#define index_piv			10
+#define SN_piv				10
+#define RN_piv				10
 // file names
 
 #endif // !SETTINGS_HPP

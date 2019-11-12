@@ -130,6 +130,7 @@
     <ClCompile Include="tcs_ssn_h\functions.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="buildIndex.h" />
     <ClInclude Include="dij.hpp" />
     <ClInclude Include="readFiles.hpp" />
     <ClInclude Include="tcs_ssn_h\dij.hpp" />

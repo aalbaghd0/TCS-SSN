@@ -53,5 +53,8 @@
     <ClInclude Include="tcs_ssn_h\readFiles.hpp">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="buildIndex.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
