@@ -11,11 +11,6 @@
 #include <set>
 
 
-
-
-
-
-
 double quality(int v, int piv) {
 	return (??);
 }
@@ -40,9 +35,6 @@ void gen_subgraphs(int cand_index_piv[], std::set<int> G[]) {
 		G[assign].insert(v);
 	}
 }
-
-
-
 
 void sn_piv_select(std::list<int> rnGraph, std::list<int> snGraph) {
 	double global_cost = INT_MAX;
