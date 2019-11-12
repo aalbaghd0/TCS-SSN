@@ -31,9 +31,40 @@ int set_parameters(char filename[]) {
 #define No_sn_E				set_parameters(sn_E_file) * 2
 #define No_rn_V				set_parameters(rn_V_file)
 #define No_rn_E				set_parameters(rn_E_file) * 2
-#define index_piv			10
-#define SN_piv				10
-#define RN_piv				10
+#define No_index_piv			10
+#define No_SN_piv				10
+#define No_RN_piv				10
+
+
+int* index_piv = new int[No_index_piv];
+
 // file names
+
+
+
+/// some globale structurs 
+vertex* sn_vrtx = new vertex[No_sn_V];
+vertex* rn_vrtx = new vertex[No_rn_V];
+
+std::list<int>* snGraph = new std::list<int>[No_sn_V];
+std::list<int>* rnGraph = new std::list<int>[No_rn_V];
+
+edges* snEdges = new edges[No_sn_E];
+edges* rnEdges = new edges[No_rn_E];
+
+
+
+
+/// some global functions
+int uniform(int _min, int _max) {
+	//	cout<<_min<<"  "<<_max<<endl;
+	int int_r = rand();
+	long base = RAND_MAX - 1;
+	float f_r = ((float)int_r) / base;
+	return (int) (_max - _min) * f_r + _min;
+}
+
+
+// functions
 
 #endif // !SETTINGS_HPP

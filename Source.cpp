@@ -10,14 +10,7 @@
 
 
 // define arrays
-vertex *sn_vrtx = new vertex[No_sn_V];
-vertex* rn_vrtx = new vertex[No_rn_V];
 
-std::list<int> * snGraph = new std::list<int>[No_sn_V];
-std::list<int>* rnGraph = new std::list<int>[No_rn_V];
-
-edges *snEdges = new edges[No_sn_E];
-edges* rnEdges = new edges[No_rn_E];
 
 
 // the main function
