@@ -1,5 +1,6 @@
 #pragma once
 #include <bitset>
+#include <set>
 #ifndef VERTEX_H
 #define VERTEX_H
 
@@ -10,9 +11,10 @@ const int No_T= 10;
 class vertex {
 public:
 	int id;
-	double ckins[CKINS];
+	std::pair<double, double> ckins[CKINS];
 	std::bitset<No_K> key;
 	std::bitset<No_T> topic;
+	std::set<int> nbrs;
 };
 
 class edges {
@@ -21,6 +23,8 @@ public:
 	int from = 0;
 	int to = 0;
 	int weight = 1;
+	int sup;
+
 };
 
 

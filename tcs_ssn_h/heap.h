@@ -41,6 +41,7 @@ public:
 	void init(int _dim, int _hsize = MAX_HEAP_SIZE);
 	void insert(HeapEntry *_he);
 	bool remove(HeapEntry *_he);
+	bool deleteEntry(int a);
 };
 
 #endif

@@ -6,16 +6,17 @@
 #include"tcs_ssn_h/vertex.h"
 #include"heap.h"
 #include <list>
+#include "parameterSettings.h"
 
 
-double rn_Dij(std::list<int> graph[], edges edge[],int V_num, int src, int dst) {
+double rn_Dij(int src, int dst) {
 	
-	int* dist = new int[V_num];
-	int* parent = new int[V_num];
-	bool* s = new bool[V_num];
-	bool* f = new bool[V_num];
+	int* dist = new int[No_rn_V];
+	int* parent = new int[No_rn_V];
+	bool* s = new bool[No_rn_V];
+	bool* f = new bool[No_rn_V];
 
-	for (int v = 0; v < V_num; v++) {
+	for (int v = 0; v < No_rn_V; v++) {
 		s[v] = false;
 		f[v] = false;
 		dist[v] = INT_MAX;
@@ -47,10 +48,10 @@ double rn_Dij(std::list<int> graph[], edges edge[],int V_num, int src, int dst) 
 		f[e] = false;
 		delete he;
 
-		for (std::list<int>::iterator it = graph[e].begin(); it != graph[e].end(); ++it) {
+		for (std::list<int>::iterator it = rnGraph[e].begin(); it != rnGraph[e].end(); ++it) {
 			int to = *it;
 			if (s[to] == false) {
-				double new_dist = dist[e] + edge[to].weight;
+				double new_dist = dist[e] + rnEdges[to].weight;
 				if (new_dist < dist[to]) {
 					dist[to] = new_dist;
 					HeapEntry* he = new HeapEntry();
@@ -83,15 +84,15 @@ double rn_Dij(std::list<int> graph[], edges edge[],int V_num, int src, int dst) 
 
 
 
-double sn_Dij(std::list<int> graph[], int V_num, int src, int dst) {
+double sn_Dij(int src, int dst) {
 	//initialise all vertices as unexplored 
-	int * dist = new int[V_num];
-	int *parent = new int[V_num];
-	bool* s = new bool[V_num];
-	bool* f = new bool[V_num];
+	int * dist = new int[No_sn_V];
+	int *parent = new int[No_sn_V];
+	bool* s = new bool[No_sn_V];
+	bool* f = new bool[No_sn_V];
 
 
-	for (int v = 0; v < V_num; v++) {
+	for (int v = 0; v < No_sn_V; v++) {
 		s[v] = false;
 		f[v] = false;
 		dist[v] = INT_MAX;
@@ -129,7 +130,7 @@ double sn_Dij(std::list<int> graph[], int V_num, int src, int dst) {
 
 		//Node_N<the_edge>* temp = graphh[e].beginning;
 		//list<the_edge> *temp = graphh[e].front;
-		for (std::list<int>::iterator it = graph[e].begin(); it != graph[e].end(); ++it) {
+		for (std::list<int>::iterator it = snGraph[e].begin(); it != snGraph[e].end(); ++it) {
 			int to = *it;
 			if (!s[to]) {
 				double new_dist = dist[e] + 1;

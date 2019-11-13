@@ -13,6 +13,8 @@
 void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 	FILE* file = fopen(Vfile, "r");
 	int v_id, i, j, r, f = 0, r1;
+	double r2, r3;
+	std::pair<double, double> pir;
 	j = 0;
 	if (file == NULL) {
 		std::cout << "could not open the file to read social network vertices";
@@ -26,9 +28,12 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 		fscanf(file, "%d", &v_id);
 		j = 0;
 		//std::cerr << v_id << " ";
-		for (i = 1; i <= 12; i++) {
-			fscanf(file, "%lf", &vrtx[v_id].ckins[j]);
+		for (i = 1; i <= 6; i++) {
+			fscanf(file, "%lf %lf", &r2, &r3);
+			pir = std::make_pair(r2, r3);
 			//std::cerr << vrtx[v_id].ckins[j] << " ";
+			vrtx[v_id].ckins[i].first = r2;
+			vrtx[v_id].ckins[i].second = r3;
 			j++;
 		}
 		for (i = 1; i <= 5; i++) {
@@ -69,11 +74,12 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	// get ride of the number of lines in the file
 	int getRide;
 	fscanf(file, "%d", &getRide);
-	
+
 	while (!feof(file)) {
 		fscanf(file, "%d %d", &from, &to);
 		edge[from].push_back(to);
 		edge[to].push_back(from);
+		
 	}
 	fclose(file);
 }

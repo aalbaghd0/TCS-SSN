@@ -176,3 +176,23 @@ void Heap::init(int _dim, int _hsize)
 }
 //------------------------------------------
 	
+
+bool Heap::deleteEntry(int a) {
+	int pos;
+	if (used == 0)
+		return false;
+
+	for (int i = 0; i < used; i++) {
+		if (cont[i].son1 == a) {
+			pos = i;
+			break;
+		}
+		if (i == used - 1) {// the element is not there
+			std::cerr << "THe element is not in the heap \n";
+		}
+	}
+	
+	cont[pos].copy(&(cont[used - 1]));
+	used--;
+ // does not work
+}

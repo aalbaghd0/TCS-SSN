@@ -34,7 +34,16 @@ int set_parameters(char filename[]) {
 #define No_index_piv			10
 #define No_SN_piv				10
 #define No_RN_piv				10
+#define No_subgraphs			10
+#define No_CKINs				6
 
+//set parameters//
+#define W1					0.5
+#define W2					0.5
+#define W3					0.5
+
+
+//////
 
 int* index_piv = new int[No_index_piv];
 
