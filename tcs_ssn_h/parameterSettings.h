@@ -2,7 +2,9 @@
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 
+#include<unordered_map>
 #include<fstream>
+
 
 char sn_V_file[100] =			"data/SN_vertices.txt";
 char sn_E_file[100] =			"data/SN_edges.txt";
@@ -41,6 +43,8 @@ int set_parameters(char filename[]) {
 #define W1					0.5
 #define W2					0.5
 #define W3					0.5
+#define No_topics			3
+
 
 
 //////
@@ -72,6 +76,17 @@ int uniform(int _min, int _max) {
 	float f_r = ((float)int_r) / base;
 	return (int) (_max - _min) * f_r + _min;
 }
+//////////////////////////////////////////
+typedef std::pair<int, int> pair;
+struct pair_hash {
+	template <class T1, class T2>
+	std::size_t operator() (const std::pair<T1, T2>& pair) const {
+		return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
+	}
+};
+//////////////
+std::unordered_map<pair, int, pair_hash> hash_edge;
+
 
 
 // functions

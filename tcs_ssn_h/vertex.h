@@ -11,10 +11,11 @@ const int No_T= 10;
 class vertex {
 public:
 	int id;
-	std::pair<double, double> ckins[CKINS];
+	int ckins[CKINS];
 	std::bitset<No_K> key;
-	std::bitset<No_T> topic;
 	std::set<int> nbrs;
+	std::set<int> myedges;
+	int truss;
 };
 
 class edges {
@@ -24,6 +25,7 @@ public:
 	int to = 0;
 	int weight = 1;
 	int sup;
+	
 
 };
 

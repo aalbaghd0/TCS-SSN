@@ -8,12 +8,14 @@
 #include "vertex.h"
 #include<fstream>
 #include<list>
+#include"parameterSettings.h"
+
 
 
 void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 	FILE* file = fopen(Vfile, "r");
 	int v_id, i, j, r, f = 0, r1;
-	double r2, r3;
+	int r2, r3;
 	std::pair<double, double> pir;
 	j = 0;
 	if (file == NULL) {
@@ -26,16 +28,13 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 
 	while (!feof(file)) {
 		fscanf(file, "%d", &v_id);
-		j = 0;
 		//std::cerr << v_id << " ";
-		for (i = 1; i <= 6; i++) {
-			fscanf(file, "%lf %lf", &r2, &r3);
-			pir = std::make_pair(r2, r3);
-			//std::cerr << vrtx[v_id].ckins[j] << " ";
-			vrtx[v_id].ckins[i].first = r2;
-			vrtx[v_id].ckins[i].second = r3;
-			j++;
+		for (i = 1; i <= 12; i++) {
+			fscanf(file, "%d", &r2);
+			vrtx[v_id].ckins[i] = r2;
+			std::cerr << vrtx[v_id].ckins[i] << " ";
 		}
+		std::cerr << "\n";
 		for (i = 1; i <= 5; i++) {
 			fscanf(file, "%d", &r);
 			vrtx[v_id].key[r] = 1;
@@ -43,7 +42,7 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 		}
 		for (i = 1; i <= 5; i++) {
 			fscanf(file, "%d", &r);
-			vrtx[v_id].topic[r] = 1;
+			//vrtx[v_id].topic[r] = 1;
 			//std::cerr << r << " ";
 		}
 		//std::cerr << " \n";
@@ -65,7 +64,7 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 
 void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	FILE* file = fopen(Efile, "r");
-	int from, to;
+	int from, to, e_id = 0;
 
 	if (file == NULL) {
 		std::cout << "The edge file cannot be open";
@@ -80,6 +79,27 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		edge[from].push_back(to);
 		edge[to].push_back(from);
 		
+		sn_vrtx[from].nbrs.insert(to);
+		sn_vrtx[to].nbrs.insert(from);
+
+		/*
+		//get edges associated with each 
+		sn_vrtx[from].myedges.insert(e_id);
+		sn_vrtx[to].myedges.insert(e_id);
+		sn_vrtx[from].myedges.insert((No_sn_E / 2) + e_id);
+		sn_vrtx[to].myedges.insert((No_sn_E / 2) + e_id);
+		*/
+
+		snEdges[e_id].from = from;
+		snEdges[e_id].to = to;
+
+		snEdges[(No_sn_E / 2) + e_id].from = to;
+		snEdges[(No_sn_E / 2) + e_id].to = from;
+
+		//hash_edge[std::make_pair(from, to)] = e_id;
+		//hash_edge[std::make_pair(to, from)] = (No_sn_E / 2) + e_id;
+
+		e_id++;
 	}
 	fclose(file);
 }

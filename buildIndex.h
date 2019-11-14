@@ -14,6 +14,9 @@
 #include"tcs_ssn_h/vertex.h"
 #include "tcs_ssn_h/heap.h"
 #include"tcs_ssn_h/gendef.h"
+#include <vector>
+#include <algorithm>
+#include <iterator>
 
 double quality(int v, int piv) {
 	return (rn_dist(v, piv) + sn_dist(v, piv));
@@ -143,7 +146,7 @@ double X_st(std::set<int> G[]) {
 					p2 = std::make_pair(*it2, *it);
 
 					if (!map[p1] && !map[p2]) {
-						sub_rslt = sub_rslt + ((truss(*it) + truss(*it2)) / sn_dist(*it, *it2));
+						sub_rslt = sub_rslt + ((sn_vrtx[*it].truss + sn_vrtx[*it2].truss) / sn_dist(*it, *it2));
 						map[p1] = true;
 						map[p2] = true;
 					}
@@ -184,8 +187,6 @@ double X_inf(std::set<int> G[]) {
 	return rslt;
 }
 
-
-
 /*
 Here we compute distances functions
 -- we start with the road network shortest path distance
@@ -199,12 +200,12 @@ ENSURE::    shortest path distance between src and dst
 double rn_dist(int src, int dst) {
 	double temp_rslt = 0.0;
 
-	for (int i = 0; i < No_CKINs; ++i) {
+	for (int i = 0; i < No_CKINs; ++i) {// for all user locations
 		for ( int j = 0; j < No_CKINs; j++) {
 			// map the user location to the from the social to the road network, match the 
 			// user location to a vertex on the road network
-			int src_map = mapping(src, sn_vrtx[src].ckins[i].first, sn_vrtx[src].ckins[i].second);
-			int dst_map = mapping(dst, sn_vrtx[dst].ckins[j].first, sn_vrtx[dst].ckins[j].second);
+			int src_map = sn_vrtx[src].ckins[i];
+			int dst_map = sn_vrtx[dst].ckins[j];
 
 			temp_rslt = temp_rslt + rn_Dij(src_map, dst_map);
 		}
@@ -220,79 +221,115 @@ double sn_dist(int src, int dst) {
 	return sn_Dij(src, dst);
 }
 
-///
 
+//////////////
+/*
+REQUIRE::		two vertices a and b
+ENSURE ::		rslt--> is the itersection set of edges with the edge a--b
+				we return the number of intersected vertices
+*/
+
+
+int intersect(std::set<int>* common_edges, int a, int b) {
+	double rslt = 0.0;
+
+	std::set<int> intersect;
+
+	set_intersection(sn_vrtx[snEdges[a].from].nbrs.begin(), sn_vrtx[snEdges[a].from].nbrs.end(),
+		sn_vrtx[snEdges[b].to].nbrs.begin(), sn_vrtx[snEdges[b].to].nbrs.end(),
+		std::inserter(intersect, intersect.begin()));
+	rslt = intersect.size();
+	// v -- a, v -- b, a -- v, b -- v
+
+	for (std::set<int>::iterator it = intersect.begin();
+		it != intersect.end(); ++it) {
+
+		common_edges->insert(hash_edge[std::make_pair(a, *it)]);
+		common_edges->insert(hash_edge[std::make_pair(*it, a)]);
+	}
+	return rslt;
+}
+//////////////////////////////////////////////////////
 /*
 GIVEN	::	social network graph
 ENSURE	::	the maximum support of each edge
 */
+
 void truss_decomposition() {
 	int k = 3;
-	int get_edge;
-	std::pair<int, int> pr;
 	Heap* hp = new Heap();
-	std::unordered_map<std::pair<int, int>, int> is_there;
-	
+	hp->init(2);
+	std::set<int>* pool = new std::set<int>;
+	int e;
+	int min_sup = INT_MAX;
+	int min_temp = INT_MAX;
+
 	for (int e = 0; e < No_sn_E; e++) {
-		snEdges[e].sup = intersect(sn_vrtx[snEdges[e].from].nbrs, sn_vrtx[snEdges[e].to].nbrs);
+		snEdges[e].sup = intersect(pool, snEdges[e].from, snEdges[e].to);
 		HeapEntry* he = new HeapEntry();
 		he->son1 = e;
+
+		if (snEdges[e].sup < min_sup)
+			min_sup = snEdges[e].sup;
+
 		he->key = snEdges[e].sup;
+
+		hp->insert(he);
 		delete he;
 	}
 
+label2:
 	while (true) {
 		HeapEntry* he = new HeapEntry();
 		hp->remove(he);
-		if (he->key <= (k - 2)) {
-			delete he;
-			hp->~Heap();
-			break;
-		}
-
-		get_edge = he->son1;
+		e = he->son1;
 		delete he;
-		int mx = max(snEdges[get_edge].from, snEdges[get_edge].to);
-		for (std::set<int>::iterator it = sn_vrtx[mx].nbrs.begin();
-			it != sn_vrtx[mx].nbrs.end(); ++it) {
-			pr = std::make_pair(mx, *it);
-			if (is_there[pr] != 100) {
-				is_there[std::make_pair(mx, *it)] = 100;
-			}
+		if (snEdges[e].sup >= (k - 2))
+			break;
+
+		intersect(pool, snEdges[e].from, snEdges[e].to);
+		for (std::set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
+			snEdges[*it].sup = snEdges[*it].sup - 1;
+
+			hp->deleteEntry(*it);
+			snEdges[*it].sup = snEdges[*it].sup - 1;
+
+			HeapEntry* he = new HeapEntry();
+			he->son1 = *it;
+			he->key = snEdges[*it].sup;
+			hp->insert(he);
+			delete he;
 		}
+	}
+
+	if (hp->used > 0) {
+		k = k + 1;
+		goto label2;
+	}
+	// assign sup of truss values
+	hp->~Heap();
+	
+	for (int i = 0; i < No_sn_V; ++i) {
+		Heap* hp = new Heap();
+		hp->init(2);
+
+		for (std::set<int>::iterator it = sn_vrtx[i].myedges.begin();
+			it != sn_vrtx[i].myedges; ++it) {
+			HeapEntry* he = new HeapEntry();
+			he->son1 = *it;
+			he->key = -snEdges[*it].sup;
+			hp->insert(he);
+			delete he;
+		}
+		HeapEntry* he = new HeapEntry();
+		hp->remove(he);
+		sn_vrtx[i].truss = he->son1;
+		delete he;
+		hp->~Heap();
 	}
 	
-
 }
 
-
-double intersect(std::set<int> a, std::set<int> b) {
-	double rslt = 0.0;
-
-	return rslt;
-}
-
-
-void bucketSort(float arr[], int n) {
-	// 1) Create n empty buckets 
-	vector<float> b[n];
-
-	// 2) Put array elements in different buckets 
-	for (int i = 0; i < n; i++) {
-		int bi = n * arr[i]; // Index in bucket 
-		b[bi].push_back(arr[i]);
-	}
-
-	// 3) Sort individual buckets 
-	for (int i = 0; i < n; i++)
-		sort(b[i].begin(), b[i].end());
-
-	// 4) Concatenate all buckets into arr[] 
-	int index = 0;
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < b[i].size(); j++)
-			arr[index++] = b[i][j];
-}
 
 //////
 #endif // !INDEX_HPP

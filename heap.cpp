@@ -135,6 +135,70 @@ bool Heap::remove(HeapEntry *_he)
 	return true;
 };
 //------------------------------------------
+
+bool Heap::deleteEntry(int a) {
+	// this function delete a node with specific value passed a
+	int pos;
+	if (used == 0)
+		return false;
+
+	for (int i = 0; i < used; i++) {
+		if (cont[i].son1 == a) {
+			pos = i;
+			break;
+		}
+		if (i == used - 1) {// the element is not there
+			std::cerr << "THe element is not in the heap \n";
+		}
+	}
+
+	cont[pos].copy(&(cont[used - 1]));
+	used--;
+	
+label1:
+	int parent = (pos - 1) / 2;
+	int child1 = (pos * 2) + 1;
+	int child2 = (pos * 2) + 1 + 1;
+	
+	if (cont[pos].key <= cont[parent].key && cont[pos].key >= cont[child1].key
+		    && cont[pos].key >= cont[child2].key) {
+		return true;
+	}
+	else if(cont[pos].key < cont[parent].key){
+		HeapEntry* the = new HeapEntry();
+		the->init_HeapEntry(cont[parent].dim);
+				the->copy(&(cont[parent]));
+				cont[parent].copy(&(cont[pos]));
+				cont[pos].copy(the);
+				delete the;
+				goto label1;
+	}
+	else {
+		if (2 * pos <= used) {
+			int child;
+			if (2 * pos + 2 > used)
+				child = 2 * pos + 1;
+			else
+				if (cont[child1].key < cont[child2].key)
+					child = child1;
+				else
+					child = child2;
+
+			if (cont[pos].key > cont[child].key) {
+				HeapEntry* the = new HeapEntry();
+				the->init_HeapEntry(cont[pos].dim);
+				the->copy(&(cont[pos]));
+				cont[pos].copy(&(cont[child]));
+				cont[child].copy(the);
+				delete the;
+				pos = child;
+				goto label1;
+			}
+		}
+	}
+
+	// does not work
+}
 void Heap::clean(double _dist)
 //this function cleans those entries with keys greater thab _dist
 //in the memory
@@ -177,22 +241,3 @@ void Heap::init(int _dim, int _hsize)
 //------------------------------------------
 	
 
-bool Heap::deleteEntry(int a) {
-	int pos;
-	if (used == 0)
-		return false;
-
-	for (int i = 0; i < used; i++) {
-		if (cont[i].son1 == a) {
-			pos = i;
-			break;
-		}
-		if (i == used - 1) {// the element is not there
-			std::cerr << "THe element is not in the heap \n";
-		}
-	}
-	
-	cont[pos].copy(&(cont[used - 1]));
-	used--;
- // does not work
-}
