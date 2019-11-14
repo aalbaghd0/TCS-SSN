@@ -167,7 +167,7 @@ double sn_Dij(int src, int dst) {
 }
 
 
-/*
+
 double inf_score(int src, int dst) {
 	//initialise all vertices as unexplored 
 	double* dist = new double[No_sn_V];
@@ -253,5 +253,5 @@ double inf_score(int src, int dst) {
 
 	return cost;
 }
-*/
+
 #endif // !1

@@ -42,7 +42,7 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 		}
 		for (i = 1; i <= 5; i++) {
 			fscanf(file, "%d", &r);
-			//vrtx[v_id].topic[r] = 1;
+			vrtx[v_id].topic[r] = 1;
 			//std::cerr << r << " ";
 		}
 		//std::cerr << " \n";
@@ -82,13 +82,12 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		sn_vrtx[from].nbrs.insert(to);
 		sn_vrtx[to].nbrs.insert(from);
 
-		/*
 		//get edges associated with each 
 		sn_vrtx[from].myedges.insert(e_id);
 		sn_vrtx[to].myedges.insert(e_id);
 		sn_vrtx[from].myedges.insert((No_sn_E / 2) + e_id);
 		sn_vrtx[to].myedges.insert((No_sn_E / 2) + e_id);
-		*/
+
 
 		snEdges[e_id].from = from;
 		snEdges[e_id].to = to;

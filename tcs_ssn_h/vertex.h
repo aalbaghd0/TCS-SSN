@@ -13,6 +13,7 @@ public:
 	int id;
 	int ckins[CKINS];
 	std::bitset<No_K> key;
+	std::bitset<No_T> topic;
 	std::set<int> nbrs;
 	std::set<int> myedges;
 	int truss;
@@ -25,8 +26,7 @@ public:
 	int to = 0;
 	int weight = 1;
 	int sup;
-	
-
+	double topics[No_T];
 };
 
 
