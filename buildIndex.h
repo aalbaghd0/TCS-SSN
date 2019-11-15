@@ -19,16 +19,18 @@
 #include <iterator>
 #include <utility>
 
-
+/*
+	functions prototypes
+*/
 double sn_dist(int src, int dst);
 double rn_dist(int src, int dst);
 double rn_dist_for_users(int src, int dst);
-
-
 double X_sc(std::set<int> G[]);
 double X_st(std::set<int> G[]);
 double X_inf(std::set<int> G[]);
 double evaluate_subgraphs(std::set<int> G[]);
+
+
 
 double quality(int v, int piv) {
 	return (rn_dist_for_users(v, piv) + sn_dist(v, piv));
@@ -346,7 +348,20 @@ label2:
 	}
 	
 }
+ 
 
+void buildTheIndex(std::set<int> G[]) {
+	
+	for (int i = 0; i < No_index_piv; ++i) {
+		double best_cand = 0.0;
+		for (int j = 0; j < No_index_piv; j++) {
+			if (i != j) {
+				double eval = quality(index_piv[i], index_piv[j]);
+				best_cand = min(eval, best_cand);
+			}
+		}
+	}
+}
 
 //////
 #endif // !INDEX_HPP
