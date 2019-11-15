@@ -18,8 +18,18 @@
 #include <algorithm>
 #include <iterator>
 
+double sn_dist(int src, int dst);
+double rn_dist(int src, int dst);
+double rn_dist_for_users(int src, int dst);
+
+
+double X_sc(std::set<int> G[]);
+double X_st(std::set<int> G[]);
+double X_inf(std::set<int> G[]);
+double evaluate_subgraphs(std::set<int> G[]);
+
 double quality(int v, int piv) {
-	return (rn_dist(v, piv) + sn_dist(v, piv));
+	return (rn_dist_for_users(v, piv) + sn_dist(v, piv));
 }
 
 void gen_subgraphs(int cand_index_piv[], std::set<int> G[]) {
@@ -103,6 +113,8 @@ double evaluate_subgraphs(std::set<int> G[]) {
 	return rslt1 + rslt2 + rslt3;
 }
 
+
+
 double X_sc(std::set<int> G[]) {
 	std::pair <int, int> p1, p2, p3;
 	std::unordered_map<std::pair<int, int>, bool> map;
@@ -118,7 +130,7 @@ double X_sc(std::set<int> G[]) {
 					p2 = std::make_pair(*it2, *it);
 
 					if (!map[p1] && !map[p2]) {
-						sub_rslt = sub_rslt + rn_dist(*it, *it2);
+						sub_rslt = sub_rslt + rn_dist_for_users(*it, *it2);
 						map[p1] = true;
 						map[p2] = true;
 					}
@@ -197,7 +209,7 @@ Here we compute distances functions
 GIVEN::     RN, src, and dst
 ENSURE::    shortest path distance between src and dst 
 */
-double rn_dist(int src, int dst) {
+double rn_dist_for_users(int src, int dst) {
 	double temp_rslt = 0.0;
 
 	for (int i = 0; i < No_CKINs; ++i) {// for all user locations
@@ -221,6 +233,14 @@ double sn_dist(int src, int dst) {
 	return sn_Dij(src, dst);
 }
 
+////////////////////////////////////////////////////////
+/*
+GIVEN::     RN, src, and dst
+ENSURE::    shortest path distance between src and dst
+*/
+double rn_dist(int src, int dst) {
+	return rn_Dij(src, dst);
+}
 
 //////////////
 /*
@@ -314,7 +334,7 @@ label2:
 		hp->init(2);
 
 		for (std::set<int>::iterator it = sn_vrtx[i].myedges.begin();
-			it != sn_vrtx[i].myedges; ++it) {
+			it != sn_vrtx[i].myedges.end(); ++it) {
 			HeapEntry* he = new HeapEntry();
 			he->son1 = *it;
 			he->key = -snEdges[*it].sup;

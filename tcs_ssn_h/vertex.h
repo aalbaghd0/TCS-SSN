@@ -29,5 +29,4 @@ public:
 	double topics[No_T];
 };
 
-
 #endif

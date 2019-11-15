@@ -10,7 +10,7 @@
 #include "tcs_ssn_h/gendef.h"
 #include <iterator>
 #include <unordered_map>
-
+#include "buildIndex.h"
 
 // define arrays
 
