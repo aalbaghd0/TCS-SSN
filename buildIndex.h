@@ -17,6 +17,8 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <utility>
+
 
 double sn_dist(int src, int dst);
 double rn_dist(int src, int dst);
@@ -116,8 +118,7 @@ double evaluate_subgraphs(std::set<int> G[]) {
 
 
 double X_sc(std::set<int> G[]) {
-	std::pair <int, int> p1, p2, p3;
-	std::unordered_map<std::pair<int, int>, bool> map;
+	std::unordered_map<pair, bool, pair_hash> map;
 
 	double sub_rslt = 0.0;
 	double rslt = 0.0;
@@ -126,13 +127,11 @@ double X_sc(std::set<int> G[]) {
 		for (std::set<int>::iterator it = G[g].begin(); it != G[g].end(); ++it) {
 			for (std::set<int>::iterator it2 = G[g].begin(); it2 != G[g].end(); ++it2) {
 				if (*it != *it2) {
-					p1 = std::make_pair(*it,  *it2);
-					p2 = std::make_pair(*it2, *it);
 
-					if (!map[p1] && !map[p2]) {
+					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
 						sub_rslt = sub_rslt + rn_dist_for_users(*it, *it2);
-						map[p1] = true;
-						map[p2] = true;
+						map[std::make_pair(*it, *it2)] = true;
+						map[std::make_pair(*it2, *it)] = true;
 					}
 				}
 			}
@@ -144,8 +143,7 @@ double X_sc(std::set<int> G[]) {
 }
 
 double X_st(std::set<int> G[]) {
-	std::pair <int, int> p1, p2, p3;
-	std::unordered_map<std::pair<int, int>, bool> map;
+	std::unordered_map<pair, bool, pair_hash> map;
 
 	double sub_rslt = 0.0;
 	double rslt = 0.0;
@@ -154,13 +152,13 @@ double X_st(std::set<int> G[]) {
 		for (std::set<int>::iterator it = G[g].begin(); it != G[g].end(); ++it) {
 			for (std::set<int>::iterator it2 = G[g].begin(); it2 != G[g].end(); ++it2) {
 				if (*it != *it2) {
-					p1 = std::make_pair(*it, *it2);
-					p2 = std::make_pair(*it2, *it);
 
-					if (!map[p1] && !map[p2]) {
+					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
+
 						sub_rslt = sub_rslt + ((sn_vrtx[*it].truss + sn_vrtx[*it2].truss) / sn_dist(*it, *it2));
-						map[p1] = true;
-						map[p2] = true;
+
+						map[std::make_pair(*it, *it2)] = true;
+						map[std::make_pair(*it2, *it)] = true;
 					}
 				}
 			}
@@ -172,8 +170,7 @@ double X_st(std::set<int> G[]) {
 }
 
 double X_inf(std::set<int> G[]) {
-	std::pair <int, int> p1, p2, p3;
-	std::unordered_map<std::pair<int, int>, bool> map;
+	std::unordered_map<pair, bool, pair_hash> map;
 
 	double sub_rslt = 0.0;
 	double rslt = 0.0;
@@ -182,13 +179,13 @@ double X_inf(std::set<int> G[]) {
 		for (std::set<int>::iterator it = G[g].begin(); it != G[g].end(); ++it) {
 			for (std::set<int>::iterator it2 = G[g].begin(); it2 != G[g].end(); ++it2) {
 				if (*it != *it2) {
-					p1 = std::make_pair(*it, *it2);
-					p2 = std::make_pair(*it2, *it);
 
-					if (!map[p1] && !map[p2]) {
+					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
+						
 						sub_rslt = sub_rslt + (inf_score(*it, *it2));
-						map[p1] = true;
-						map[p2] = true;
+
+						map[std::make_pair(*it, *it2)] = true;
+						map[std::make_pair(*it2, *it)] = true;
 					}
 				}
 			}

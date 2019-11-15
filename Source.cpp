@@ -22,6 +22,11 @@
 // the main function
 void main() {
 
+	std::unordered_map<pair, bool, pair_hash> map;
+	map[std::make_pair(1, 2)] = true;
+
+	std::cerr << map[std::make_pair(2, 2)];
+
 	read_vertices(sn_vrtx, 10, sn_V_file);
 	sn_read_edges(snGraph, sn_E_file);
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
