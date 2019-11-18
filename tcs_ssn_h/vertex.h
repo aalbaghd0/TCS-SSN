@@ -29,4 +29,11 @@ public:
 	double topics[No_T];
 };
 
+class node {
+public:
+	std::set<int> chldrn;
+	int* s_ptr;
+	int* e_ptr;
+	int* parent;
+};
 #endif

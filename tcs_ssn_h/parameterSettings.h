@@ -65,8 +65,7 @@ std::list<int>* rnGraph = new std::list<int>[No_rn_V];
 edges* snEdges = new edges[No_sn_E];
 edges* rnEdges = new edges[No_rn_E];
 
-
-
+node* index = new node[100];
 
 /// some global functions
 int uniform(int _min, int _max) {

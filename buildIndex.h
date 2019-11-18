@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef INDEX_HPP
 #define INDEX_HPP
 
@@ -250,8 +250,8 @@ ENSURE ::		rslt--> is the itersection set of edges with the edge a--b
 
 
 int intersect(std::set<int>* common_edges, int a, int b) {
-	double rslt = 0.0;
 
+	double rslt = 0.0;
 	std::set<int> intersect;
 
 	set_intersection(sn_vrtx[snEdges[a].from].nbrs.begin(), sn_vrtx[snEdges[a].from].nbrs.end(),
@@ -349,19 +349,41 @@ label2:
 	
 }
  
+///////////////////////////////
 
-void buildTheIndex(std::set<int> G[]) {
+/*
+REQUIRES :: spgraphs
+ENSURES  :: build the hybrid index
+*/
+
+//امرر كراف كامل, وامرر 
+std::set<int>* buildTheIndex(std::set<int> G[], int piv_set[], int no_piv_set,int new_pivots[], int no_new_piv) {
+	double qual_rslt;
+	int best_quality;
+	int assign;
 	
-	for (int i = 0; i < No_index_piv; ++i) {
-		double best_cand = 0.0;
-		for (int j = 0; j < No_index_piv; j++) {
-			if (i != j) {
-				double eval = quality(index_piv[i], index_piv[j]);
-				best_cand = min(eval, best_cand);
+	for (int v = 0; v < no_piv_set; v++) {
+		best_quality = INT_MAX;
+		qual_rslt = 0.0;
+		for (int piv = 0; piv < no_new_piv; piv++) {
+
+			qual_rslt = quality(piv_set[v], new_pivots[piv]);
+
+			if (qual_rslt < best_quality) {
+				assign = piv;
+				best_quality = qual_rslt;
 			}
 		}
+		G[assign].insert(v);
 	}
+	return G;
+}
+//////
+/*
+
+	ENSURES :: find level_index pivots 
+*/
+void Index_piv_select() {
 }
 
-//////
 #endif // !INDEX_HPP
