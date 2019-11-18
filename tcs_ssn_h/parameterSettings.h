@@ -45,6 +45,7 @@ int set_parameters(char filename[]) {
 #define W3					0.5
 #define No_topics			3
 
+#define SizeOfTheIndex		100
 
 
 //////
@@ -65,8 +66,10 @@ std::list<int>* rnGraph = new std::list<int>[No_rn_V];
 edges* snEdges = new edges[No_sn_E];
 edges* rnEdges = new edges[No_rn_E];
 
-node* index = new node[100];
 
+
+std::set<int>* index = new std::set<int>[1000];
+int GlobalIndexIter = 0;
 /// some global functions
 int uniform(int _min, int _max) {
 	//	cout<<_min<<"  "<<_max<<endl;
@@ -86,7 +89,19 @@ struct pair_hash {
 //////////////
 std::unordered_map<pair, int, pair_hash> hash_edge;
 
-
+///////////////////////////////////////
+/*
+	the unique function,
+	REQUIRES :: an array of integers and an integer
+	ENSURES  :: the given integer is not in the array
+*/
+bool isInTheArray(int arr[], int arr_size, int x) {
+	for (int i = 0; i < arr_size; i++) {
+		if (arr[i] == x)
+			return true;
+	}
+	return false;
+}
 
 // functions
 
