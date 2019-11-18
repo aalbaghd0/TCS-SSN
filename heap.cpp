@@ -149,6 +149,7 @@ bool Heap::deleteEntry(int a) {
 		}
 		if (i == used - 1) {// the element is not there
 			std::cerr << "THe element is not in the heap \n";
+			return false;
 		}
 	}
 

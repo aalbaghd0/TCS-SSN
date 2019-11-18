@@ -46,8 +46,8 @@ void gen_subgraphs(int cand_index_piv[], std::set<int> G[]) {
 		qual_rslt = 0.0;
 		for (int piv = 0; piv < No_index_piv; piv++) {
 			
-			qual_rslt = quality(v, cand_index_piv[piv]);
-
+			//qual_rslt = quality(v, cand_index_piv[piv]);
+			qual_rslt = rand() % 1000;
 			if (qual_rslt < best_quality) {
 				assign = piv;
 				best_quality = qual_rslt;
@@ -55,14 +55,21 @@ void gen_subgraphs(int cand_index_piv[], std::set<int> G[]) {
 		}
 		G[assign].insert(v);
 	}
+	for (int i = 0; i < No_index_piv; ++i) {
+		for (std::set<int>::iterator it = G[i].begin(); it != G[i].end(); ++it) {
+			std::cerr << *it << " ";
+		}
+		std::cerr << "\n" << "\n";
+	}
 }
 
-void sn_piv_select(std::list<int> rnGraph, std::list<int> snGraph) {
+void sn_piv_select() {
 	double global_cost = INT_MAX;
 	int* S_p = new int[No_index_piv];
 	int* new_S_p = new int[No_index_piv];
 	std::set<int>* G = new std::set<int>[No_index_piv];
 	std::set<int>* new_G = new std::set<int>[No_index_piv];
+	std::set<int>* final_G = new std::set<int>[No_index_piv];
 	
 	double cost_G = 0.0;
 	double local_cost = 0.0;
@@ -79,10 +86,18 @@ void sn_piv_select(std::list<int> rnGraph, std::list<int> snGraph) {
 		
 		// select random pivots at first
 		for (int i = 0; i < No_index_piv; ++i) {
-			S_p[i] = uniform(0, No_sn_V);
+			labelA:
+			int git = uniform(0, No_sn_V);
+			if (!isInTheArray(S_p, No_index_piv, git))
+				S_p[i] = uniform(0, No_sn_V);
+			else
+				goto labelA;
 		}
 		// get subgraphs based on pivots
 		gen_subgraphs(S_p, G);
+
+		// get the final subgraph
+		memcpy(final_G, G, No_index_piv);
 
 		// evaluate the cost function
 		local_cost = evaluate_subgraphs(G, No_subgraphs);
@@ -95,11 +110,16 @@ void sn_piv_select(std::list<int> rnGraph, std::list<int> snGraph) {
 			new_S_p[get_piv] = new_piv;
 			
 			gen_subgraphs(new_S_p, new_G);
+			
+			
+
 			new_cost = evaluate_subgraphs(new_G, No_subgraphs);
 
 			if (new_cost > local_cost) {
 				local_cost = new_cost;
 				memcpy(S_p, new_S_p, No_index_piv);
+				// get the final subgraph
+				memcpy(final_G, new_G, No_index_piv);
 			}
 		}
 		if (local_cost > global_cost) {
@@ -108,14 +128,13 @@ void sn_piv_select(std::list<int> rnGraph, std::list<int> snGraph) {
 		}
 	}
 
-	/*
 	for (int i = 0; i < No_index_piv; ++i) {
-		for (std::set<int>::iterator it = G[i].begin(); it != G[i].end(); ++it) {
+		for (std::set<int>::iterator it = final_G[i].begin(); it != final_G[i].end(); ++it) {
 			index[GlobalIndexIter].insert(*it);
 			GlobalIndexIter++;
 		}
 	}
-	*/
+	
 }
 
 
@@ -141,7 +160,7 @@ double X_sc(std::set<int> G[], int no_of_subgraphs) {
 				if (*it != *it2) {
 
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
-						sub_rslt = sub_rslt + rn_dist_for_users(*it, *it2);
+						sub_rslt = sub_rslt + rand() % 1000;//rn_dist_for_users(*it, *it2);						
 						map[std::make_pair(*it, *it2)] = true;
 						map[std::make_pair(*it2, *it)] = true;
 					}
@@ -405,6 +424,7 @@ int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
 	
 	std::set<int>* G = new std::set<int>[no_new_piv];
 	std::set<int>* new_G = new std::set<int>[no_new_piv];
+	std::set<int>* final_G = new std::set<int>[no_new_piv];
 
 	double cost_G = 0.0;
 	double local_cost = 0.0;
@@ -431,6 +451,9 @@ int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
 		// get subgraphs based on pivots
 		get_index_subgraphs(G, prev_piv, no_prev_piv, S_p, no_new_piv);
 		
+		// copy to the final graph
+		memcpy(final_G, G, no_new_piv);
+
 		// evaluate the cost function
 		local_cost = evaluate_Indexsubgraphs(G, no_new_piv);
 		for (int b = 1; b < swap_iter; b++) {
@@ -448,6 +471,9 @@ int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
 			if (new_cost > local_cost) {
 				local_cost = new_cost;
 				memcpy(S_p, new_S_p, no_new_piv);
+				
+				// copy to the final graph
+				memcpy(final_G, new_G, no_new_piv);
 			}
 		}
 		if (local_cost > global_cost) {
@@ -456,8 +482,12 @@ int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
 		}
 	}
 
-
-
+	for (int i = 0; i < No_index_piv; ++i) {
+		for (std::set<int>::iterator it = final_G[i].begin(); it != final_G[i].end(); ++it) {
+			index[GlobalIndexIter].insert(*it);
+			GlobalIndexIter++;
+		}
+	}
 	return final_S_p;
 }
 

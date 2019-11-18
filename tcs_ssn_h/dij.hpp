@@ -66,6 +66,10 @@ double rn_Dij(int src, int dst) {
 	}
 	hp->~Heap();
 	
+	/*
+	this is a printing function
+	*/
+	/*
 	if (cost != 0) {// if cost ==0, no path exsists
 		int p = parent[dst];
 		std::cerr << std::endl << dst << " " << p << " ";
@@ -75,6 +79,7 @@ double rn_Dij(int src, int dst) {
 			std::cerr << p << " ";
 		}
 	}
+	*/
 	delete[] s;
 	delete[] f;
 	delete[] dist;
@@ -148,6 +153,11 @@ double sn_Dij(int src, int dst) {
 	}
 	hp->~Heap();
 
+
+	/*
+	this is a printing function
+	*/
+	/*
 	if (cost != 0) {// if cost ==0, no path exsists
 		int p = parent[dst];
 		std::cerr << std::endl << dst << " " << p << " ";
@@ -157,6 +167,8 @@ double sn_Dij(int src, int dst) {
 			std::cerr << p << " ";
 		}
 	}
+
+	*/
 
 	delete[] s;
 	delete[] f;
@@ -236,6 +248,10 @@ double inf_score(int src, int dst) {
 	}
 	hp->~Heap();
 
+	/*
+	this is a printing function
+	*/
+	/*
 	if (cost != 0) {// if cost ==0, no path exsists
 		int p = parent[dst];
 		std::cerr << std::endl << dst << " " << p << " ";
@@ -245,6 +261,7 @@ double inf_score(int src, int dst) {
 			std::cerr << p << " ";
 		}
 	}
+	*/
 
 	delete[] s;
 	delete[] f;

@@ -9,7 +9,7 @@
 #include<fstream>
 #include<list>
 #include"parameterSettings.h"
-
+#include"gendef.h"
 
 
 void read_vertices(vertex vrtx[], int size, char Vfile[]) {
@@ -29,12 +29,12 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 	while (!feof(file)) {
 		fscanf(file, "%d", &v_id);
 		//std::cerr << v_id << " ";
-		for (i = 1; i <= 12; i++) {
+		for (i = 0; i < 12; i++) {
 			fscanf(file, "%d", &r2);
 			vrtx[v_id].ckins[i] = r2;
-			std::cerr << vrtx[v_id].ckins[i] << " ";
+			//std::cerr << vrtx[v_id].ckins[i] << " ";
 		}
-		std::cerr << "\n";
+		//std::cerr << "\n";
 		for (i = 1; i <= 5; i++) {
 			fscanf(file, "%d", &r);
 			vrtx[v_id].key[r] = 1;
@@ -66,6 +66,8 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	FILE* file = fopen(Efile, "r");
 	int from, to, e_id = 0;
 
+	int max_vrtx= - INT_MAX;
+
 	if (file == NULL) {
 		std::cout << "The edge file cannot be open";
 		return;
@@ -88,6 +90,10 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		sn_vrtx[from].myedges.insert((No_sn_E / 2) + e_id);
 		sn_vrtx[to].myedges.insert((No_sn_E / 2) + e_id);
 
+		//get maximum vrtx in the file
+		max_vrtx = max(max_vrtx, from);
+		max_vrtx = max(max_vrtx, to);
+
 
 		snEdges[e_id].from = from;
 		snEdges[e_id].to = to;
@@ -101,6 +107,7 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		e_id++;
 	}
 	fclose(file);
+	std::cerr << "The maximum vrtx is: " << max_vrtx << std::endl;
 }
 
 void rn_read_edges(std::list<int> graph[], edges edge[], int E_num,int size, char Efile[]) {
