@@ -280,11 +280,24 @@ ENSURE ::		rslt--> is the itersection set of edges with the edge a--b
 
 int intersect(std::set<int>* common_edges, int a, int b) {
 
+	std::cerr << " snEdges[a].from " << snEdges[a].from << "\n";
+	for (std::set<int>::iterator it = sn_vrtx[a].nbrs.begin();
+		it != sn_vrtx[a].nbrs.end(); ++it) {
+		std::cerr << *it << " ";
+	}
+	std::cerr << "\n\n";
+
+	for (std::set<int>::iterator it = sn_vrtx[b].nbrs.begin();
+		it != sn_vrtx[b].nbrs.end(); ++it) {
+		std::cerr << *it << " ";
+	}
+	std::cerr << "\n\n";
+
 	double rslt = 0.0;
 	std::set<int> intersect;
 	common_edges->clear();
-	set_intersection(sn_vrtx[snEdges[a].from].nbrs.begin(), sn_vrtx[snEdges[a].from].nbrs.end(),
-		sn_vrtx[snEdges[b].to].nbrs.begin(), sn_vrtx[snEdges[b].to].nbrs.end(),
+	set_intersection(sn_vrtx[a].nbrs.begin(), sn_vrtx[a].nbrs.end(),
+		sn_vrtx[b].nbrs.begin(), sn_vrtx[b].nbrs.end(),
 		std::inserter(intersect, intersect.begin()));
 	rslt = intersect.size();
 	// v -- a, v -- b, a -- v, b -- v
@@ -303,7 +316,6 @@ int intersect(std::set<int>* common_edges, int a, int b) {
 GIVEN	::	social network graph
 ENSURE	::	the maximum support of each edge
 */
-
 void truss_decomposition() {
 	int k = 3;
 	Heap* hp = new Heap();
@@ -315,8 +327,10 @@ void truss_decomposition() {
 	for (int e = 0; e < No_sn_E; e++) {
 		snEdges[e].sup = intersect(pool, snEdges[e].from, snEdges[e].to);
 		
-		HeapEntry* he = new HeapEntry();
+		std::cerr << snEdges[e].sup * 2 << pool->size() << "\n";
 		
+		HeapEntry* he = new HeapEntry();
+
 		he->son1 = e;
 		he->key = snEdges[e].sup;
 
@@ -326,33 +340,33 @@ void truss_decomposition() {
 	}
 
 label2:
-	while (true) {
+	while (hp->used > 0) {
 		HeapEntry* he = new HeapEntry();
 		hp->remove(he);
 		e = he->son1;
 
-		std::cerr << (pool, snEdges[e].from, snEdges[e].to);
+		 (pool, snEdges[e].from, snEdges[e].to);
 
 		std::set<int>::iterator it2;
+
 		it2 = sn_vrtx[snEdges[e].from].nbrs.find(snEdges[e].to);
+		if(it2 != sn_vrtx[snEdges[e].from].nbrs.end())
+			sn_vrtx[snEdges[e].from].nbrs.erase(it2);
+
+
+		it2 = sn_vrtx[snEdges[e].to].nbrs.find(snEdges[e].from);
 		
-		sn_vrtx[snEdges[e].from].nbrs.erase(it2, sn_vrtx[snEdges[e].from].nbrs.end());
-
-
- 		it2 = sn_vrtx[snEdges[e].to].nbrs.find(snEdges[e].from);
-		sn_vrtx[snEdges[e].to].nbrs.erase(it2, sn_vrtx[snEdges[e].to].nbrs.end());
-
-
-		std::cerr << (pool, snEdges[e].from, snEdges[e].to);
+		if (it2 != sn_vrtx[snEdges[e].to].nbrs.end())
+			sn_vrtx[snEdges[e].to].nbrs.erase(it2);
 
 
 		delete he;
 		if (snEdges[e].sup < (k - 2)) {
-			
+
 			for (std::set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
-				std::cerr << *it;
+				std::cerr << *it << " ";
 				hp->deleteEntry(*it);
-		
+
 				snEdges[*it].sup = snEdges[*it].sup - 1;
 
 				HeapEntry* he = new HeapEntry();
@@ -378,7 +392,7 @@ label2:
 	}
 	// assign sup of truss values
 	hp->~Heap();
-	
+
 	for (int i = 0; i < No_sn_V; ++i) {
 		Heap* hp = new Heap();
 		hp->init(2);
@@ -397,8 +411,9 @@ label2:
 		delete he;
 		hp->~Heap();
 	}
-	
+
 }
+
  
 ///////////////////////////////
 
@@ -538,3 +553,102 @@ void generateTheIndex(int prev_piv[], int no_prev_pivots, int divBy) {
 	}
 }
 #endif // !INDEX_HPP
+
+
+/*
+void truss_decomposition() {
+	int k = 3;
+	Heap* hp = new Heap();
+	hp->init(2);
+	std::set<int>* pool = new std::set<int>;
+	int e;
+
+
+	for (int e = 0; e < No_sn_E; e++) {
+		snEdges[e].sup = intersect(pool, snEdges[e].from, snEdges[e].to);
+
+		HeapEntry* he = new HeapEntry();
+
+		he->son1 = e;
+		he->key = snEdges[e].sup;
+
+		hp->insert(he);
+
+		delete he;
+	}
+
+label2:
+	while (true) {
+		HeapEntry* he = new HeapEntry();
+		hp->remove(he);
+		e = he->son1;
+
+		std::cerr << (pool, snEdges[e].from, snEdges[e].to);
+
+		std::set<int>::iterator it2;
+		it2 = sn_vrtx[snEdges[e].from].nbrs.find(snEdges[e].to);
+
+		sn_vrtx[snEdges[e].from].nbrs.erase(it2, sn_vrtx[snEdges[e].from].nbrs.end());
+
+
+		it2 = sn_vrtx[snEdges[e].to].nbrs.find(snEdges[e].from);
+		sn_vrtx[snEdges[e].to].nbrs.erase(it2, sn_vrtx[snEdges[e].to].nbrs.end());
+
+
+		std::cerr << (pool, snEdges[e].from, snEdges[e].to);
+
+
+		delete he;
+		if (snEdges[e].sup < (k - 2)) {
+
+			for (std::set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
+				std::cerr << *it;
+				hp->deleteEntry(*it);
+
+				snEdges[*it].sup = snEdges[*it].sup - 1;
+
+				HeapEntry* he = new HeapEntry();
+				he->son1 = *it;
+				he->key = snEdges[*it].sup;
+				hp->insert(he);
+				delete he;
+			}
+		}
+		else {
+			HeapEntry* he = new HeapEntry();
+			he->son1 = e;
+			he->key = snEdges[e].sup;
+			hp->insert(he);
+			delete he;
+			break;
+		}
+	}
+
+	if (hp->used > 0) {
+		k = k + 1;
+		goto label2;
+	}
+	// assign sup of truss values
+	hp->~Heap();
+
+	for (int i = 0; i < No_sn_V; ++i) {
+		Heap* hp = new Heap();
+		hp->init(2);
+
+		for (std::set<int>::iterator it = sn_vrtx[i].myedges.begin();
+			it != sn_vrtx[i].myedges.end(); ++it) {
+			HeapEntry* he = new HeapEntry();
+			he->son1 = *it;
+			he->key = -snEdges[*it].sup;
+			hp->insert(he);
+			delete he;
+		}
+		HeapEntry* he = new HeapEntry();
+		hp->remove(he);
+		sn_vrtx[i].truss = he->son1;
+		delete he;
+		hp->~Heap();
+	}
+
+}
+*/

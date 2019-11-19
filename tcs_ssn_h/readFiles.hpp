@@ -104,10 +104,12 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		hash_edge[std::make_pair(from, to)] = e_id;
 		hash_edge[std::make_pair(to, from)] = (No_sn_E / 2) + e_id;
 
+		std::cerr << "e_id " << e_id << " from: " << from << " to: " << to << std::endl;
+		std::cerr << "e_id " << (No_sn_E / 2) + e_id << " from: " << to << " to: " << from << std::endl;
 		e_id++;
 	}
 	fclose(file);
-	std::cerr << "The maximum vrtx is: " << max_vrtx << std::endl;
+	std::cout << "The maximum vrtx is: " << max_vrtx << std::endl;
 }
 
 void rn_read_edges(std::list<int> graph[], edges edge[], int E_num,int size, char Efile[]) {
