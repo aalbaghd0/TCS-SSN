@@ -280,7 +280,8 @@ ENSURE ::		rslt--> is the itersection set of edges with the edge a--b
 
 int intersect(std::set<int>* common_edges, int a, int b) {
 
-	std::cerr << " snEdges[a].from " << snEdges[a].from << "\n";
+	std::cerr << a <<" --> " << b <<" ";
+	/*
 	for (std::set<int>::iterator it = sn_vrtx[a].nbrs.begin();
 		it != sn_vrtx[a].nbrs.end(); ++it) {
 		std::cerr << *it << " ";
@@ -292,7 +293,7 @@ int intersect(std::set<int>* common_edges, int a, int b) {
 		std::cerr << *it << " ";
 	}
 	std::cerr << "\n\n";
-
+	*/
 	double rslt = 0.0;
 	std::set<int> intersect;
 	common_edges->clear();
@@ -309,6 +310,8 @@ int intersect(std::set<int>* common_edges, int a, int b) {
 		common_edges->insert(hash_edge[std::make_pair(*it, a)]);
 
 	}
+
+	std::cerr << rslt << "\n";
 	return rslt;
 }
 //////////////////////////////////////////////////////
@@ -345,7 +348,7 @@ label2:
 		hp->remove(he);
 		e = he->son1;
 
-		 (pool, snEdges[e].from, snEdges[e].to);
+		intersect(pool, snEdges[e].from, snEdges[e].to);
 
 		std::set<int>::iterator it2;
 
@@ -411,7 +414,9 @@ label2:
 		delete he;
 		hp->~Heap();
 	}
-
+	for (int i = 0; i < No_sn_E; i++) {
+		std::cerr << "the edge " << i << "from: "<< snEdges[i].from<<" --> "<< snEdges[i].to <<" support: " << snEdges[i].sup << "\n";
+	}
 }
 
  
