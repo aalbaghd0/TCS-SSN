@@ -101,8 +101,8 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		snEdges[(No_sn_E / 2) + e_id].from = to;
 		snEdges[(No_sn_E / 2) + e_id].to = from;
 
-		//hash_edge[std::make_pair(from, to)] = e_id;
-		//hash_edge[std::make_pair(to, from)] = (No_sn_E / 2) + e_id;
+		hash_edge[std::make_pair(from, to)] = e_id;
+		hash_edge[std::make_pair(to, from)] = (No_sn_E / 2) + e_id;
 
 		e_id++;
 	}

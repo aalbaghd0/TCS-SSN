@@ -16,15 +16,12 @@
 
 
 
-
-
-
 // the main function
 void main() {
+
 	read_vertices(sn_vrtx, 10, sn_V_file);
 	sn_read_edges(snGraph, sn_E_file);
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
-
 
 	truss_decomposition();
 	sn_piv_select();

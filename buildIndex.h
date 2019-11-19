@@ -282,7 +282,7 @@ int intersect(std::set<int>* common_edges, int a, int b) {
 
 	double rslt = 0.0;
 	std::set<int> intersect;
-
+	common_edges->clear();
 	set_intersection(sn_vrtx[snEdges[a].from].nbrs.begin(), sn_vrtx[snEdges[a].from].nbrs.end(),
 		sn_vrtx[snEdges[b].to].nbrs.begin(), sn_vrtx[snEdges[b].to].nbrs.end(),
 		std::inserter(intersect, intersect.begin()));
@@ -294,6 +294,7 @@ int intersect(std::set<int>* common_edges, int a, int b) {
 
 		common_edges->insert(hash_edge[std::make_pair(a, *it)]);
 		common_edges->insert(hash_edge[std::make_pair(*it, a)]);
+
 	}
 	return rslt;
 }
@@ -309,20 +310,18 @@ void truss_decomposition() {
 	hp->init(2);
 	std::set<int>* pool = new std::set<int>;
 	int e;
-	int min_sup = INT_MAX;
-	int min_temp = INT_MAX;
+
 
 	for (int e = 0; e < No_sn_E; e++) {
 		snEdges[e].sup = intersect(pool, snEdges[e].from, snEdges[e].to);
+		
 		HeapEntry* he = new HeapEntry();
+		
 		he->son1 = e;
-
-		if (snEdges[e].sup < min_sup)
-			min_sup = snEdges[e].sup;
-
 		he->key = snEdges[e].sup;
 
 		hp->insert(he);
+
 		delete he;
 	}
 
@@ -331,22 +330,45 @@ label2:
 		HeapEntry* he = new HeapEntry();
 		hp->remove(he);
 		e = he->son1;
+
+		std::cerr << (pool, snEdges[e].from, snEdges[e].to);
+
+		std::set<int>::iterator it2;
+		it2 = sn_vrtx[snEdges[e].from].nbrs.find(snEdges[e].to);
+		
+		sn_vrtx[snEdges[e].from].nbrs.erase(it2, sn_vrtx[snEdges[e].from].nbrs.end());
+
+
+ 		it2 = sn_vrtx[snEdges[e].to].nbrs.find(snEdges[e].from);
+		sn_vrtx[snEdges[e].to].nbrs.erase(it2, sn_vrtx[snEdges[e].to].nbrs.end());
+
+
+		std::cerr << (pool, snEdges[e].from, snEdges[e].to);
+
+
 		delete he;
-		if (snEdges[e].sup >= (k - 2))
-			break;
+		if (snEdges[e].sup < (k - 2)) {
+			
+			for (std::set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
+				std::cerr << *it;
+				hp->deleteEntry(*it);
+		
+				snEdges[*it].sup = snEdges[*it].sup - 1;
 
-		intersect(pool, snEdges[e].from, snEdges[e].to);
-		for (std::set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
-			snEdges[*it].sup = snEdges[*it].sup - 1;
-
-			hp->deleteEntry(*it);
-			snEdges[*it].sup = snEdges[*it].sup - 1;
-
+				HeapEntry* he = new HeapEntry();
+				he->son1 = *it;
+				he->key = snEdges[*it].sup;
+				hp->insert(he);
+				delete he;
+			}
+		}
+		else {
 			HeapEntry* he = new HeapEntry();
-			he->son1 = *it;
-			he->key = snEdges[*it].sup;
+			he->son1 = e;
+			he->key = snEdges[e].sup;
 			hp->insert(he);
 			delete he;
+			break;
 		}
 	}
 
