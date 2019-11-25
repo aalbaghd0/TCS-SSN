@@ -33,17 +33,20 @@ int set_parameters(char filename[]) {
 #define No_sn_E				set_parameters(sn_E_file) * 2
 #define No_rn_V				set_parameters(rn_V_file)
 #define No_rn_E				set_parameters(rn_E_file) * 2
-#define No_index_piv			10
-#define No_SN_piv				10
-#define No_RN_piv				10
-#define No_subgraphs			10
+#define No_index_piv			3
+#define No_SN_piv				3
+#define No_RN_piv				3
+#define No_subgraphs			3
 #define No_CKINs				6
+
+
 
 //set parameters//
 #define W1					0.5
 #define W2					0.5
 #define W3					0.5
-#define No_topics			3
+#define No_of_TOPICS	    3
+
 
 #define SizeOfTheIndex		100
 
@@ -63,8 +66,8 @@ vertex* rn_vrtx = new vertex[No_rn_V];
 std::list<int>* snGraph = new std::list<int>[No_sn_V];
 std::list<int>* rnGraph = new std::list<int>[No_rn_V];
 
-edges* snEdges = new edges[No_sn_E];
-edges* rnEdges = new edges[No_rn_E];
+SN_edges* snEdges = new SN_edges[No_sn_E];
+RN_edges* rnEdges = new RN_edges[No_rn_E];
 
 
 
@@ -88,6 +91,22 @@ struct pair_hash {
 };
 //////////////
 std::unordered_map<pair, int, pair_hash> hash_edge;
+
+std::unordered_map<pair, SN_edges, pair_hash> sn_edge_info;
+std::unordered_map<pair, RN_edges, pair_hash> rn_edge_info;
+
+std::unordered_map<pair, double, pair_hash> hash_sn_dist;
+std::unordered_map<pair, bool, pair_hash> check_hash_sn_dist;
+
+std::unordered_map<pair, double, pair_hash> hash_rn_dist;
+std::unordered_map<pair, bool, pair_hash> check_hash_rn_dist;
+
+std::unordered_map<pair, double, pair_hash> hash_rnToUser_dist;
+std::unordered_map<pair, bool, pair_hash> check_hash_rnToUser_dist;
+
+std::unordered_map<pair, double, pair_hash> hash_infScore;
+std::unordered_map<pair, bool, pair_hash> check_hash_infScore;
+
 
 ///////////////////////////////////////
 /*

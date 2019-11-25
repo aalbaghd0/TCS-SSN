@@ -8,6 +8,10 @@
 const int CKINS = 6 * 2; // 6 ckin locations
 const int No_K= 10;
 const int No_T= 10;
+
+#define No_of_TOPICS	    3
+
+
 class vertex {
 public:
 	int id;
@@ -19,14 +23,22 @@ public:
 	int truss;
 };
 
-class edges {
+class RN_edges {
+public:
+	int id;
+	int from = 0;
+	int to = 0;
+	double weight = 0;
+};
+
+class SN_edges {
 public:
 	int id;
 	int from = 0;
 	int to = 0;
 	int weight = 1;
 	int sup;
-	double topics[No_T];
+	double topics[No_of_TOPICS];
 };
 
 class node {
@@ -35,5 +47,9 @@ public:
 	int* s_ptr;
 	int* e_ptr;
 	int* parent;
+};
+
+class Gnode {
+	std::set<int> child;
 };
 #endif

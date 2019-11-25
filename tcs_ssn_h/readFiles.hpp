@@ -65,7 +65,7 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	FILE* file = fopen(Efile, "r");
 	int from, to, e_id = 0;
-
+	double  pr0, pr1, pr2;
 	int max_vrtx= - INT_MAX;
 
 	if (file == NULL) {
@@ -77,7 +77,7 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	fscanf(file, "%d", &getRide);
 
 	while (!feof(file)) {
-		fscanf(file, "%d %d", &from, &to);
+		fscanf(file, "%d %d %lf %lf %lf", &from, &to, &pr0, &pr1, &pr2);
 		edge[from].push_back(to);
 		edge[to].push_back(from);
 		
@@ -94,9 +94,18 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		max_vrtx = max(max_vrtx, from);
 		max_vrtx = max(max_vrtx, to);
 
+		
 
 		snEdges[e_id].from = from;
 		snEdges[e_id].to = to;
+
+		sn_edge_info[std::make_pair(from, to)].topics[0] = pr0;
+		sn_edge_info[std::make_pair(from, to)].topics[1] = pr1;
+		sn_edge_info[std::make_pair(from, to)].topics[2] = pr2;
+
+		sn_edge_info[std::make_pair(to, from)].topics[0] = pr0;
+		sn_edge_info[std::make_pair(to, from)].topics[1] = pr1;
+		sn_edge_info[std::make_pair(to, from)].topics[2] = pr2;
 
 		snEdges[(No_sn_E / 2) + e_id].from = to;
 		snEdges[(No_sn_E / 2) + e_id].to = from;
@@ -104,15 +113,15 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		hash_edge[std::make_pair(from, to)] = e_id;
 		hash_edge[std::make_pair(to, from)] = (No_sn_E / 2) + e_id;
 
-		std::cerr << "e_id " << e_id << " from: " << from << " to: " << to << std::endl;
-		std::cerr << "e_id " << (No_sn_E / 2) + e_id << " from: " << to << " to: " << from << std::endl;
+		//std::cerr << "e_id " << e_id << " from: " << from << " to: " << to << std::endl;
+		//std::cerr << "e_id " << (No_sn_E / 2) + e_id << " from: " << to << " to: " << from << std::endl;
 		e_id++;
 	}
 	fclose(file);
 	std::cout << "The maximum vrtx is: " << max_vrtx << std::endl;
 }
 
-void rn_read_edges(std::list<int> graph[], edges edge[], int E_num,int size, char Efile[]) {
+void rn_read_edges(std::list<int> graph[], RN_edges edge[], int E_num,int size, char Efile[]) {
 	FILE* file = fopen(Efile, "r");
 	int from, to, id;
 	int max = 0;
@@ -130,6 +139,10 @@ void rn_read_edges(std::list<int> graph[], edges edge[], int E_num,int size, cha
 		fscanf(file, "%d %d %d %lf", &id, &from, &to, &w);
 		edge[id].weight = w;
 		edge[(E_num / 2) + id].weight = w;
+
+		rn_edge_info[std::make_pair(from, to)].weight = w;
+		rn_edge_info[std::make_pair(to, from)].weight = w;
+
 		graph[from].push_back(to);
 		graph[to].push_back(from);
 		if (max < from)

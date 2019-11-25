@@ -33,34 +33,49 @@ double evaluate_Indexsubgraphs(std::set<int> G[], int no_of_subgraphs);
 
 
 double quality(int v, int piv) {
-	return (rn_dist_for_users(v, piv) + sn_dist(v, piv));
+	double sn_dist_rslt = 0.0, rn_dist_rslt = 0.0;
+	
+
+	if ( ! check_hash_sn_dist[std::make_pair(piv, v)]) { // if we don't have the distance, the we will compute it
+		sn_Dij_to_all_vertices(piv); // find distance to all other vertices
+							         // at the same time store distances to all other vertices
+		sn_dist_rslt = hash_sn_dist[std::make_pair(piv, v)];
+	}
+	else {
+		sn_dist_rslt = hash_sn_dist[std::make_pair(piv, v)];
+	}
+
+	return (rn_dist_for_users(piv, v) + sn_dist_rslt);
 }
 
-void gen_subgraphs(int cand_index_piv[], std::set<int> G[]) {
+std::unordered_map<int, std::set<int>> gen_subgraphs(int cand_index_piv[], std::set<int> G[]) {
 	double qual_rslt;
 	int best_quality;
 	int assign;
-	
+
+	std::unordered_map<int, std::set<int>> GG;
+
 	for (int v = 0; v < No_sn_V; v++) {
 		best_quality = INT_MAX;
 		qual_rslt = 0.0;
 		for (int piv = 0; piv < No_index_piv; piv++) {
+			qual_rslt = quality(v, cand_index_piv[piv]);
 			
-			//qual_rslt = quality(v, cand_index_piv[piv]);
-			qual_rslt = rand() % 1000;
 			if (qual_rslt < best_quality) {
 				assign = piv;
 				best_quality = qual_rslt;
 			}
 		}
-		G[assign].insert(v);
+		GG[assign].insert(v);
 	}
 	for (int i = 0; i < No_index_piv; ++i) {
-		for (std::set<int>::iterator it = G[i].begin(); it != G[i].end(); ++it) {
+		std::cerr << "Index_Piv " << cand_index_piv[i] << " --->> ";
+		for (std::set<int>::iterator it = GG[cand_index_piv[i]].begin(); it != GG[cand_index_piv[i]].end(); ++it) {
 			std::cerr << *it << " ";
 		}
 		std::cerr << "\n" << "\n";
 	}
+	return GG;
 }
 
 void sn_piv_select() {
@@ -70,7 +85,15 @@ void sn_piv_select() {
 	std::set<int>* G = new std::set<int>[No_index_piv];
 	std::set<int>* new_G = new std::set<int>[No_index_piv];
 	std::set<int>* final_G = new std::set<int>[No_index_piv];
-	
+
+	std::unordered_map<int, std::set<int>> GG;
+
+	/*
+	std::unordered_map<int, std::set<int>>* G = new std::unordered_map<int, std::set<int>>;
+	std::unordered_map<int, std::set<int>>* new_G = new std::unordered_map<int, std::set<int>>;
+	std::unordered_map<int, std::set<int>>* final_G = new std::unordered_map<int, std::set<int>>;
+	*/
+
 	double cost_G = 0.0;
 	double local_cost = 0.0;
 	int new_cost = 0.0;
@@ -89,24 +112,41 @@ void sn_piv_select() {
 			labelA:
 			int git = uniform(0, No_sn_V);
 			if (!isInTheArray(S_p, No_index_piv, git))
-				S_p[i] = uniform(0, No_sn_V);
+				S_p[i] = git;
 			else
 				goto labelA;
 		}
 		// get subgraphs based on pivots
-		gen_subgraphs(S_p, G);
+		GG = gen_subgraphs(S_p, G);
+		
+		for (int i = 0; i < No_index_piv; ++i) {
+			std::cerr << "Index_Piv " << S_p[i] << " --->> ";
+			for (std::set<int>::iterator it = GG[S_p[i]].begin(); it != GG[S_p[i]].end(); ++it) {
+				std::cerr << *it << " ";
+			}
+			std::cerr << "\n" << "\n";
+		}
+
 
 		// get the final subgraph
-		memcpy(final_G, G, No_index_piv);
+		memcpy(final_G, G, sizeof(G[0]) * No_index_piv);
 
 		// evaluate the cost function
 		local_cost = evaluate_subgraphs(G, No_subgraphs);
 		
 		for (int  b = 1; b < swap_iter; b++) {
 			get_piv = uniform(0, No_index_piv);
-			new_piv = uniform(0, No_sn_V);
+			
+		labelB:
+			 int git = uniform(0, No_sn_V);
+			if (!isInTheArray(S_p, No_index_piv, git))
+				new_piv = git;
+			else
+				goto labelB;
+			
 
-			memcpy(new_S_p, S_p, No_index_piv);
+			std::memcpy(new_S_p, S_p, sizeof(S_p[0]) * No_index_piv);
+			
 			new_S_p[get_piv] = new_piv;
 			
 			gen_subgraphs(new_S_p, new_G);
@@ -117,16 +157,24 @@ void sn_piv_select() {
 
 			if (new_cost > local_cost) {
 				local_cost = new_cost;
-				memcpy(S_p, new_S_p, No_index_piv);
+				std::memcpy(S_p, new_S_p, sizeof(new_S_p[0]) * No_index_piv);
 				// get the final subgraph
-				memcpy(final_G, new_G, No_index_piv);
+				memcpy(final_G, new_G, sizeof(new_G) * No_index_piv);
 			}
 		}
 		if (local_cost > global_cost) {
-			memcpy(index_piv, S_p, No_index_piv);
+			memcpy(index_piv, S_p, sizeof(S_p[0]) * No_index_piv);
 			global_cost = local_cost;
 		}
 	}
+
+	for (int i = 0; i < No_index_piv; ++i) {
+		std::cerr << i << " --- >> ";
+		for (std::set<int>::iterator it = final_G[i].begin(); it != final_G[i].end(); ++it) {
+			std::cerr << *it;
+		}
+	}
+
 
 	for (int i = 0; i < No_index_piv; ++i) {
 		for (std::set<int>::iterator it = final_G[i].begin(); it != final_G[i].end(); ++it) {
@@ -158,9 +206,8 @@ double X_sc(std::set<int> G[], int no_of_subgraphs) {
 		for (std::set<int>::iterator it = G[g].begin(); it != G[g].end(); ++it) {
 			for (std::set<int>::iterator it2 = G[g].begin(); it2 != G[g].end(); ++it2) {
 				if (*it != *it2) {
-
-					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
-						sub_rslt = sub_rslt + rand() % 1000;//rn_dist_for_users(*it, *it2);						
+					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) { // to make sure not to compute distance more than once
+						sub_rslt = rn_dist_for_users(*it, *it2);						
 						map[std::make_pair(*it, *it2)] = true;
 						map[std::make_pair(*it2, *it)] = true;
 					}
@@ -213,7 +260,13 @@ double X_inf(std::set<int> G[], int no_of_subgraphs) {
 
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
 						
-						sub_rslt = sub_rslt + (inf_score(*it, *it2));
+						if (check_hash_infScore[std::make_pair(*it, *it2)]) {
+							sub_rslt = sub_rslt + hash_infScore[std::make_pair(*it, *it2)];
+						}
+						else {
+							inf_score_to_all_vertices(*it);
+							sub_rslt = sub_rslt + hash_infScore[std::make_pair(*it, *it2)];
+						}
 
 						map[std::make_pair(*it, *it2)] = true;
 						map[std::make_pair(*it2, *it)] = true;
@@ -239,18 +292,41 @@ ENSURE::    shortest path distance between src and dst
 */
 double rn_dist_for_users(int src, int dst) {
 	double temp_rslt = 0.0;
+	double temp = 0.0;
 
-	for (int i = 0; i < No_CKINs; ++i) {// for all user locations
-		for ( int j = 0; j < No_CKINs; j++) {
-			// map the user location to the from the social to the road network, match the 
-			// user location to a vertex on the road network
-			int src_map = sn_vrtx[src].ckins[i];
-			int dst_map = sn_vrtx[dst].ckins[j];
-
-			temp_rslt = temp_rslt + rn_Dij(src_map, dst_map);
-		}
+	if (check_hash_rnToUser_dist[std::make_pair(src, dst)]) { // if we already computed those two users
+		return hash_rnToUser_dist[std::make_pair(src, dst)];
 	}
-	return temp_rslt / (No_CKINs * 2);
+	else { // else, compute them and store the result
+		
+		for (int i = 0; i < No_CKINs; ++i) {// for all user locations
+			for (int j = 0; j < No_CKINs; j++) {
+				// map the user location to the from the social to the road network, match the 
+				// user location to a vertex on the road network
+				int src_map = sn_vrtx[src].ckins[i];
+				int dst_map = sn_vrtx[dst].ckins[j];
+
+				if (!check_hash_rn_dist[std::make_pair(src_map, dst_map)]) { // if we don't have the distance, the we will compute it
+					rn_Dij_to_all_vertices(src_map); // find distance to all other vertices
+													 // at the same time store distances to all other vertices
+					temp = hash_rn_dist[std::make_pair(src_map, dst_map)];
+				}
+				else {
+					temp = hash_rn_dist[std::make_pair(src_map, dst_map)];
+				}
+
+				temp_rslt = temp_rslt + temp;
+			}
+		}
+		
+		check_hash_rnToUser_dist[std::make_pair(src, dst)] = true;
+		hash_rnToUser_dist[std::make_pair(src, dst)] = temp_rslt / (No_CKINs * No_CKINs);
+
+		check_hash_rnToUser_dist[std::make_pair(dst, src)] = true;
+		hash_rnToUser_dist[std::make_pair(dst, src)] = temp_rslt / (No_CKINs * No_CKINs);
+
+		return temp_rslt / (No_CKINs * No_CKINs);
+	}
 }
 ////////////////////////////////////////////////////////
 /*
@@ -258,7 +334,14 @@ GIVEN::     SN, src, and dst
 ENSURE::    shortest path distance between src and dst
 */
 double sn_dist(int src, int dst) {
-	return sn_Dij(src, dst);
+	if (!check_hash_sn_dist[std::make_pair(src, dst)]) { // if we don't have the distance, the we will compute it
+		sn_Dij_to_all_vertices(src); // find distance to all other vertices
+									 // at the same time store distances to all other vertices
+		return hash_sn_dist[std::make_pair(src, dst)];
+	}
+	else {
+		return  hash_sn_dist[std::make_pair(src, dst)];
+	}
 }
 
 ////////////////////////////////////////////////////////
@@ -270,30 +353,15 @@ double rn_dist(int src, int dst) {
 	return rn_Dij(src, dst);
 }
 
-//////////////
+////////////////////////////////////////////////////////////////////////
 /*
 REQUIRE::		two vertices a and b
 ENSURE ::		rslt--> is the itersection set of edges with the edge a--b
 				we return the number of intersected vertices
 */
-
-
+///////////////////////////////////////////////////////////////////////
 int intersect(std::set<int>* common_edges, int a, int b) {
 
-	std::cerr << a <<" --> " << b <<" ";
-	/*
-	for (std::set<int>::iterator it = sn_vrtx[a].nbrs.begin();
-		it != sn_vrtx[a].nbrs.end(); ++it) {
-		std::cerr << *it << " ";
-	}
-	std::cerr << "\n\n";
-
-	for (std::set<int>::iterator it = sn_vrtx[b].nbrs.begin();
-		it != sn_vrtx[b].nbrs.end(); ++it) {
-		std::cerr << *it << " ";
-	}
-	std::cerr << "\n\n";
-	*/
 	double rslt = 0.0;
 	std::set<int> intersect;
 	common_edges->clear();
@@ -311,7 +379,7 @@ int intersect(std::set<int>* common_edges, int a, int b) {
 
 	}
 
-	std::cerr << rslt << "\n";
+	//std::cerr << rslt << "\n";
 	return rslt;
 }
 //////////////////////////////////////////////////////
@@ -330,7 +398,7 @@ void truss_decomposition() {
 	for (int e = 0; e < No_sn_E; e++) {
 		snEdges[e].sup = intersect(pool, snEdges[e].from, snEdges[e].to);
 		
-		std::cerr << snEdges[e].sup * 2 << pool->size() << "\n";
+		//std::cerr << snEdges[e].sup * 2 << pool->size() << "\n";
 		
 		HeapEntry* he = new HeapEntry();
 
@@ -367,7 +435,7 @@ label2:
 		if (snEdges[e].sup < (k - 2)) {
 
 			for (std::set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
-				std::cerr << *it << " ";
+				//std::cerr << *it << " ";
 				hp->deleteEntry(*it);
 
 				snEdges[*it].sup = snEdges[*it].sup - 1;
@@ -393,9 +461,9 @@ label2:
 		k = k + 1;
 		goto label2;
 	}
-	// assign sup of truss values
 	hp->~Heap();
 
+	// assign sup of truss values
 	for (int i = 0; i < No_sn_V; ++i) {
 		Heap* hp = new Heap();
 		hp->init(2);
@@ -414,9 +482,12 @@ label2:
 		delete he;
 		hp->~Heap();
 	}
+	/*
 	for (int i = 0; i < No_sn_E; i++) {
-		std::cerr << "the edge " << i << "from: "<< snEdges[i].from<<" --> "<< snEdges[i].to <<" support: " << snEdges[i].sup << "\n";
+		std::cerr << "the edge " << i << "from: "<< snEdges[i].from<<" --> "
+				<< snEdges[i].to <<" support: " << snEdges[i].sup << "\n";
 	}
+	*/
 }
 
  
@@ -450,7 +521,7 @@ void get_index_subgraphs(std::set<int> G[], int piv_set[], int no_piv_set,int ne
 }
 //////
 /*
-
+	GIVEN	:: a lower index pivot array
 	ENSURES :: find level_index pivots 
 */
 int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
@@ -494,7 +565,7 @@ int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
 		get_index_subgraphs(G, prev_piv, no_prev_piv, S_p, no_new_piv);
 		
 		// copy to the final graph
-		memcpy(final_G, G, no_new_piv);
+		memcpy(final_G, G, sizeof(G[0]) * no_new_piv);
 
 		// evaluate the cost function
 		local_cost = evaluate_Indexsubgraphs(G, no_new_piv);
@@ -503,7 +574,7 @@ int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
 			get_piv = uniform(0, no_new_piv);
 			new_piv = uniform(0, no_prev_piv);
 
-			memcpy(new_S_p, S_p, no_new_piv);
+			memcpy(new_S_p, S_p, sizeof(S_p[0]) * no_new_piv);
 			new_S_p[get_piv] = new_piv;
 			//get the neew subgraphs
 			get_index_subgraphs(new_G, prev_piv, no_prev_piv, new_S_p, no_new_piv);
@@ -512,14 +583,14 @@ int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
 
 			if (new_cost > local_cost) {
 				local_cost = new_cost;
-				memcpy(S_p, new_S_p, no_new_piv);
+				memcpy(S_p, new_S_p, sizeof(new_S_p[0]) * no_new_piv);
 				
 				// copy to the final graph
-				memcpy(final_G, new_G, no_new_piv);
+				memcpy(final_G, new_G, sizeof(new_G[0]) * no_new_piv);
 			}
 		}
 		if (local_cost > global_cost) {
-			memcpy(final_S_p, S_p, no_new_piv);
+			memcpy(final_S_p, S_p, sizeof(S_p[0]) * no_new_piv);
 			global_cost = local_cost;
 		}
 	}
@@ -541,119 +612,5 @@ double evaluate_Indexsubgraphs(std::set<int> G[], int no_of_subgraphs) {
 }
 
 
-void generateTheIndex(int prev_piv[], int no_prev_pivots, int divBy) {
-	
-	int no_new_piv = no_prev_pivots / divBy;
-	
-	while (no_new_piv > 0) {
-		int* temp_piv_arr = new int[no_new_piv];
-		temp_piv_arr = Index_piv_select(no_new_piv, prev_piv, no_prev_pivots);
-		
-		no_prev_pivots = no_new_piv;
-		no_new_piv = no_new_piv / divBy;
-		
-		memset(prev_piv, -1, no_prev_pivots);
 
-		memcpy(prev_piv, temp_piv_arr, no_prev_pivots);
-	}
-}
 #endif // !INDEX_HPP
-
-
-/*
-void truss_decomposition() {
-	int k = 3;
-	Heap* hp = new Heap();
-	hp->init(2);
-	std::set<int>* pool = new std::set<int>;
-	int e;
-
-
-	for (int e = 0; e < No_sn_E; e++) {
-		snEdges[e].sup = intersect(pool, snEdges[e].from, snEdges[e].to);
-
-		HeapEntry* he = new HeapEntry();
-
-		he->son1 = e;
-		he->key = snEdges[e].sup;
-
-		hp->insert(he);
-
-		delete he;
-	}
-
-label2:
-	while (true) {
-		HeapEntry* he = new HeapEntry();
-		hp->remove(he);
-		e = he->son1;
-
-		std::cerr << (pool, snEdges[e].from, snEdges[e].to);
-
-		std::set<int>::iterator it2;
-		it2 = sn_vrtx[snEdges[e].from].nbrs.find(snEdges[e].to);
-
-		sn_vrtx[snEdges[e].from].nbrs.erase(it2, sn_vrtx[snEdges[e].from].nbrs.end());
-
-
-		it2 = sn_vrtx[snEdges[e].to].nbrs.find(snEdges[e].from);
-		sn_vrtx[snEdges[e].to].nbrs.erase(it2, sn_vrtx[snEdges[e].to].nbrs.end());
-
-
-		std::cerr << (pool, snEdges[e].from, snEdges[e].to);
-
-
-		delete he;
-		if (snEdges[e].sup < (k - 2)) {
-
-			for (std::set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
-				std::cerr << *it;
-				hp->deleteEntry(*it);
-
-				snEdges[*it].sup = snEdges[*it].sup - 1;
-
-				HeapEntry* he = new HeapEntry();
-				he->son1 = *it;
-				he->key = snEdges[*it].sup;
-				hp->insert(he);
-				delete he;
-			}
-		}
-		else {
-			HeapEntry* he = new HeapEntry();
-			he->son1 = e;
-			he->key = snEdges[e].sup;
-			hp->insert(he);
-			delete he;
-			break;
-		}
-	}
-
-	if (hp->used > 0) {
-		k = k + 1;
-		goto label2;
-	}
-	// assign sup of truss values
-	hp->~Heap();
-
-	for (int i = 0; i < No_sn_V; ++i) {
-		Heap* hp = new Heap();
-		hp->init(2);
-
-		for (std::set<int>::iterator it = sn_vrtx[i].myedges.begin();
-			it != sn_vrtx[i].myedges.end(); ++it) {
-			HeapEntry* he = new HeapEntry();
-			he->son1 = *it;
-			he->key = -snEdges[*it].sup;
-			hp->insert(he);
-			delete he;
-		}
-		HeapEntry* he = new HeapEntry();
-		hp->remove(he);
-		sn_vrtx[i].truss = he->son1;
-		delete he;
-		hp->~Heap();
-	}
-
-}
-*/
