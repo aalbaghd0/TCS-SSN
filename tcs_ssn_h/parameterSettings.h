@@ -107,6 +107,7 @@ std::unordered_map<pair, bool, pair_hash> check_hash_rnToUser_dist;
 std::unordered_map<pair, double, pair_hash> hash_infScore;
 std::unordered_map<pair, bool, pair_hash> check_hash_infScore;
 
+std::unordered_map<int, std::set<int>> G;
 
 ///////////////////////////////////////
 /*
