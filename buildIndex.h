@@ -126,7 +126,7 @@ void sn_piv_select() {
 			get_piv = uniform(0, No_index_piv);
 			
 		labelB:
-			 int git = uniform(0, No_sn_V);
+			int git = uniform(0, No_sn_V);
 			if (!isInTheArray(S_p, No_index_piv, git))
 				new_piv = git;
 			else
@@ -477,12 +477,6 @@ label2:
 		delete he;
 		hp->~Heap();
 	}
-	/*
-	for (int i = 0; i < No_sn_E; i++) {
-		std::cerr << "the edge " << i << "from: "<< snEdges[i].from<<" --> "
-				<< snEdges[i].to <<" support: " << snEdges[i].sup << "\n";
-	}
-	*/
 }
 
  
@@ -494,11 +488,12 @@ ENSURES  :: build the hybrid index
 */
 
 //امرر كراف كامل, وامرر 
-void get_index_subgraphs(std::set<int> G[], int piv_set[], int no_piv_set,int new_pivots[], int no_new_piv) {
+std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no_piv_set,int 
+									new_pivots[], int no_new_piv) {
 	double qual_rslt;
 	int best_quality;
 	int assign;
-	
+	std::unordered_map<int, std::set<int>> Gr;
 	for (int v = 0; v < no_piv_set; v++) {
 		best_quality = INT_MAX;
 		qual_rslt = 0.0;
@@ -507,37 +502,48 @@ void get_index_subgraphs(std::set<int> G[], int piv_set[], int no_piv_set,int ne
 			qual_rslt = quality(piv_set[v], new_pivots[piv]);
 
 			if (qual_rslt < best_quality) {
-				assign = piv;
+				assign = new_pivots[piv];
 				best_quality = qual_rslt;
 			}
 		}
-		G[assign].insert(v);
+		Gr[assign].insert(v);
 	}
+
+	for (int i = 0; i < no_new_piv; ++i) {
+		std::cerr << "Index_Piv " << new_pivots[i] << " --->> ";
+		for (std::set<int>::iterator it = Gr[new_pivots[i]].begin(); it != Gr[new_pivots[i]].end(); ++it) {
+			std::cerr << *it << " ";
+		}
+		std::cerr << "\n" << "\n";
+	}
+
+
+	return Gr;
 }
+
+
 //////
 /*
 	GIVEN	:: a lower index pivot array
 	ENSURES :: find level_index pivots 
 */
-/*
-int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
-	double global_cost = INT_MAX;
 
-	int* S_p = new int[no_new_piv];
-	int* new_S_p = new int[no_new_piv];
-	int* final_S_p = new int[no_new_piv];
+std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv, int f_piv[]) {
+	// define variables
+	double global_cost = -INT_MAX;
+	int* S_p = new int[No_index_piv];
+	int* new_S_p = new int[No_index_piv];
+	double final_cost;
+	std::unordered_map<int, std::set<int>> GG;
+	std::unordered_map<int, std::set<int>> new_GG;
+	std::unordered_map<int, std::set<int>> GGG;
 
-
-
-	int* temp_arry = new int[no_new_piv];
 	
-	std::set<int>* G = new std::set<int>[no_new_piv];
-	std::set<int>* new_G = new std::set<int>[no_new_piv];
-	std::set<int>* final_G = new std::set<int>[no_new_piv];
+	memset(f_piv, -1, sizeof(f_piv[0]) * No_index_piv);
 
 	double cost_G = 0.0;
 	double local_cost = 0.0;
-	int new_cost = 0.0;
+	double new_cost = 0.0;
 
 	int global_iter = 5;
 	int swap_iter = 10;
@@ -545,68 +551,89 @@ int* Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv) {
 	int get_piv = 0;
 	int new_piv = 0;
 
-	int git;
-	for (int a = 1; a < global_iter; ++a) {
+	bool cost_was_updated = false;
+	for (int a = 1; a < global_iter; a++) { // set global iterator
+
+		int git;
 		// select random pivots at first
 		for (int i = 0; i < no_new_piv; ++i) {
-			labelA:
+		labelA:
 			git = uniform(0, no_prev_piv);
-			int git_val = prev_piv[git];
+			int git_val = prev_piv[git];  // get the values from the array itselt
 			if (!isInTheArray(S_p, no_prev_piv, git_val))
 				S_p[i] = git_val;
 			else
 				goto labelA;
 		}
+
 		// get subgraphs based on pivots
-		get_index_subgraphs(G, prev_piv, no_prev_piv, S_p, no_new_piv);
-		
-		// copy to the final graph
-		memcpy(final_G, G, sizeof(G[0]) * no_new_piv);
+		GG = get_index_subgraphs(prev_piv, no_prev_piv, S_p, no_new_piv);
+
 
 		// evaluate the cost function
-		local_cost = evaluate_Indexsubgraphs(G, no_new_piv);
+		local_cost = evaluate_subgraphs(GG, S_p, no_new_piv);
+		//std::cerr << "THe Evaluation :: " << local_cost << "\n \n";
+
+
 		for (int b = 1; b < swap_iter; b++) {
-			
 			get_piv = uniform(0, no_new_piv);
-			new_piv = uniform(0, no_prev_piv);
+
+		labelB:
+			int git = prev_piv[uniform(0, no_prev_piv)];
+			
+			if (!isInTheArray(S_p, no_new_piv, git))
+				new_piv = git;
+			else
+				goto labelB;
 
 			memcpy(new_S_p, S_p, sizeof(S_p[0]) * no_new_piv);
 			new_S_p[get_piv] = new_piv;
-			//get the neew subgraphs
-			get_index_subgraphs(new_G, prev_piv, no_prev_piv, new_S_p, no_new_piv);
-			//evaluate the new subgraphs
-			new_cost = evaluate_subgraphs(new_G, no_new_piv);
 
+
+			new_GG = get_index_subgraphs(prev_piv, no_prev_piv, new_S_p, no_new_piv);
+
+
+			new_cost = evaluate_subgraphs(new_GG, new_S_p, no_new_piv);
+
+			//std::cerr << "THe Evaluation :: " << new_cost << "\n \n";
 			if (new_cost > local_cost) {
 				local_cost = new_cost;
-				memcpy(S_p, new_S_p, sizeof(new_S_p[0]) * no_new_piv);
-				
-				// copy to the final graph
-				memcpy(final_G, new_G, sizeof(new_G[0]) * no_new_piv);
+				std::memcpy(S_p, new_S_p, sizeof(new_S_p[0]) * no_new_piv);
+
+				// get the final subgraph
+				//memcpy(final_G, new_G, sizeof(new_G) * No_index_piv);
+
+				GG = new_GG;
 			}
 		}
 		if (local_cost > global_cost) {
-			memcpy(final_S_p, S_p, sizeof(S_p[0]) * no_new_piv);
+			memcpy(f_piv, S_p, sizeof(S_p[0]) * no_new_piv);
 			global_cost = local_cost;
+			GGG = GG;
 		}
 	}
-
-	for (int i = 0; i < No_index_piv; ++i) {
-		for (std::set<int>::iterator it = final_G[i].begin(); it != final_G[i].end(); ++it) {
-			index[GlobalIndexIter].insert(*it);
-			GlobalIndexIter++;
-		}
-	}
-	return final_S_p;
-}
-
-double evaluate_Indexsubgraphs(std::set<int> G[], int no_of_subgraphs) {
 	
-	double rslt1 = W1 * X_sc(G, no_of_subgraphs);
 
-	return rslt1 ;
+	for (int i = 0; i < no_new_piv; ++i) {
+		std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
+		for (std::set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
+			std::cerr << *it << " ";
+		}
+		std::cerr << "\n" << "\n";
+	}
+	std::cerr << "THe Evaluation :: " << global_cost << "\n \n";
+
+	return GGG;
 }
-*/
 
 
+
+int number_nodes(int a, int b) {
+	int count = 0;
+	while (a > 0) {
+		a = a / b;
+		count++;
+	}
+	return count;
+}
 #endif // !INDEX_HPP

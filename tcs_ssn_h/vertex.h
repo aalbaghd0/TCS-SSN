@@ -1,6 +1,7 @@
 #pragma once
 #include <bitset>
 #include <set>
+#include<unordered_set>
 #ifndef VERTEX_H
 #define VERTEX_H
 
@@ -50,6 +51,9 @@ public:
 };
 
 class Gnode {
-	std::set<int> child;
+	std::unordered_set<int> child;
+	int start;
+	int end;
+	int n_id;
 };
 #endif
