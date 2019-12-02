@@ -683,8 +683,10 @@ void indexing() {
 		for (int j = 0; j < no_new_piv; ++j) {
 			//trying to assign the children to the node
 			for (std::set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
-				tree[assign_counter].child.insert(*it);
-				tree[assign_counter].ptr.insert(hash_father_list[*it]);
+				//tree[assign_counter].child.insert(*it);
+				tree[assign_counter].child.insert(hash_father_list[*it]);
+				
+				//tree[assign_counter].ptr.insert(hash_father_list[*it]);
 				hash_father_list[*it] = assign_counter;
 			}
 			assign_counter--;
