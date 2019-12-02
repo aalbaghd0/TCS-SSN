@@ -54,8 +54,24 @@ class Gnode {
 public:
 	std::unordered_set<int> child;
 	std::set<int> ptr;
+	int parent;
 	int start;
 	int end;
 	int n_id;
+	int truss;
+	int level;
+	
+	int rn_min_dist_to_piv;
+	int rn_max_dist_to_piv;
+	int rn_minimum_piv;
+	int rn_maximum_piv;
+
+	int sn_min_dist_to_piv;
+	int sn_max_dist_to_piv;
+	int sn_minimum_piv;
+	int sn_maximum_piv;
+
+	std::bitset<No_K> keys;
+
 };
 #endif

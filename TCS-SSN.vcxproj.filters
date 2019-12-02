@@ -56,5 +56,11 @@
     <ClInclude Include="buildIndex.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="tcs_ssn_h\IndexSummurizing.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcs_ssn_h\IndexTraversal.hpp">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

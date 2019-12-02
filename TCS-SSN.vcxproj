@@ -137,6 +137,8 @@
     <ClInclude Include="tcs_ssn_h\dij.hpp" />
     <ClInclude Include="tcs_ssn_h\gendef.h" />
     <ClInclude Include="tcs_ssn_h\heap.h" />
+    <ClInclude Include="tcs_ssn_h\IndexSummurizing.h" />
+    <ClInclude Include="tcs_ssn_h\IndexTraversal.hpp" />
     <ClInclude Include="tcs_ssn_h\parameterSettings.h" />
     <ClInclude Include="tcs_ssn_h\readFiles.hpp" />
     <ClInclude Include="tcs_ssn_h\vertex.h" />

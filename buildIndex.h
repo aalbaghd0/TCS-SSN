@@ -30,6 +30,7 @@ double X_st(std::unordered_map<int, std::set<int>> G, int pivots[], int number_s
 double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[],int number_subgraphs);
 double evaluate_subgraphs(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
 double evaluate_Indexsubgraphs(std::set<int> G[], int no_of_subgraphs);
+double inf_score_users(int src, int dst);
 
 
 double quality(int v, int piv) {
@@ -96,8 +97,8 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 	double local_cost = 0.0;
 	double new_cost = 0.0;
 
-	int global_iter = 5;
-	int swap_iter = 10;
+	int global_iter = 3;
+	int swap_iter = 4;
 
 	int get_piv = 0;
 	int new_piv = 0;
@@ -247,14 +248,8 @@ double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_s
 				if (*it != *it2) {
 
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
-						
-						if (check_hash_infScore[std::make_pair(*it, *it2)]) {
-							sub_rslt = sub_rslt + hash_infScore[std::make_pair(*it, *it2)];
-						}
-						else {
-							inf_score_to_all_vertices(*it);
-							sub_rslt = sub_rslt + hash_infScore[std::make_pair(*it, *it2)];
-						}
+					
+						sub_rslt = sub_rslt + inf_score_users(*it, *it2);
 
 						map[std::make_pair(*it, *it2)] = true;
 						map[std::make_pair(*it2, *it)] = true;
@@ -269,9 +264,25 @@ double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_s
 }
 
 /*
-Here we compute distances functions
--- we start with the road network shortest path distance
+	compute the influence score between two users
 */
+
+double inf_score_users(int src, int dst) {
+	double rslt = 0.0;
+
+	if (check_hash_infScore[std::make_pair(src, dst)]) { // if it is already coomputed, we just return it
+		rslt = hash_infScore[std::make_pair(src, dst)];
+	}
+	else { // if nott computed, we run bfs to compute to all vertices, and then we retuen the value
+		inf_score_to_all_vertices(src);
+		rslt = hash_infScore[std::make_pair(src, dst)];
+	}
+
+	return rslt;
+}
+
+
+
 
 
 /*
@@ -539,8 +550,8 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 	double local_cost = 0.0;
 	double new_cost = 0.0;
 
-	int global_iter = 5;
-	int swap_iter = 10;
+	int global_iter = 3;
+	int swap_iter = 4;
 
 	int get_piv = 0;
 	int new_piv = 0;
@@ -608,7 +619,7 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 	}
 	
 	
-	/*
+	///*
 	// get the new assigned fathers in a hashmap
 	for (int i = 0; i < no_new_piv; ++i) {
 		std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
@@ -618,35 +629,26 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 		std::cerr << "\n" << "\n";
 	}
 	std::cerr << "THe Evaluation :: " << global_cost << "\n \n";
-	*/
+	//*/
 	return GGG;
 }
 
 
-
-int number_nodes(int a, int b, int& c) {
-	int count = 0;
-	while (a > 0) {
-		c = c + a;
-		a = a / b; 
-		count++;
-
-	}
-	return count;
-}
-
+/*
+ GIVEN		:: a first layer subgraphs with their corresponding pivots
+ ENSURES	:: a tree index as an array of objects
+*/
 void indexing() {
 
 	int c = 0;
 	std::cerr << number_nodes(No_index_piv, 2, c) << " " << c;
-	Gnode* tree = new Gnode[c];
 
 
 	truss_decomposition();
 	std::unordered_map<int, std::set<int>> GGG;
 
 	GGG = sn_piv_select();
-
+	
 	int assign_counter = c - 1;
 	for (int j = 0; j < No_index_piv; ++j) {
 		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
@@ -685,7 +687,6 @@ void indexing() {
 				tree[assign_counter].child.insert(*it);
 				tree[assign_counter].ptr.insert(hash_father_list[*it]);
 				hash_father_list[f_piv[j]] = assign_counter;
-
 			}
 			assign_counter--;
 		}
@@ -706,7 +707,9 @@ void indexing() {
 		std::cerr << "the node is " << i << " --> ";
 		for (std::set<int>::iterator it = tree[i].ptr.begin(); it != tree[i].ptr.end(); ++it) {
 			std::cerr << *it;
+			
 		}
+		std::cerr << " the parent is:: " << tree[i].parent;
 		std::cerr << std::endl;
 	}
 	std::cerr << " --------------------------- " << "\nl";

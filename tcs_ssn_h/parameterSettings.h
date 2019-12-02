@@ -63,12 +63,16 @@ int* index_piv = new int[No_index_piv];
 vertex* sn_vrtx = new vertex[No_sn_V];
 vertex* rn_vrtx = new vertex[No_rn_V];
 
+
+
 std::list<int>* snGraph = new std::list<int>[No_sn_V];
 std::list<int>* rnGraph = new std::list<int>[No_rn_V];
 
 SN_edges* snEdges = new SN_edges[No_sn_E];
 RN_edges* rnEdges = new RN_edges[No_rn_E];
 
+int* RN_piv_set = new int[No_RN_piv];
+int* SN_piv_set = new int[No_SN_piv];
 
 
 std::set<int>* index = new std::set<int>[1000];
@@ -122,6 +126,25 @@ bool isInTheArray(int arr[], int arr_size, int x) {
 	}
 	return false;
 }
+
+
+
+/////////////////////////////////
+// se the index size and define the tree
+int number_nodes(int a, int b, int& c) {
+	int count = 0;
+	while (a > 0) {
+		c = c + a;
+		a = a / b;
+		count++;
+
+	}
+	return count;
+}
+
+int INDEXSIZE = 0;
+int b = number_nodes(No_index_piv, 2, INDEXSIZE);
+Gnode* tree = new Gnode[INDEXSIZE];
 
 
 // functions

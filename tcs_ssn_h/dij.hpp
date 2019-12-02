@@ -504,8 +504,13 @@ double inf_score_to_all_vertices(int src) {
 		hp->remove(he);
 		int v = he->son1;
 		if (dst == v) {
-			cost = he->key;
-			break;
+
+			hash_infScore[std::make_pair(src, v)] = dist[v];
+			check_hash_infScore[std::make_pair(src, v)] = true;
+
+			hash_infScore[std::make_pair(v, src)] = dist[v];
+			check_hash_infScore[std::make_pair(v, src)] = true;
+		
 		}
 		s[v] = true;
 		f[v] = false;
