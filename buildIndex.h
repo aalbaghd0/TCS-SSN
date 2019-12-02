@@ -89,7 +89,6 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 	double final_cost;
 	std::unordered_map<int, std::set<int>> GG;
 	std::unordered_map<int, std::set<int>> new_GG;
-	std::unordered_map<int, std::set<int>> final_GG;
 	std::unordered_map<int, std::set<int>> G;
 	
 
@@ -117,7 +116,7 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 		}
 		// get subgraphs based on pivots
 		GG = gen_subgraphs(S_p);
-		
+
 		// evaluate the cost function
 		local_cost = evaluate_subgraphs(GG, S_p, No_subgraphs);
 		//std::cerr << "THe Evaluation :: " << local_cost << "\n \n";
@@ -151,13 +150,13 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 				// get the final subgraph
 				//memcpy(final_G, new_G, sizeof(new_G) * No_index_piv);
 
-				final_GG = new_GG;
+				GG = new_GG;
 			}
 		}
 		if (local_cost > global_cost) {
 			memcpy(index_piv, S_p, sizeof(S_p[0]) * No_index_piv);
 			global_cost = local_cost;
-			G = final_GG;
+			G = GG;
 		}
 	}
 
@@ -550,8 +549,8 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 	double local_cost = 0.0;
 	double new_cost = 0.0;
 
-	int global_iter = 3;
-	int swap_iter = 4;
+	int global_iter = 5;
+	int swap_iter = 10;
 
 	int get_piv = 0;
 	int new_piv = 0;
@@ -686,7 +685,7 @@ void indexing() {
 			for (std::set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
 				tree[assign_counter].child.insert(*it);
 				tree[assign_counter].ptr.insert(hash_father_list[*it]);
-				hash_father_list[*it] = assign_counter;
+				hash_father_list[f_piv[j]] = assign_counter;
 			}
 			assign_counter--;
 		}
