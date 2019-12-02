@@ -117,7 +117,7 @@ void summraize_RN_lb_dist() {
 	GIVEN	:: an array of dnodes
 	ENSURES :: summurize the maximum and the minimum social distance to the social network pivots in each node
 */
-void summraize_RN_lb_dist() {
+void summraize_SN_lb_dist() {
 
 	for (int i = INDEXSIZE; i >= 0; i--) { // for all nodes from the bottom up
 
@@ -203,12 +203,12 @@ void summurize_keywords() {
 
 			if (tree[i].level == 0) {
 
-				tree[i].keys = tree[i].keys || sn_vrtx[*it].key;
+				tree[i].keys |= sn_vrtx[*it].key;
 
 			}
 			else {
 
-				tree[i].keys = tree[i].keys || tree[*it].keys;
+				tree[i].keys |= tree[*it].keys;
 
 			}
 
