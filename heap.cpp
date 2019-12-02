@@ -39,7 +39,7 @@ Heap::Heap()
 //------------------------------------------
 Heap::~Heap()
 {
-	printf("maximum heap entry=%d\n", maxused);
+	//printf("maximum heap entry=%d\n", maxused);
 	delete [] cont;
 	cont = NULL;
 }

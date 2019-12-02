@@ -81,7 +81,7 @@ std::unordered_map<int, std::set<int>> gen_subgraphs(int cand_index_piv[]) {
 	return GG;
 }
 
-void sn_piv_select() {
+std::unordered_map<int, std::set<int>> sn_piv_select() {
 	double global_cost = -INT_MAX;
 	int* S_p = new int[No_index_piv];
 	int* new_S_p = new int[No_index_piv];
@@ -89,7 +89,7 @@ void sn_piv_select() {
 	std::unordered_map<int, std::set<int>> GG;
 	std::unordered_map<int, std::set<int>> new_GG;
 	std::unordered_map<int, std::set<int>> final_GG;
-	
+	std::unordered_map<int, std::set<int>> G;
 	
 
 	double cost_G = 0.0;
@@ -170,14 +170,7 @@ void sn_piv_select() {
 		}
 		std::cerr << "THe Evaluation :: " << global_cost << "\n \n";
 
-	/*
-	for (int i = 0; i < No_index_piv; ++i) {
-		for (std::set<int>::iterator it = final_G[i].begin(); it != final_G[i].end(); ++it) {
-			index[GlobalIndexIter].insert(*it);
-			GlobalIndexIter++;
-		}
-	}
-	*/
+		return G;
 }
 
 
@@ -493,6 +486,7 @@ std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no
 	double qual_rslt;
 	int best_quality;
 	int assign;
+
 	std::unordered_map<int, std::set<int>> Gr;
 	for (int v = 0; v < no_piv_set; v++) {
 		best_quality = INT_MAX;
@@ -506,9 +500,9 @@ std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no
 				best_quality = qual_rslt;
 			}
 		}
-		Gr[assign].insert(v);
+		Gr[assign].insert(piv_set[v]);
 	}
-
+	/*
 	for (int i = 0; i < no_new_piv; ++i) {
 		std::cerr << "Index_Piv " << new_pivots[i] << " --->> ";
 		for (std::set<int>::iterator it = Gr[new_pivots[i]].begin(); it != Gr[new_pivots[i]].end(); ++it) {
@@ -517,7 +511,7 @@ std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no
 		std::cerr << "\n" << "\n";
 	}
 
-
+	*/
 	return Gr;
 }
 
@@ -613,7 +607,9 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 		}
 	}
 	
-
+	
+	/*
+	// get the new assigned fathers in a hashmap
 	for (int i = 0; i < no_new_piv; ++i) {
 		std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
 		for (std::set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
@@ -622,18 +618,105 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 		std::cerr << "\n" << "\n";
 	}
 	std::cerr << "THe Evaluation :: " << global_cost << "\n \n";
-
+	*/
 	return GGG;
 }
 
 
 
-int number_nodes(int a, int b) {
+int number_nodes(int a, int b, int& c) {
 	int count = 0;
 	while (a > 0) {
-		a = a / b;
+		c = c + a;
+		a = a / b; 
 		count++;
+
 	}
 	return count;
 }
+
+void indexing() {
+
+	int c = 0;
+	std::cerr << number_nodes(No_index_piv, 2, c) << " " << c;
+	Gnode* tree = new Gnode[c];
+
+
+	truss_decomposition();
+	std::unordered_map<int, std::set<int>> GGG;
+
+	GGG = sn_piv_select();
+
+	int assign_counter = c - 1;
+	for (int j = 0; j < No_index_piv; ++j) {
+		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
+			tree[assign_counter].child.insert(*it);
+			hash_father_list[*it] = assign_counter;
+			std::cerr << "the vertex " << *it << " its position in the tree " << assign_counter << "\n";
+		}
+		assign_counter--;
+	}
+
+	std::cerr << "---- the index pivots final -------";
+	for (int i = 0; i < No_index_piv; i++) {
+		std::cerr << index_piv[i] << " ";
+	}
+	std::cerr << "----------";
+
+	int* f_piv = new int[100];
+	int no_new_piv = 2;
+
+	int no_prev_piv = No_index_piv;
+	int* layer_piv = new int[No_index_piv];
+	std::memcpy(layer_piv, index_piv, sizeof(index_piv[0]) * No_index_piv);
+
+	std::cerr << "\n" << "---- the index pivots final -------";
+	for (int i = 0; i < No_index_piv; i++) {
+		std::cerr << layer_piv[i] << " ";
+	}
+	std::cerr << "----------";
+
+	while (no_new_piv > 0) {
+		GGG = Index_piv_select(no_new_piv, layer_piv, no_prev_piv, f_piv);
+
+		for (int j = 0; j < no_new_piv; ++j) {
+			//trying to assign the children to the node
+			for (std::set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
+				tree[assign_counter].child.insert(*it);
+				tree[assign_counter].ptr.insert(hash_father_list[*it]);
+				hash_father_list[f_piv[j]] = assign_counter;
+
+			}
+			assign_counter--;
+		}
+
+		no_prev_piv = no_new_piv;
+		no_new_piv = no_new_piv / 2;
+		std::memcpy(layer_piv, f_piv, sizeof(f_piv[0]) * no_prev_piv);
+
+		for (int i = 0; i < no_prev_piv; ++i) {
+			std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
+			for (std::set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
+				std::cerr << *it << " ";
+			}
+			std::cerr << "\n" << "\n";
+		}
+	}
+	for (int i = 0; i < c; i++) {
+		std::cerr << "the node is " << i << " --> ";
+		for (std::set<int>::iterator it = tree[i].ptr.begin(); it != tree[i].ptr.end(); ++it) {
+			std::cerr << *it;
+		}
+		std::cerr << std::endl;
+	}
+	std::cerr << " --------------------------- " << "\nl";
+	for (int i = 0; i < c; i++) {
+		std::cerr << "the node is " << i << " --> ";
+		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
+			std::cerr << *it;
+		}
+		std::cerr << std::endl;
+	}
+}
+
 #endif // !INDEX_HPP

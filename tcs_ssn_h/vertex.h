@@ -51,7 +51,9 @@ public:
 };
 
 class Gnode {
+public:
 	std::unordered_set<int> child;
+	std::set<int> ptr;
 	int start;
 	int end;
 	int n_id;
