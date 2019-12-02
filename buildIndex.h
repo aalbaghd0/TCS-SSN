@@ -108,7 +108,7 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 		// select random pivots at first
 		for (int i = 0; i < No_index_piv; ++i) {
 			labelA:
-			int git = uniform(0, No_sn_V);
+			int git = uniform(0, No_sn_V - 1);
 			if (!isInTheArray(S_p, No_index_piv, git))
 				S_p[i] = git;
 			else
@@ -123,10 +123,10 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 		
 		
 		for (int  b = 1; b < swap_iter; b++) {
-			get_piv = uniform(0, No_index_piv);
+			get_piv = uniform(0, No_index_piv - 1);
 			
 		labelB:
-			int git = uniform(0, No_sn_V);
+			int git = uniform(0, No_sn_V - 1);
 			if (!isInTheArray(S_p, No_index_piv, git))
 				new_piv = git;
 			else
@@ -562,7 +562,7 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 		// select random pivots at first
 		for (int i = 0; i < no_new_piv; ++i) {
 		labelA:
-			git = uniform(0, no_prev_piv);
+			git = uniform(0, no_prev_piv - 1);
 			int git_val = prev_piv[git];  // get the values from the array itselt
 			if (!isInTheArray(S_p, no_prev_piv, git_val))
 				S_p[i] = git_val;
@@ -580,10 +580,10 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 
 
 		for (int b = 1; b < swap_iter; b++) {
-			get_piv = uniform(0, no_new_piv);
+			get_piv = uniform(0, no_new_piv - 1);
 
 		labelB:
-			int git = prev_piv[uniform(0, no_prev_piv)];
+			int git = prev_piv[uniform(0, no_prev_piv - 1)];
 			
 			if (!isInTheArray(S_p, no_new_piv, git))
 				new_piv = git;
@@ -722,6 +722,183 @@ void indexing() {
 		}
 		std::cerr << std::endl;
 	}
+}
+
+
+
+/*
+	GIVEN		:: a social network and a number ??, of pivots
+	ENSURES		:: the social network pivot set SN_piv_set
+*/
+void find_social_network_pivots() {
+	
+	const int h = No_SN_piv;
+	int globelIter = 3, int max = No_sn_V, min = -INT_MAX;
+	double cost = 0;
+	double d1, d2, diff, maxEva = 0;
+	double localCost, newCost = 0;
+	int swapIter = 100;
+	int rand_piv, npiv;
+	double globaCost = -INT_MAX;
+
+	int S_p[h], new_S_p[h];
+	int new_piv = -1;
+	for (int a = 1; a <= globelIter; ++a) {
+		
+		// select random pivots at first
+		for (int i = 0; i < No_SN_piv; ++i) {
+		labelA:
+			int git = uniform(0, No_sn_V - 1);
+			if (!isInTheArray(S_p, No_SN_piv, git))
+				S_p[i] = git;
+			else
+				goto labelA;
+		}
+
+		//evaluate the pivot set
+		localCost = evaluate_SN_pivots(S_p, No_SN_piv);
+
+		for (int b = 1; b < swapIter; b++) {
+					
+			int get_piv = uniform(0, No_SN_piv - 1);
+
+		labelB:
+			int git = uniform(0, No_sn_V - 1);
+			if (!isInTheArray(S_p, No_SN_piv, git))
+				new_piv = git;
+			else
+				goto labelB;
+		
+			std::memcpy(new_S_p, S_p, sizeof(S_p[0]) * No_SN_piv);
+			
+			newCost = evaluate_SN_pivots(new_S_p, No_SN_piv);
+
+			if (newCost > localCost) {
+				localCost = newCost;
+				std::memcpy(S_p, new_S_p, sizeof(S_p[0]) * No_SN_piv);
+			
+			}
+		}
+
+		if (localCost > globaCost) {
+			memcpy(SN_piv_set, S_p, sizeof(S_p[0]) * No_SN_piv);
+			globaCost = localCost;
+		}
+	}
+}
+
+
+double evaluate_SN_pivots(int S_p[], int no_pivs) {
+
+	double rslt = 0.0;
+	double diff = -INT_MAX;
+	double temp = - INT_MAX;
+	
+	for (int i = 0; i < No_sn_V; i++) {
+
+		for (int j = 0; j < No_sn_V; j++) {
+
+			for (int k = 0; k < no_pivs; k++) {
+
+				temp = abs(sn_dist(S_p[k], i) - sn_dist(S_p[k], j));
+
+				if (diff < temp)
+					diff = temp;
+			}
+
+			rslt = rslt + diff;
+
+		}
+
+	}
+
+	return rslt;
+
+}
+
+
+void find_road_network_pivots() {
+
+	int globelIter = 3;
+	double cost = 0;
+	double localCost, newCost = 0;
+	int swapIter = 100;
+	int rand_piv, npiv;
+	double globaCost = -INT_MAX;
+
+	int S_p[No_RN_piv], new_S_p[No_RN_piv];
+	int new_piv = -1;
+	for (int a = 1; a <= globelIter; ++a) {
+
+		// select random pivots at first
+		for (int i = 0; i < No_RN_piv; ++i) {
+		labelA:
+			int git = uniform(0, No_rn_V - 1);
+			if (!isInTheArray(S_p, No_RN_piv, git))
+				S_p[i] = git;
+			else
+				goto labelA;
+		}
+
+		//evaluate the pivot set
+		localCost = evaluate_SN_pivots(S_p, No_RN_piv);
+
+		for (int b = 1; b < swapIter; b++) {
+
+			int get_piv = uniform(0, No_RN_piv - 1);
+
+		labelB:
+			int git = uniform(0, No_rn_V - 1);
+			if (!isInTheArray(S_p, No_RN_piv, git))
+				new_piv = git;
+			else
+				goto labelB;
+
+			std::memcpy(new_S_p, S_p, sizeof(S_p[0]) * No_RN_piv);
+
+			newCost = evaluate_SN_pivots(new_S_p, No_RN_piv);
+
+			if (newCost > localCost) {
+				localCost = newCost;
+				std::memcpy(S_p, new_S_p, sizeof(S_p[0]) * No_RN_piv);
+
+			}
+		}
+
+		if (localCost > globaCost) {
+			memcpy(RN_piv_set, S_p, sizeof(S_p[0]) * No_RN_piv);
+			globaCost = localCost;
+		}
+	}
+}
+
+
+double evaluate_RN_pivots(int S_p[], int no_pivs) {
+
+	double rslt = 0.0;
+	double diff = -INT_MAX;
+	double temp = -INT_MAX;
+
+	for (int i = 0; i < No_rn_V; i++) {
+
+		for (int j = 0; j < No_rn_V; j++) {
+
+			for (int k = 0; k < no_pivs; k++) {
+
+				temp = abs(rn_dist_for_users(S_p[k], i) - rn_dist_for_users(S_p[k], j));
+
+				if (diff < temp)
+					diff = temp;
+			}
+
+			rslt = rslt + diff;
+
+		}
+
+	}
+
+	return rslt;
+
 }
 
 #endif // !INDEX_HPP

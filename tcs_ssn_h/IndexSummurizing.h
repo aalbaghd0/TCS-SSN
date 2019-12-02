@@ -216,10 +216,7 @@ void summurize_keywords() {
 	}
 }
 
-/*
-	GIVEN	:: an array of dnodes
-	ENSURES :: upper bound of the out influence score
-*/
+
 
 
 #endif // !INDEXTRAVERSE
