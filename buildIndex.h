@@ -89,7 +89,6 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 	double final_cost;
 	std::unordered_map<int, std::set<int>> GG;
 	std::unordered_map<int, std::set<int>> new_GG;
-	std::unordered_map<int, std::set<int>> final_GG;
 	std::unordered_map<int, std::set<int>> G;
 	
 
@@ -151,13 +150,13 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 				// get the final subgraph
 				//memcpy(final_G, new_G, sizeof(new_G) * No_index_piv);
 
-				final_GG = new_GG;
+				GG = new_GG;
 			}
 		}
 		if (local_cost > global_cost) {
 			memcpy(index_piv, S_p, sizeof(S_p[0]) * No_index_piv);
 			global_cost = local_cost;
-			G = final_GG;
+			G = GG;
 		}
 	}
 
