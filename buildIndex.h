@@ -653,6 +653,7 @@ void indexing() {
 		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
 			tree[assign_counter].child.insert(*it);
 			hash_father_list[*it] = assign_counter;
+			tree[assign_counter].level = 0;
 			std::cerr << "the vertex " << *it << " its position in the tree " << assign_counter << "\n";
 		}
 		assign_counter--;

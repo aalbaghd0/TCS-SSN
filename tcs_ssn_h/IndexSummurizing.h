@@ -15,7 +15,7 @@
 	ENSURES :: summurize the maximum truss value in each node
 */
 void summraize_truss() {
-	for (int i = INDEXSIZE; i >= 0; i--) { // for all nodes from bottom to up
+	for (int i = INDEXSIZE - 1; i >= 0; i--) { // for all nodes from bottom to up
 
 		int max_t = -INT_MAX;
 
@@ -40,15 +40,15 @@ void summraize_truss() {
 */
 void summraize_RN_lb_dist() {
 
-	for (int i = INDEXSIZE; i >= 0; i--) { // for all nodes from the bottom up
+	for (int i = INDEXSIZE - 1; i >= 0; i--) { // for all nodes from the bottom up
 
 		if (tree[i].level == 0) { // if the node is a leaf
 
 			int min_dist = INT_MAX;
-			int min_piv;
+			int min_piv = -1;
 
 			int max_dist = -INT_MAX;
-			int max_piv;
+			int max_piv = -1;
 
 			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all children in the node
 
@@ -82,10 +82,10 @@ void summraize_RN_lb_dist() {
 		else { // if it is an intermediate node
 
 			int min_dist = INT_MAX;
-			int min_piv;
+			int min_piv = -1;
 
 			int max_dist = -INT_MAX;
-			int max_piv;
+			int max_piv = -1;
 
 			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all node children in the node
 
@@ -119,15 +119,15 @@ void summraize_RN_lb_dist() {
 */
 void summraize_SN_lb_dist() {
 
-	for (int i = INDEXSIZE; i >= 0; i--) { // for all nodes from the bottom up
+	for (int i = INDEXSIZE - 1; i >= 0; i--) { // for all nodes from the bottom up
 
 		if (tree[i].level == 0) { // if the node is a leaf
 
 			int min_dist = INT_MAX;
-			int min_piv;
+			int min_piv = -1;
 
 			int max_dist = -INT_MAX;
-			int max_piv;
+			int max_piv = -1;
 
 			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all children in the node
 
@@ -161,10 +161,10 @@ void summraize_SN_lb_dist() {
 		else { // if it is an intermediate node
 
 			int min_dist = INT_MAX;
-			int min_piv;
+			int min_piv = -1;
 
 			int max_dist = -INT_MAX;
-			int max_piv;
+			int max_piv = -1;
 
 			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all node children in the node
 
@@ -197,7 +197,7 @@ void summraize_SN_lb_dist() {
 	ENSURES :: summurize the keyword vector in each node
 */
 void summurize_keywords() {
-	for (int i = INDEXSIZE; i >= 0; i--) {
+	for (int i = INDEXSIZE - 1; i >= 0; i--) {
 
 		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
 

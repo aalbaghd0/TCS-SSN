@@ -25,7 +25,6 @@ void main() {
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
 
 	indexing();
-	summraize_truss();
 };
 
 
