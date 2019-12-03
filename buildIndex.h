@@ -299,8 +299,8 @@ double rn_dist_for_users(int src, int dst) {
 	}
 	else { // else, compute them and store the result
 		
-		for (int i = 0; i < No_CKINs; ++i) {// for all user locations
-			for (int j = 0; j < No_CKINs; j++) {
+		for (int i = 0; i < No_CKINs - 1; ++i) {// for all user locations
+			for (int j = 0; j < No_CKINs - 1; j++) {
 				// map the user location to the from the social to the road network, match the 
 				// user location to a vertex on the road network
 				int src_map = sn_vrtx[src].ckins[i];
@@ -620,7 +620,7 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 	}
 	
 	
-	///*
+	/*
 	// get the new assigned fathers in a hashmap
 	for (int i = 0; i < no_new_piv; ++i) {
 		std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
@@ -630,100 +630,8 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 		std::cerr << "\n" << "\n";
 	}
 	std::cerr << "THe Evaluation :: " << global_cost << "\n \n";
-	//*/
+	*/
 	return GGG;
-}
-
-
-/*
- GIVEN		:: a first layer subgraphs with their corresponding pivots
- ENSURES	:: a tree index as an array of objects
-*/
-void indexing() {
-
-	int c = 0;
-	std::cerr << number_nodes(No_index_piv, 2, c) << " " << c;
-
-
-	truss_decomposition();
-	std::unordered_map<int, std::set<int>> GGG;
-
-	GGG = sn_piv_select();
-	
-	int assign_counter = c - 1;
-	for (int j = 0; j < No_index_piv; ++j) {
-		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
-			tree[assign_counter].child.insert(*it);
-			hash_father_list[*it] = assign_counter;
-			tree[assign_counter].level = 0;
-			std::cerr << "the vertex " << *it << " its position in the tree " << assign_counter << "\n";
-		}
-		assign_counter--;
-	}
-
-	std::cerr << "---- the index pivots final -------";
-	for (int i = 0; i < No_index_piv; i++) {
-		std::cerr << index_piv[i] << " ";
-	}
-	std::cerr << "----------";
-
-	int* f_piv = new int[100];
-	int no_new_piv = 2;
-
-	int no_prev_piv = No_index_piv;
-	int* layer_piv = new int[No_index_piv];
-	std::memcpy(layer_piv, index_piv, sizeof(index_piv[0]) * No_index_piv);
-
-	std::cerr << "\n" << "---- the index pivots final -------";
-	for (int i = 0; i < No_index_piv; i++) {
-		std::cerr << layer_piv[i] << " ";
-	}
-	std::cerr << "----------";
-
-	while (no_new_piv > 0) {
-		GGG = Index_piv_select(no_new_piv, layer_piv, no_prev_piv, f_piv);
-
-		for (int j = 0; j < no_new_piv; ++j) {
-			//trying to assign the children to the node
-			for (std::set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
-				//tree[assign_counter].child.insert(*it);
-				tree[assign_counter].child.insert(hash_father_list[*it]);
-				
-				//tree[assign_counter].ptr.insert(hash_father_list[*it]);
-				hash_father_list[*it] = assign_counter;
-			}
-			assign_counter--;
-		}
-
-		no_prev_piv = no_new_piv;
-		no_new_piv = no_new_piv / 2;
-		std::memcpy(layer_piv, f_piv, sizeof(f_piv[0]) * no_prev_piv);
-
-		for (int i = 0; i < no_prev_piv; ++i) {
-			std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
-			for (std::set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
-				std::cerr << *it << " ";
-			}
-			std::cerr << "\n" << "\n";
-		}
-	}
-	for (int i = 0; i < c; i++) {
-		std::cerr << "the node is " << i << " --> ";
-		for (std::set<int>::iterator it = tree[i].ptr.begin(); it != tree[i].ptr.end(); ++it) {
-			std::cerr << *it;
-			
-		}
-		std::cerr << " the parent is:: " << tree[i].parent;
-		std::cerr << std::endl;
-	}
-	std::cerr << " --------------------------- " << "\nl";
-	for (int i = 0; i < c; i++) {
-		std::cerr << "the node is " << i << " --> ";
-		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
-			std::cerr << *it;
-		}
-		std::cerr << std::endl;
-	}
 }
 
 
@@ -787,6 +695,11 @@ void find_social_network_pivots() {
 			globaCost = localCost;
 		}
 	}
+
+	std::cerr << "\n ------ sn pivots ------ \n";
+	for (int i = 0; i < No_SN_piv; ++i) {
+		std::cerr << SN_piv_set[i] << " --- ";
+	}
 }
 
 
@@ -821,8 +734,8 @@ double evaluate_SN_pivots(int S_p[], int no_pivs) {
 
 void find_road_network_pivots() {
 
-	int globelIter = 3;
-	int swapIter = 100;
+	int globelIter = 2;
+	int swapIter = 5;
 
 	double cost = 0;
 	double localCost, newCost = 0;
@@ -844,7 +757,7 @@ void find_road_network_pivots() {
 		}
 
 		//evaluate the pivot set
-		localCost = evaluate_SN_pivots(S_p, No_RN_piv);
+		localCost = evaluate_RN_pivots(S_p, No_RN_piv);
 
 		for (int b = 1; b < swapIter; b++) {
 
@@ -859,7 +772,7 @@ void find_road_network_pivots() {
 
 			std::memcpy(new_S_p, S_p, sizeof(S_p[0]) * No_RN_piv);
 
-			newCost = evaluate_SN_pivots(new_S_p, No_RN_piv);
+			newCost = evaluate_RN_pivots(new_S_p, No_RN_piv);
 
 			if (newCost > localCost) {
 				localCost = newCost;
@@ -873,8 +786,35 @@ void find_road_network_pivots() {
 			globaCost = localCost;
 		}
 	}
+	std::cerr << "\n ------ rn pivots ------ \n";
+	for (int i = 0; i < No_RN_piv; ++i) {
+		std::cerr << RN_piv_set[i] << " --- ";
+	}
 }
 
+
+double rn_dist_rnPiv_to_user(int r_piv, int user) {
+	double rslt = 0.0;
+	double temp = 0.0;
+
+	for (int i = 0; i < No_CKINs -1 ; ++i) {
+
+		int src_map = sn_vrtx[user].ckins[i];
+
+		if (!check_hash_rn_dist[std::make_pair(r_piv, src_map)]) { // if we don't have the distance, the we will compute it
+			rn_Dij_to_all_vertices(r_piv); // find distance to all other vertices
+											 // at the same time store distances to all other vertices
+			temp = hash_rn_dist[std::make_pair(r_piv, src_map)];
+		}
+		else {
+			temp = hash_rn_dist[std::make_pair(r_piv, src_map)];
+		}
+
+		rslt = rslt + temp;
+
+	}
+	return rslt;
+}
 
 double evaluate_RN_pivots(int S_p[], int no_pivs) {
 
@@ -882,13 +822,13 @@ double evaluate_RN_pivots(int S_p[], int no_pivs) {
 	double diff = -INT_MAX;
 	double temp = -INT_MAX;
 
-	for (int i = 0; i < No_rn_V; i++) {
+	for (int i = 0; i < No_sn_V; i++) {
 
-		for (int j = 0; j < No_rn_V; j++) {
+		for (int j = 0; j < No_sn_V; j++) {
 
 			for (int k = 0; k < no_pivs; k++) {
 
-				temp = abs(rn_dist_for_users(S_p[k], i) - rn_dist_for_users(S_p[k], j));
+				temp = abs(rn_dist_rnPiv_to_user(S_p[k], i) - rn_dist_rnPiv_to_user(S_p[k], j));
 
 				if (diff < temp)
 					diff = temp;
@@ -903,5 +843,101 @@ double evaluate_RN_pivots(int S_p[], int no_pivs) {
 	return rslt;
 
 }
+
+
+//////////////////////////////////////////////////////////////////////
+/*
+ GIVEN		:: a first layer subgraphs with their corresponding pivots
+ ENSURES	:: a tree index as an array of objects
+*/
+//////////////////////////////////////////////////////////////////////
+void indexing() {
+	// compute the truss for each user in the social network
+	truss_decomposition();
+
+	//define a graph
+	std::unordered_map<int, std::set<int>> GGG;
+
+	// get the index pivots set (index_piv[])
+	// and devide the subgraph based on those pivots and return the subgraphs in GGG
+	GGG = sn_piv_select();
+
+
+	int assign_counter = INDEXSIZE - 1;
+
+	// for subgraph, # of subgraphs == # of index pivots
+	for (int j = 0; j < No_index_piv; ++j) {
+		// for each subgraph
+		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
+			//store all children of the node in the tree, position assign_counter
+			tree[assign_counter].child.insert(*it);
+			
+			// store the tree position of each node
+			hash_my_position_in_tree[*it] = assign_counter;
+
+			// assign the levelto each node
+			tree[assign_counter].level = 0;
+
+		}
+		assign_counter--;
+	}
+
+	
+	
+	int* f_piv = new int[No_index_piv];
+	int no_new_piv = No_index_piv / NO_INTER_PIVS;
+
+	int no_prev_piv = No_index_piv;
+	int* layer_piv = new int[No_index_piv];
+	std::memcpy(layer_piv, index_piv, sizeof(index_piv[0]) * No_index_piv);
+
+	
+	while (no_new_piv > 0) {
+		// layer the graph and get 
+		GGG = Index_piv_select(no_new_piv, layer_piv, no_prev_piv, f_piv);
+
+		//printing
+		/*
+		for (int i = 0; i < no_new_piv; ++i) {
+			std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
+			for (std::set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
+				std::cerr << *it << " ";
+			}
+			std::cerr << "\n" << "\n";
+		}
+		*/
+
+
+		for (int j = 0; j < no_new_piv; ++j) {
+			//trying to assign the children to the node
+			for (std::set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
+
+				tree[assign_counter].child.insert(hash_my_position_in_tree[*it]);
+
+				hash_my_position_in_tree[*it] = assign_counter;
+
+			}
+
+			assign_counter--;
+	
+		}
+
+		no_prev_piv = no_new_piv;
+		no_new_piv = no_new_piv / NO_INTER_PIVS;
+		std::memcpy(layer_piv, f_piv, sizeof(f_piv[0]) * no_prev_piv);
+		
+	}
+
+	std::cerr << " --------------------------- " << "\n";
+	for (int i = 0; i < INDEXSIZE; i++) {
+		std::cerr << "the node is " << i << " --> ";
+		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
+			std::cerr << *it;
+		}
+		std::cerr << std::endl;
+	}
+}
+
+
 
 #endif // !INDEX_HPP

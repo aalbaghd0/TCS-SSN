@@ -111,7 +111,7 @@ std::unordered_map<pair, bool, pair_hash> check_hash_rnToUser_dist;
 std::unordered_map<pair, double, pair_hash> hash_infScore;
 std::unordered_map<pair, bool, pair_hash> check_hash_infScore;
 
-std::unordered_map<int, int> hash_father_list;
+std::unordered_map<int, int> hash_my_position_in_tree;
 
 ///////////////////////////////////////
 /*
@@ -133,17 +133,22 @@ bool isInTheArray(int arr[], int arr_size, int x) {
 // se the index size and define the tree
 int number_nodes(int a, int b, int& c) {
 	int count = 0;
+	c = a;
 	while (a > 0) {
-		c = c + a;
 		a = a / b;
+		c = c + a;
 		count++;
 
 	}
 	return count;
+	std::cerr << "\n" << c;
 }
 
+// control the number of pivots in tree layers
+#define		NO_INTER_PIVS		2
+
 int INDEXSIZE = 0;
-int b = number_nodes(No_index_piv, 2, INDEXSIZE);
+int b = number_nodes(No_index_piv, NO_INTER_PIVS, INDEXSIZE);
 Gnode* tree = new Gnode[INDEXSIZE];
 
 
