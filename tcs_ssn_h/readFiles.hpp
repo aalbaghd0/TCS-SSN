@@ -48,6 +48,7 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 		//std::cerr << " \n";
 	}
 	fclose(file);
+	
 	/*
 	// print the vrtx array for checking
 	for (i = 0; i < 10; i++) {
@@ -95,6 +96,13 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		max_vrtx = max(max_vrtx, to);
 
 		
+		sn_vrtx[to].in_nbrs.insert(from);
+		sn_vrtx[to].out_nbrs.insert(from);
+
+		sn_vrtx[from].in_nbrs.insert(to);
+		sn_vrtx[from].out_nbrs.insert(to);
+
+
 
 		snEdges[e_id].from = from;
 		snEdges[e_id].to = to;

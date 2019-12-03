@@ -31,6 +31,8 @@ double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[],int number_s
 double evaluate_subgraphs(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
 double evaluate_Indexsubgraphs(std::set<int> G[], int no_of_subgraphs);
 double inf_score_users(int src, int dst);
+double evaluate_SN_pivots(int S_p[], int no_pivs);
+double evaluate_RN_pivots(int S_p[], int no_pivs);
 
 
 double quality(int v, int piv) {
@@ -733,7 +735,7 @@ void indexing() {
 void find_social_network_pivots() {
 	
 	const int h = No_SN_piv;
-	int globelIter = 3, int max = No_sn_V, min = -INT_MAX;
+	int globelIter = 3, max = No_sn_V, min = -INT_MAX;
 	double cost = 0;
 	double d1, d2, diff, maxEva = 0;
 	double localCost, newCost = 0;
@@ -820,9 +822,10 @@ double evaluate_SN_pivots(int S_p[], int no_pivs) {
 void find_road_network_pivots() {
 
 	int globelIter = 3;
+	int swapIter = 100;
+
 	double cost = 0;
 	double localCost, newCost = 0;
-	int swapIter = 100;
 	int rand_piv, npiv;
 	double globaCost = -INT_MAX;
 

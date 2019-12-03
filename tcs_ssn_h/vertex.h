@@ -22,6 +22,9 @@ public:
 	std::set<int> nbrs;
 	std::set<int> myedges;
 	int truss;
+	std::unordered_set<int> out_nbrs;
+	std::unordered_set<int> in_nbrs;
+
 };
 
 class RN_edges {
@@ -70,6 +73,9 @@ public:
 	int sn_max_dist_to_piv;
 	int sn_minimum_piv;
 	int sn_maximum_piv;
+
+	int in_topics_prob[No_of_TOPICS];
+	int out_topics_prob[No_of_TOPICS];
 
 	std::bitset<No_K> keys;
 
