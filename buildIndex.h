@@ -650,7 +650,7 @@ void indexing() {
 	for (int j = 0; j < No_index_piv; ++j) {
 		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
 			tree[assign_counter].child.insert(*it);
-			hash_father_list[*it] = assign_counter;
+			hash_my_position_in_tree[*it] = assign_counter;
 			tree[assign_counter].level = 0;
 			std::cerr << "the vertex " << *it << " its position in the tree " << assign_counter << "\n";
 		}
@@ -683,10 +683,10 @@ void indexing() {
 			//trying to assign the children to the node
 			for (std::set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
 				//tree[assign_counter].child.insert(*it);
-				tree[assign_counter].child.insert(hash_father_list[*it]);
+				tree[assign_counter].child.insert(hash_my_position_in_tree[*it]);
 				
 				//tree[assign_counter].ptr.insert(hash_father_list[*it]);
-				hash_father_list[*it] = assign_counter;
+				hash_my_position_in_tree[*it] = assign_counter;
 			}
 			assign_counter--;
 		}
