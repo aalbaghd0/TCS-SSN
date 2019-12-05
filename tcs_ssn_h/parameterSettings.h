@@ -6,10 +6,10 @@
 #include<fstream>
 
 
-char sn_V_file[100] =			"data/SN_vertices.txt";
-char sn_E_file[100] =			"data/SN_edges.txt";
-char rn_V_file[100] =			"data/RN_vertices.txt";
-char rn_E_file[100] =			"data/RN_edges.txt";
+char sn_V_file[100] = "data/SN_vertices.txt";
+char sn_E_file[100] = "data/SN_edges.txt";
+char rn_V_file[100] = "data/RN_vertices.txt";
+char rn_E_file[100] = "data/RN_edges.txt";
 
 
 int set_parameters(char filename[]) {
@@ -83,7 +83,7 @@ int uniform(int _min, int _max) {
 	int int_r = rand();
 	long base = RAND_MAX - 1;
 	float f_r = ((float)int_r) / base;
-	return (int) (_max - _min) * f_r + _min;
+	return (int)(_max - _min) * f_r + _min;
 }
 //////////////////////////////////////////
 typedef std::pair<int, int> pair;

@@ -7,8 +7,8 @@
 
 
 const int CKINS = 6 * 2; // 6 ckin locations
-const int No_K= 10;
-const int No_T= 10;
+const int No_K = 10;
+const int No_T = 10;
 
 #define No_of_TOPICS	    3
 
@@ -63,7 +63,7 @@ public:
 	int n_id;
 	int truss;
 	int level;
-	
+
 	int rn_min_dist_to_piv;
 	int rn_max_dist_to_piv;
 	int rn_minimum_piv;
