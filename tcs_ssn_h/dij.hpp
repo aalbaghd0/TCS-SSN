@@ -460,6 +460,17 @@ double rn_Dij_to_all_vertices(int src) {
 		}
 	}
 	*/
+	// if we cannot hit the vertex, then we assign the distance to it to maximum
+	for (int i = 0; i < No_rn_V; ++i) {
+		if (!(check_hash_rn_dist[std::make_pair(src, i)] && check_hash_rn_dist[std::make_pair(i, src)])) {
+			
+			check_hash_rn_dist[std::make_pair(src, i)] = true;
+			check_hash_rn_dist[std::make_pair(i, src)] = true;
+			hash_rn_dist[std::make_pair(src, i)] = +INT_MAX;
+			hash_rn_dist[std::make_pair(i, src)] = +INT_MAX;
+
+		}
+	}
 	delete[] s;
 	delete[] f;
 	delete[] dist;
