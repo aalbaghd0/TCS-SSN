@@ -641,16 +641,12 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 */
 void indexing() {
 
-	int c = 0;
-	std::cerr << number_nodes(No_index_piv, 2, c) << " " << c;
-
-
 	truss_decomposition();
 	std::unordered_map<int, std::set<int>> GGG;
 
 	GGG = sn_piv_select();
 	
-	int assign_counter = c - 1;
+	int assign_counter = INDEXSIZE - 1;
 	for (int j = 0; j < No_index_piv; ++j) {
 		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
 			tree[assign_counter].child.insert(*it);
@@ -707,7 +703,7 @@ void indexing() {
 			std::cerr << "\n" << "\n";
 		}
 	}
-	for (int i = 0; i < c; i++) {
+	for (int i = 0; i < INDEXSIZE; i++) {
 		std::cerr << "the node is " << i << " --> ";
 		for (std::set<int>::iterator it = tree[i].ptr.begin(); it != tree[i].ptr.end(); ++it) {
 			std::cerr << *it;
@@ -717,7 +713,7 @@ void indexing() {
 		std::cerr << std::endl;
 	}
 	std::cerr << " --------------------------- " << "\nl";
-	for (int i = 0; i < c; i++) {
+	for (int i = 0; i < INDEXSIZE; i++) {
 		std::cerr << "the node is " << i << " --> ";
 		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
 			std::cerr << *it;
