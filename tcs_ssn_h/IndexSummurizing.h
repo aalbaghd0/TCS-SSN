@@ -229,20 +229,20 @@ void summ_ub_in_influence_score() {
 
 			// for all u /in e_i
 			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all children in the node
-				
+
 				// for all v neighbours of u
 				// in_nbrs are in the in neighbours of the vertex 
 				for (std::unordered_set<int>::iterator it2 = sn_vrtx[*it].in_nbrs.begin(); it2 != sn_vrtx[*it].in_nbrs.end(); ++it2) {
-					
+
 					for (int k = 0; k < No_of_TOPICS; k++) {
-						
+
 						if (tree[i].in_topics_prob[k] < sn_edge_info[std::make_pair(*it, *it2)].topics[k]) {
-							
+
 							tree[i].in_topics_prob[k] = sn_edge_info[std::make_pair(*it, *it2)].topics[k];
 						}
 
 					}
-						
+
 				}
 
 			}
@@ -259,7 +259,7 @@ void summ_ub_in_influence_score() {
 				for (int k = 0; k < No_of_TOPICS; k++) {
 
 					if (tree[i].in_topics_prob[k] < tree[*it].in_topics_prob[k]) {
-				
+
 						tree[i].in_topics_prob[k] = tree[*it].in_topics_prob[k];
 					}
 

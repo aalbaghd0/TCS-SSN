@@ -10,7 +10,7 @@
 
 
 double rn_Dij(int src, int dst) {
-	
+
 	int* dist = new int[No_rn_V];
 	int* parent = new int[No_rn_V];
 	bool* s = new bool[No_rn_V];
@@ -65,7 +65,7 @@ double rn_Dij(int src, int dst) {
 		}
 	}
 	hp->~Heap();
-	
+
 	/*
 	this is a printing function
 	*/
@@ -91,8 +91,8 @@ double rn_Dij(int src, int dst) {
 
 double sn_Dij(int src, int dst) {
 	//initialise all vertices as unexplored 
-	double * dist = new double[No_sn_V];
-	int *parent = new int[No_sn_V];
+	double* dist = new double[No_sn_V];
+	int* parent = new int[No_sn_V];
 	bool* s = new bool[No_sn_V];
 	bool* f = new bool[No_sn_V];
 
@@ -233,7 +233,7 @@ double inf_score(int src, int dst) {
 				for (int a = 0; a < No_of_TOPICS; ++a) {
 					sum = sum + sn_edge_info[std::make_pair(v, to)].topics[a];
 				}
-				double new_dist = dist[v] + sum ;
+				double new_dist = dist[v] + sum;
 				if (new_dist < dist[to]) {
 					dist[to] = new_dist;
 					HeapEntry* he = new HeapEntry();
@@ -463,7 +463,7 @@ double rn_Dij_to_all_vertices(int src) {
 	// if we cannot hit the vertex, then we assign the distance to it to maximum
 	for (int i = 0; i < No_rn_V; ++i) {
 		if (!(check_hash_rn_dist[std::make_pair(src, i)] && check_hash_rn_dist[std::make_pair(i, src)])) {
-			
+
 			check_hash_rn_dist[std::make_pair(src, i)] = true;
 			check_hash_rn_dist[std::make_pair(i, src)] = true;
 			hash_rn_dist[std::make_pair(src, i)] = +INT_MAX;
@@ -521,7 +521,7 @@ double inf_score_to_all_vertices(int src) {
 
 			hash_infScore[std::make_pair(v, src)] = dist[v];
 			check_hash_infScore[std::make_pair(v, src)] = true;
-		
+
 		}
 		s[v] = true;
 		f[v] = false;

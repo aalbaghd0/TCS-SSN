@@ -27,7 +27,7 @@ double rn_dist(int src, int dst);
 double rn_dist_for_users(int src, int dst);
 double X_sc(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
 double X_st(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
-double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[],int number_subgraphs);
+double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
 double evaluate_subgraphs(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
 double evaluate_Indexsubgraphs(std::set<int> G[], int no_of_subgraphs);
 double inf_score_users(int src, int dst);
@@ -37,11 +37,11 @@ double evaluate_RN_pivots(int S_p[], int no_pivs);
 
 double quality(int v, int piv) {
 	double sn_dist_rslt = 0.0, rn_dist_rslt = 0.0;
-	
 
-	if ( ! check_hash_sn_dist[std::make_pair(piv, v)]) { // if we don't have the distance, the we will compute it
+
+	if (!check_hash_sn_dist[std::make_pair(piv, v)]) { // if we don't have the distance, the we will compute it
 		sn_Dij_to_all_vertices(piv); // find distance to all other vertices
-							         // at the same time store distances to all other vertices
+									 // at the same time store distances to all other vertices
 		sn_dist_rslt = hash_sn_dist[std::make_pair(piv, v)];
 	}
 	else {
@@ -63,7 +63,7 @@ std::unordered_map<int, std::set<int>> gen_subgraphs(int cand_index_piv[]) {
 		qual_rslt = 0.0;
 		for (int piv = 0; piv < No_index_piv; piv++) {
 			qual_rslt = quality(v, cand_index_piv[piv]);
-			
+
 			if (qual_rslt < best_quality) {
 				assign = cand_index_piv[piv];
 				best_quality = qual_rslt;
@@ -92,7 +92,7 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 	std::unordered_map<int, std::set<int>> GG;
 	std::unordered_map<int, std::set<int>> new_GG;
 	std::unordered_map<int, std::set<int>> G;
-	
+
 
 	double cost_G = 0.0;
 	double local_cost = 0.0;
@@ -106,10 +106,10 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 
 	bool cost_was_updated = false;
 	for (int a = 1; a < global_iter; a++) {
-		
+
 		// select random pivots at first
 		for (int i = 0; i < No_index_piv; ++i) {
-			labelA:
+		labelA:
 			int git = uniform(0, No_sn_V - 1);
 			if (!isInTheArray(S_p, No_index_piv, git))
 				S_p[i] = git;
@@ -122,33 +122,33 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 		// evaluate the cost function
 		local_cost = evaluate_subgraphs(GG, S_p, No_subgraphs);
 		//std::cerr << "THe Evaluation :: " << local_cost << "\n \n";
-		
-		
-		for (int  b = 1; b < swap_iter; b++) {
+
+
+		for (int b = 1; b < swap_iter; b++) {
 			get_piv = uniform(0, No_index_piv - 1);
-			
+
 		labelB:
 			int git = uniform(0, No_sn_V - 1);
 			if (!isInTheArray(S_p, No_index_piv, git))
 				new_piv = git;
 			else
 				goto labelB;
-			
+
 
 			std::memcpy(new_S_p, S_p, sizeof(S_p[0]) * No_index_piv);
-			
+
 			new_S_p[get_piv] = new_piv;
-			
+
 			new_GG = gen_subgraphs(new_S_p);
-			
-			
+
+
 
 			new_cost = evaluate_subgraphs(new_GG, new_S_p, No_subgraphs);
 			//std::cerr << "THe Evaluation :: " << new_cost << "\n \n";
 			if (new_cost > local_cost) {
 				local_cost = new_cost;
 				std::memcpy(S_p, new_S_p, sizeof(new_S_p[0]) * No_index_piv);
-				
+
 				// get the final subgraph
 				//memcpy(final_G, new_G, sizeof(new_G) * No_index_piv);
 
@@ -163,23 +163,23 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 	}
 
 
-		for (int i = 0; i < No_index_piv; ++i) {
-			std::cerr << "Index_Piv " << index_piv[i] << " --->> ";
-			for (std::set<int>::iterator it = G[index_piv[i]].begin(); it != G[index_piv[i]].end(); ++it) {
-				std::cerr << *it << " ";
-			}
-			std::cerr << "\n" << "\n";
+	for (int i = 0; i < No_index_piv; ++i) {
+		std::cerr << "Index_Piv " << index_piv[i] << " --->> ";
+		for (std::set<int>::iterator it = G[index_piv[i]].begin(); it != G[index_piv[i]].end(); ++it) {
+			std::cerr << *it << " ";
 		}
-		std::cerr << "THe Evaluation :: " << global_cost << "\n \n";
+		std::cerr << "\n" << "\n";
+	}
+	std::cerr << "THe Evaluation :: " << global_cost << "\n \n";
 
-		return G;
+	return G;
 }
 
 
 double evaluate_subgraphs(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_subgraphs) {
-	double rslt1 = W1 *  X_sc(G, pivots, no_of_subgraphs);
-	double rslt2 = W2 * ( 1 - X_st(G, pivots,no_of_subgraphs)  );
-	double rslt3 = W1 * ( 1 - X_inf(G, pivots,no_of_subgraphs) );
+	double rslt1 = W1 * X_sc(G, pivots, no_of_subgraphs);
+	double rslt2 = W2 * (1 - X_st(G, pivots, no_of_subgraphs));
+	double rslt3 = W1 * (1 - X_inf(G, pivots, no_of_subgraphs));
 
 	return rslt1 + rslt2 + rslt3;
 }
@@ -197,7 +197,7 @@ double X_sc(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_su
 			for (std::set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
 				if (*it != *it2) {
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) { // to make sure not to compute distance more than once
-						sub_rslt = rn_dist_for_users(*it, *it2);						
+						sub_rslt = rn_dist_for_users(*it, *it2);
 						map[std::make_pair(*it, *it2)] = true;
 						map[std::make_pair(*it2, *it)] = true;
 					}
@@ -249,7 +249,7 @@ double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_s
 				if (*it != *it2) {
 
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
-					
+
 						sub_rslt = sub_rslt + inf_score_users(*it, *it2);
 
 						map[std::make_pair(*it, *it2)] = true;
@@ -288,7 +288,7 @@ double inf_score_users(int src, int dst) {
 
 /*
 GIVEN::     RN, src, and dst
-ENSURE::    shortest path distance between src and dst 
+ENSURE::    shortest path distance between src and dst
 */
 double rn_dist_for_users(int src, int dst) {
 	double temp_rslt = 0.0;
@@ -298,7 +298,7 @@ double rn_dist_for_users(int src, int dst) {
 		return hash_rnToUser_dist[std::make_pair(src, dst)];
 	}
 	else { // else, compute them and store the result
-		
+
 		for (int i = 0; i < No_CKINs - 1; ++i) {// for all user locations
 			for (int j = 0; j < No_CKINs - 1; j++) {
 				// map the user location to the from the social to the road network, match the 
@@ -318,7 +318,7 @@ double rn_dist_for_users(int src, int dst) {
 				temp_rslt = temp_rslt + temp;
 			}
 		}
-		
+
 		check_hash_rnToUser_dist[std::make_pair(src, dst)] = true;
 		hash_rnToUser_dist[std::make_pair(src, dst)] = temp_rslt / (No_CKINs * No_CKINs);
 
@@ -397,9 +397,9 @@ void truss_decomposition() {
 
 	for (int e = 0; e < No_sn_E; e++) {
 		snEdges[e].sup = intersect(pool, snEdges[e].from, snEdges[e].to);
-		
+
 		//std::cerr << snEdges[e].sup * 2 << pool->size() << "\n";
-		
+
 		HeapEntry* he = new HeapEntry();
 
 		he->son1 = e;
@@ -421,12 +421,12 @@ label2:
 		std::set<int>::iterator it2;
 
 		it2 = sn_vrtx[snEdges[e].from].nbrs.find(snEdges[e].to);
-		if(it2 != sn_vrtx[snEdges[e].from].nbrs.end())
+		if (it2 != sn_vrtx[snEdges[e].from].nbrs.end())
 			sn_vrtx[snEdges[e].from].nbrs.erase(it2);
 
 
 		it2 = sn_vrtx[snEdges[e].to].nbrs.find(snEdges[e].from);
-		
+
 		if (it2 != sn_vrtx[snEdges[e].to].nbrs.end())
 			sn_vrtx[snEdges[e].to].nbrs.erase(it2);
 
@@ -484,7 +484,7 @@ label2:
 	}
 }
 
- 
+
 ///////////////////////////////
 
 /*
@@ -493,8 +493,8 @@ ENSURES  :: build the hybrid index
 */
 
 //امرر كراف كامل, وامرر 
-std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no_piv_set,int 
-									new_pivots[], int no_new_piv) {
+std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no_piv_set, int
+	new_pivots[], int no_new_piv) {
 	double qual_rslt;
 	int best_quality;
 	int assign;
@@ -531,7 +531,7 @@ std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no
 //////
 /*
 	GIVEN	:: a lower index pivot array
-	ENSURES :: find level_index pivots 
+	ENSURES :: find level_index pivots
 */
 
 std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv, int f_piv[]) {
@@ -544,7 +544,7 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 	std::unordered_map<int, std::set<int>> new_GG;
 	std::unordered_map<int, std::set<int>> GGG;
 
-	
+
 	memset(f_piv, -1, sizeof(f_piv[0]) * No_index_piv);
 
 	double cost_G = 0.0;
@@ -586,7 +586,7 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 
 		labelB:
 			int git = prev_piv[uniform(0, no_prev_piv - 1)];
-			
+
 			if (!isInTheArray(S_p, no_new_piv, git))
 				new_piv = git;
 			else
@@ -618,8 +618,8 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 			GGG = GG;
 		}
 	}
-	
-	
+
+
 	/*
 	// get the new assigned fathers in a hashmap
 	for (int i = 0; i < no_new_piv; ++i) {
@@ -641,7 +641,7 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 	ENSURES		:: the social network pivot set SN_piv_set
 */
 void find_social_network_pivots() {
-	
+
 	const int h = No_SN_piv;
 	int globelIter = 3, max = No_sn_V, min = -INT_MAX;
 	double cost = 0;
@@ -654,7 +654,7 @@ void find_social_network_pivots() {
 	int S_p[h], new_S_p[h];
 	int new_piv = -1;
 	for (int a = 1; a <= globelIter; ++a) {
-		
+
 		// select random pivots at first
 		for (int i = 0; i < No_SN_piv; ++i) {
 		labelA:
@@ -669,7 +669,7 @@ void find_social_network_pivots() {
 		localCost = evaluate_SN_pivots(S_p, No_SN_piv);
 
 		for (int b = 1; b < swapIter; b++) {
-					
+
 			int get_piv = uniform(0, No_SN_piv - 1);
 
 		labelB:
@@ -678,15 +678,15 @@ void find_social_network_pivots() {
 				new_piv = git;
 			else
 				goto labelB;
-		
+
 			std::memcpy(new_S_p, S_p, sizeof(S_p[0]) * No_SN_piv);
-			
+
 			newCost = evaluate_SN_pivots(new_S_p, No_SN_piv);
 
 			if (newCost > localCost) {
 				localCost = newCost;
 				std::memcpy(S_p, new_S_p, sizeof(S_p[0]) * No_SN_piv);
-			
+
 			}
 		}
 
@@ -707,8 +707,8 @@ double evaluate_SN_pivots(int S_p[], int no_pivs) {
 
 	double rslt = 0.0;
 	double diff = -INT_MAX;
-	double temp = - INT_MAX;
-	
+	double temp = -INT_MAX;
+
 	for (int i = 0; i < No_sn_V; i++) {
 
 		for (int j = 0; j < No_sn_V; j++) {
@@ -797,7 +797,7 @@ double rn_dist_rnPiv_to_user(int r_piv, int user) {
 	double rslt = 0.0;
 	double temp = 0.0;
 
-	for (int i = 0; i < No_CKINs -1 ; ++i) {
+	for (int i = 0; i < No_CKINs - 1; ++i) {
 
 		int src_map = sn_vrtx[user].ckins[i];
 
@@ -871,7 +871,7 @@ void indexing() {
 		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
 			//store all children of the node in the tree, position assign_counter
 			tree[assign_counter].child.insert(*it);
-			
+
 			// store the tree position of each node
 			hash_my_position_in_tree[*it] = assign_counter;
 
@@ -882,8 +882,8 @@ void indexing() {
 		assign_counter--;
 	}
 
-	
-	
+
+
 	int* f_piv = new int[No_index_piv];
 	int no_new_piv = No_index_piv / NO_INTER_PIVS;
 
@@ -891,7 +891,7 @@ void indexing() {
 	int* layer_piv = new int[No_index_piv];
 	std::memcpy(layer_piv, index_piv, sizeof(index_piv[0]) * No_index_piv);
 
-	
+
 	while (no_new_piv > 0) {
 		// layer the graph and get 
 		GGG = Index_piv_select(no_new_piv, layer_piv, no_prev_piv, f_piv);
@@ -919,13 +919,13 @@ void indexing() {
 			}
 
 			assign_counter--;
-	
+
 		}
 
 		no_prev_piv = no_new_piv;
 		no_new_piv = no_new_piv / NO_INTER_PIVS;
 		std::memcpy(layer_piv, f_piv, sizeof(f_piv[0]) * no_prev_piv);
-		
+
 	}
 
 	std::cerr << " --------------------------- " << "\n";

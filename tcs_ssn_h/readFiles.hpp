@@ -48,7 +48,7 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 		//std::cerr << " \n";
 	}
 	fclose(file);
-	
+
 	/*
 	// print the vrtx array for checking
 	for (i = 0; i < 10; i++) {
@@ -67,7 +67,7 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	FILE* file = fopen(Efile, "r");
 	int from, to, e_id = 0;
 	double  pr0, pr1, pr2;
-	int max_vrtx= - INT_MAX;
+	int max_vrtx = -INT_MAX;
 
 	if (file == NULL) {
 		std::cout << "The edge file cannot be open";
@@ -81,7 +81,7 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		fscanf(file, "%d %d %lf %lf %lf", &from, &to, &pr0, &pr1, &pr2);
 		edge[from].push_back(to);
 		edge[to].push_back(from);
-		
+
 		sn_vrtx[from].nbrs.insert(to);
 		sn_vrtx[to].nbrs.insert(from);
 
@@ -95,7 +95,7 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		max_vrtx = max(max_vrtx, from);
 		max_vrtx = max(max_vrtx, to);
 
-		
+
 		sn_vrtx[to].in_nbrs.insert(from);
 		sn_vrtx[to].out_nbrs.insert(from);
 
@@ -129,7 +129,7 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	std::cout << "The maximum vrtx is: " << max_vrtx << std::endl;
 }
 
-void rn_read_edges(std::list<int> graph[], RN_edges edge[], int E_num,int size, char Efile[]) {
+void rn_read_edges(std::list<int> graph[], RN_edges edge[], int E_num, int size, char Efile[]) {
 	FILE* file = fopen(Efile, "r");
 	int from, to, id;
 	int max = 0;
