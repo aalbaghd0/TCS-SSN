@@ -28,7 +28,7 @@ void indexTrav() {
 	hp->insert(he);
 	delete he;
 	
-
+	// this is an update
 	while (hp->used > 0) {
 		HeapEntry* he = new HeapEntry();
 		hp->remove(he);
