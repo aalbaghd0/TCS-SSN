@@ -327,5 +327,43 @@ void summ_ub_out_influence_score() {
 	}
 }
 
+
+///////////////////////////////////////////////////////
+/*
+REQUIRES :: a query vertex, v
+ENSURES  ::
+*/
+int* get_queryNode(int q) {
+	int git;
+	int treeHeight = getTreeHight();
+	int* queryNodeIndex = new int[TreeHeight];
+	for (int i = INDEXSIZE - 1; i >= 0; ++i) {
+
+		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); it++) {
+			if (q == *it) {
+				git = i;
+				break;
+			}
+		}
+	}
+
+	queryNodeIndex[treeHeight - 1] = git;
+	for (int i = treeHeight - 2; i >= 0; --i) {
+		queryNodeIndex[i] = tree[queryNodeIndex[i - 1]].parent;
+	}
+
+	return queryNodeIndex;
+}
+
+int getTreeHight() {
+	int height = -1;
+	int ptr = INT_MAX;
+
+	while (ptr != 0) {
+
+	}
+
+}
+
 #endif // !INDEXTRAVERSE
 

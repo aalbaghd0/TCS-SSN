@@ -22,13 +22,13 @@ void indexTrav() {
 	int root = 0;
 
 	HeapEntry* he = new HeapEntry();
-	
+
 	he->son1 = root;
 	he->key = 0;
 	hp->insert(he);
 	delete he;
-	
-	// this is an update
+
+
 	while (hp->used > 0) {
 		HeapEntry* he = new HeapEntry();
 		hp->remove(he);
@@ -49,14 +49,14 @@ void indexTrav() {
 			}
 
 		}
-		else{ // non-leaf node
+		else { // non-leaf node
 
 			// optain the tree node that contains the query vertex
 			int queryNode = get_queryNode(tree, q);
-			
+
 			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
 				if (!Lem7(q, *it)) {
-					
+
 					HeapEntry* he = new HeapEntry();
 
 					he->son1 = *it;
