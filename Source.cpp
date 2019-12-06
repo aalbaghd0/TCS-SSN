@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include "buildIndex.h"
 #include "tcs_ssn_h/IndexSummurizing.h"
+#include "tcs_ssn_h/IndexTraversal.hpp"
 
 // define arrays
 
