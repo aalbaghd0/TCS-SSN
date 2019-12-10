@@ -3,6 +3,10 @@
 #include "parameterSettings.h"
 #include "vertex.h"
 #include"heap.h"
+#include"../buildIndex.h"
+#include "IndexSummurizing.h"
+
+
 /*
 
 	This pice of the code will traverse the index to get the solution
@@ -10,7 +14,7 @@
 */
 
 
-void indexTrav() {
+void indexTrav(int q) {
 
 	Heap* hp = new Heap();
 	Heap* hp_p = new Heap();
@@ -18,6 +22,11 @@ void indexTrav() {
 
 	std::unordered_set<int> S;
 
+	int treeHeight = getTreeHight();
+	int* queryNode = new int[treeHeight];
+	
+	std::unordered_map<pair, int, pair_hash> queryNodeLevel;
+	queryNodeLevel = get_queryNode(q);
 
 	int root = 0;
 
@@ -52,8 +61,8 @@ void indexTrav() {
 		else { // non-leaf node
 
 			// optain the tree node that contains the query vertex
-			int queryNode = get_queryNode(tree, q);
-
+			int queryNode = queryNodeLevel[std::make_pair(q, tree[theNode].level)];
+			
 			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
 				if (!Lem7(q, *it)) {
 
@@ -71,6 +80,7 @@ void indexTrav() {
 		Heap* temp = new Heap();
 		temp = hp;
 		hp = hp_p;
+
 		delete hp_p;
 		delete temp;
 
@@ -79,6 +89,17 @@ void indexTrav() {
 	S = Refine(S);
 
 	//return S;
+}
+
+double lb_dist_RN(int qNode, int theNode) {
+	double min = INT_MAX;
+
+	for (int r_piv = 0; r_piv < No_RN_piv; ++ r_piv) {
+
+		double dst = abs(tree[qNode].rn_max_dist_to_piv[std::make_pair(qNode, RN_piv_set[r_piv])] - tree[theNode].rn_max_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]);
+
+	}
+
 }
 
 #endif // !INDEX_TRAV
