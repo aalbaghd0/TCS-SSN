@@ -64,13 +64,13 @@ public:
 	int truss;
 	int level;
 
-	int rn_min_dist_to_piv;
-	int rn_max_dist_to_piv;
+	std::unordered_map<pair, double, pair_hash> rn_min_dist_to_piv;
+	double rn_max_dist_to_piv;
 	int rn_minimum_piv;
 	int rn_maximum_piv;
 
-	int sn_min_dist_to_piv;
-	int sn_max_dist_to_piv;
+	double sn_min_dist_to_piv;
+	double sn_max_dist_to_piv;
 	int sn_minimum_piv;
 	int sn_maximum_piv;
 

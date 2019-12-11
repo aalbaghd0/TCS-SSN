@@ -892,6 +892,7 @@ void indexing() {
 	std::memcpy(layer_piv, index_piv, sizeof(index_piv[0]) * No_index_piv);
 
 
+	int level = 1;
 	while (no_new_piv > 0) {
 		// layer the graph and get 
 		GGG = Index_piv_select(no_new_piv, layer_piv, no_prev_piv, f_piv);
@@ -913,14 +914,21 @@ void indexing() {
 			for (std::set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
 
 				tree[assign_counter].child.insert(hash_my_position_in_tree[*it]);
+				
+				// set the level
+				tree[assign_counter].level = level;
 
 				hash_my_position_in_tree[*it] = assign_counter;
+
 
 			}
 
 			assign_counter--;
 
 		}
+
+		// get a new level
+		level = level + 1;
 
 		no_prev_piv = no_new_piv;
 		no_new_piv = no_new_piv / NO_INTER_PIVS;
@@ -938,6 +946,30 @@ void indexing() {
 	}
 }
 
+/*
+GIVEN	 :: tree node (index)
+ENSURES  :: assigns the parent to each node, parent of root = -1;
+*/
+void setParentOfNodes() {
+	
+	bool* check = new bool[INDEXSIZE];
+
+	int i = 1;
+	// set the parent to the root
+	tree[0].parent = -1;
+
+	while (!(tree[i].level == 0)) {
+
+		if (!check[i]) { // we have not set the parent for this node
+			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
+				tree[*it].parent = i;
+				check[*it] = true;
+			}
+		}
+		i++;
+	}
+	delete check;
+}
 
 
 #endif // !INDEX_HPP
