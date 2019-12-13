@@ -847,15 +847,15 @@ double evaluate_RN_pivots(int S_p[], int no_pivs) {
 				if (diff < temp)
 					diff = temp;
 			}
-
+			
 			rslt = rslt + diff;
 
 		}
 
 	}
+	
 
 	return rslt;
-
 }
 
 
