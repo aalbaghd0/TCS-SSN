@@ -696,6 +696,18 @@ void find_social_network_pivots() {
 		}
 	}
 
+	// get the distance from the social network pivot to every social network vrtx
+	for (int v = 0; v < No_sn_V; ++v) {
+		for (int piv = 0; piv < No_SN_piv; piv++) {
+			if (check_hash_sn_dist[std::make_pair(v, SN_piv_set[piv])]) {
+				sn_vrtx[v].sn_distToPiv[std::make_pair(v, SN_piv_set[piv])] = hash_sn_dist[std::make_pair(v, RN_piv_set[piv])];
+			}
+			else {
+				std::cerr << " the sn_vrtx[v].sn_distToPiv is not found";
+			}
+		}
+	}
+
 	std::cerr << "\n ------ sn pivots ------ \n";
 	for (int i = 0; i < No_SN_piv; ++i) {
 		std::cerr << SN_piv_set[i] << " --- ";
@@ -769,7 +781,7 @@ void find_road_network_pivots() {
 				new_piv = git;
 			else
 				goto labelB;
-
+			
 			std::memcpy(new_S_p, S_p, sizeof(S_p[0]) * No_RN_piv);
 
 			newCost = evaluate_RN_pivots(new_S_p, No_RN_piv);
@@ -786,6 +798,19 @@ void find_road_network_pivots() {
 			globaCost = localCost;
 		}
 	}
+
+	// save the distance from pivots to all other vertices
+	for (int v = 0; v < No_sn_V; ++v) {
+		for(int piv = 0; piv < No_RN_piv; piv++){
+			if (check_hash_rnToUser_dist[std::make_pair(v, RN_piv_set[piv])]) {
+				sn_vrtx[v].rn_distToPiv[std::make_pair(v, RN_piv_set[piv])] = hash_rnToUser_dist[std::make_pair(v, RN_piv_set[piv])];
+			}
+			else {
+				std::cerr << " the sn_vrtx[v].rn_distToPiv is not found";
+			}
+		}
+	}
+
 	std::cerr << "\n ------ rn pivots ------ \n";
 	for (int i = 0; i < No_RN_piv; ++i) {
 		std::cerr << RN_piv_set[i] << " --- ";
@@ -919,7 +944,7 @@ void indexing() {
 				tree[assign_counter].level = level;
 
 				hash_my_position_in_tree[*it] = assign_counter;
-
+				
 
 			}
 
@@ -970,6 +995,11 @@ void setParentOfNodes() {
 	}
 	delete check;
 }
+
+
+
+
+
 
 
 #endif // !INDEX_HPP

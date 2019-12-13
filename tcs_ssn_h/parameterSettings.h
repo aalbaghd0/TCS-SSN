@@ -25,7 +25,15 @@ int set_parameters(char filename[]) {
 	fclose(file);
 	return read;
 }
+//////////////////////////////////
+/*        parameters        */
+#define			SIGMA			0.5 
+#define			THETA			0.5
+#define			No_Hops			3
 
+
+
+///////////////////////////////
 
 
 // file sizes

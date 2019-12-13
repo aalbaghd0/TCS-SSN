@@ -91,9 +91,9 @@ void summraize_RN_lb_dist() {
 			int max_piv = -1;
 
 			for (int r_piv = 0; r_piv > No_RN_piv; r_piv++) { // for all RN pivots
-				
+
 				for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all node children in the node
-					
+
 					if (min_dist > tree[*it].rn_min_dist_to_piv[std::make_pair(*it, RN_piv_set[r_piv])]) { // grt the min
 						min_dist = tree[*it].rn_min_dist_to_piv[std::make_pair(*it, RN_piv_set[r_piv])];
 						//min_piv = tree[i].rn_minimum_piv;
@@ -343,11 +343,32 @@ void summ_ub_out_influence_score() {
 REQUIRES :: a query vertex, v
 ENSURES  ::
 */
+int getTreeHight() {
+	int height = 0;
+	int ptr = INT_MAX;
+	int i = INDEXSIZE - 1;
+
+	while (i >= 0) {
+		height++;
+		i = tree[i].parent;
+	}
+
+	height = height + 1; // this is to add the root level
+
+	return height;
+}
+
+
+///////////////////////////////////////////////////////
+/*
+REQUIRES :: a query vertex, v
+ENSURES  ::
+*/
 std::unordered_map<pair, int, pair_hash> get_queryNode(int q) {
 	int git;
 	int treeHeight = getTreeHight();
 	int* queryNodeIndex = new int[treeHeight];
-	
+
 	// first, we find the query node at leaf level (level == 0)
 	bool found = false;
 	for (int i = INDEXSIZE - 1; i >= 0; ++i) {
@@ -376,55 +397,34 @@ std::unordered_map<pair, int, pair_hash> get_queryNode(int q) {
 	return queryNodeLevel;
 }
 
-int getTreeHight() {
-	int height = 0;
-	int ptr = INT_MAX;
-	int i = INDEXSIZE - 1;
-
-	while (i >= 0) {
-		height++;
-		i = tree[i].parent;
-	}
-
-	height = height + 1; // this is to add the root level
-
-	return height;
-}
 
 
-///////////////////////////////////////////////////////
+
 /*
-REQUIRES :: a query vertex, v
-ENSURES  :: 
+	GIVEN		:: social network
+	ENSURES		:: in_inf, and out_info for each social network vrtx
 */
-int* get_queryNode(int q) {
-	int git;
-	int treeHeight = getTreeHight();
-	int* queryNodeIndex = new int[TreeHeight];
-	for (int i = INDEXSIZE - 1; i >= 0; ++i) {
+void computeIn_inf_Out_inf_for_vertices() {
 
-		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); it++) {
-			if (q == *it) {
-				git = i;
-				break;
+	for (int v = 0; v < No_sn_V; v++) {
+
+		for (std::unordered_set<int>::iterator it = sn_vrtx[v].out_nbrs.begin(); it != sn_vrtx[v].out_nbrs.end(); it++) {
+
+			for (int i = 0; i < No_of_TOPICS; ++i) {
+
+				if (sn_vrtx[v].out_inf[i] < sn_edge_info[std::make_pair(v, *it)].topics[i])
+					sn_vrtx[v].out_inf[i] = sn_edge_info[std::make_pair(v, *it)].topics[i];
+
+				if (sn_vrtx[v].in_inf[i] < sn_edge_info[std::make_pair(*it, v)].topics[i])
+					sn_vrtx[v].in_inf[i] = sn_edge_info[std::make_pair(*it, v)].topics[i];
+
 			}
+
 		}
-	}
 
-	queryNodeIndex[treeHeight - 1] = git;
-	for (int i = treeHeight -2 ; i >= 0; --i) {
-		queryNodeIndex[i] = tree[queryNodeIndex[i - 1]].parent;
 	}
-
-	return queryNodeIndex;
 }
 
-int getTreeHight() {
-	int height = -1;
 
-	while()
-
-}
 
 #endif // !INDEXTRAVERSE
-
