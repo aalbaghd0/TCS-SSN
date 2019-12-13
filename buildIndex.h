@@ -394,7 +394,6 @@ void truss_decomposition() {
 	std::set<int>* pool = new std::set<int>;
 	int e;
 
-
 	for (int e = 0; e < No_sn_E; e++) {
 		snEdges[e].sup = intersect(pool, snEdges[e].from, snEdges[e].to);
 
@@ -699,12 +698,7 @@ void find_social_network_pivots() {
 	// get the distance from the social network pivot to every social network vrtx
 	for (int v = 0; v < No_sn_V; ++v) {
 		for (int piv = 0; piv < No_SN_piv; piv++) {
-			if (check_hash_sn_dist[std::make_pair(v, SN_piv_set[piv])]) {
-				sn_vrtx[v].sn_distToPiv[std::make_pair(v, SN_piv_set[piv])] = hash_sn_dist[std::make_pair(v, RN_piv_set[piv])];
-			}
-			else {
-				std::cerr << " the sn_vrtx[v].sn_distToPiv is not found";
-			}
+			sn_vrtx[v].sn_distToPiv[std::make_pair(v, SN_piv_set[piv])] = sn_dist(v, SN_piv_set[piv]);
 		}
 	}
 
@@ -801,13 +795,8 @@ void find_road_network_pivots() {
 
 	// save the distance from pivots to all other vertices
 	for (int v = 0; v < No_sn_V; ++v) {
-		for(int piv = 0; piv < No_RN_piv; piv++){
-			if (check_hash_rnToUser_dist[std::make_pair(v, RN_piv_set[piv])]) {
-				sn_vrtx[v].rn_distToPiv[std::make_pair(v, RN_piv_set[piv])] = hash_rnToUser_dist[std::make_pair(v, RN_piv_set[piv])];
-			}
-			else {
-				std::cerr << " the sn_vrtx[v].rn_distToPiv is not found";
-			}
+		for (int piv = 0; piv < No_RN_piv; piv++) {
+			sn_vrtx[v].rn_distToPiv[std::make_pair(v, RN_piv_set[piv])] = rn_dist_for_users(v, RN_piv_set[piv]);
 		}
 	}
 
@@ -993,7 +982,7 @@ void setParentOfNodes() {
 		}
 		i++;
 	}
-	delete check;
+	delete[] check;
 }
 
 

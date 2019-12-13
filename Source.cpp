@@ -25,11 +25,33 @@ void main() {
 	sn_read_edges(snGraph, sn_E_file);
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
 
+	
+	
+/***********  Build Index Functions  *************/
 	find_road_network_pivots();
-	find_road_network_pivots();
+	find_social_network_pivots();
 
 	indexing();
-};
+	setParentOfNodes();
+
+
+/**********  summurizin the index functions  *************/
+	summraize_truss();
+	summraize_RN_lb_dist();
+	summraize_SN_lb_dist();
+	summurize_keywords();
+	summ_ub_in_influence_score();
+	summ_ub_out_influence_score();
+	computeIn_inf_Out_inf_for_vertices();
+
+
+/***********  INDEX TRAVERSAL  *************************/
+	indexTrav(4);
+
+
+
+
+}
 
 
 

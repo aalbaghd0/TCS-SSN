@@ -386,12 +386,20 @@ std::unordered_map<pair, int, pair_hash> get_queryNode(int q) {
 	// we build an array of the query vertex
 	std::unordered_map<pair, int, pair_hash> queryNodeLevel;
 	queryNodeIndex[treeHeight - 1] = git;
-	queryNodeLevel[std::make_pair(q, 0)] = git;
+	queryNodeLevel[std::make_pair(q, treeHeight - 1)] = git;
 
 
 	for (int i = treeHeight - 2; i >= 0; --i) {
-		queryNodeIndex[i] = tree[queryNodeIndex[i - 1]].parent;
-		queryNodeLevel[std::make_pair(q, i)] = tree[queryNodeLevel[std::make_pair(q, i - 1)]].parent;
+		if (i > 0) {
+			queryNodeIndex[i] = tree[queryNodeIndex[i - 1]].parent;
+			queryNodeLevel[std::make_pair(q, i)] = tree[queryNodeLevel[std::make_pair(q, i - 1)]].parent;
+		}
+		else if(i == 0){
+			queryNodeIndex[i] = 0;
+			queryNodeLevel[std::make_pair(q, i)] = 0;
+		}
+
+
 	}
 
 	return queryNodeLevel;

@@ -29,13 +29,13 @@ void indexTrav(int q) {
 	// here we set the query topics set, they are just an index 0, 1, 2, ..
 	int SizeQtopic = 2;
 	int* Qtopic = new int[SizeQtopic];
-
+	Qtopic[0] = 0;
+	Qtopic[1] = 1;
 
 
 	Heap* hp = new Heap();
-	Heap* hp_p = new Heap();
-	Heap* temp = new Heap();
-
+	hp->init(2);
+	
 	std::unordered_set<int> S;
 
 	int treeHeight = getTreeHight();
@@ -53,13 +53,19 @@ void indexTrav(int q) {
 	hp->insert(he);
 	delete he;
 
-
+	Heap* hp_p = new Heap();
+	hp_p->init(2);
 	while (hp->used > 0) {
 		HeapEntry* he = new HeapEntry();
 		hp->remove(he);
+		
+		int theNode = he->son1;
+		int key = he->key;
 		delete he;
 
-		int theNode = he->son1;
+		// if key greater than threshold, treminate the loop
+		if (key > SIGMA)
+			break;
 
 		if (tree[theNode].level == 0) { // if a leaf node
 
@@ -80,26 +86,20 @@ void indexTrav(int q) {
 			int queryNode = queryNodeLevel[std::make_pair(q, tree[theNode].level)];
 			
 			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
-				
-				if (!Index_SpatialDistancePruning(q, *it) && Index_InfluenceScorePruning(q, *it, Qtopic, SizeQtopic)) {
+
+				if (!Index_SpatialDistancePruning(q, *it) && !Index_InfluenceScorePruning(q, *it, Qtopic, SizeQtopic)) {
 
 					HeapEntry* he = new HeapEntry();
 
 					he->son1 = *it;
 					he->key = Index_lb_dist_RN(q, *it);
 
-					hp_p->insert(he);
+					hp->insert(he);
 					delete he;
 				}
 			}
+
 		}
-
-		Heap* temp = new Heap();
-		temp = hp;
-		hp = hp_p;
-
-		delete hp_p;
-		delete temp;
 
 	}
 

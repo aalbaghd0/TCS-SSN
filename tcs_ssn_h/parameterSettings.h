@@ -27,8 +27,8 @@ int set_parameters(char filename[]) {
 }
 //////////////////////////////////
 /*        parameters        */
-#define			SIGMA			0.5 
-#define			THETA			0.5
+#define			SIGMA			5 
+#define			THETA			2
 #define			No_Hops			3
 
 
@@ -55,8 +55,6 @@ int set_parameters(char filename[]) {
 #define W3					0.5
 #define No_of_TOPICS	    3
 
-
-#define SizeOfTheIndex		100
 
 
 //////
