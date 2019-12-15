@@ -41,7 +41,7 @@ int set_parameters(char filename[]) {
 #define No_sn_E				set_parameters(sn_E_file) * 2
 #define No_rn_V				set_parameters(rn_V_file)
 #define No_rn_E				set_parameters(rn_E_file) * 2
-#define No_index_piv			4
+#define No_index_piv			20
 #define No_SN_piv				4
 #define No_RN_piv				4
 #define No_subgraphs			4
@@ -116,6 +116,7 @@ std::unordered_map<pair, bool, pair_hash> check_hash_rnToUser_dist;
 
 std::unordered_map<pair, double, pair_hash> hash_infScore;
 std::unordered_map<pair, bool, pair_hash> check_hash_infScore;
+
 
 std::unordered_map<int, int> hash_my_position_in_tree;
 

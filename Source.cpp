@@ -28,9 +28,10 @@ void main() {
 	
 	
 /***********  Build Index Functions  *************/
-	find_road_network_pivots();
-	find_social_network_pivots();
+	//find_road_network_pivots();
+	//find_social_network_pivots();
 
+	get_socialNetwork_connected();
 	indexing();
 	setParentOfNodes();
 

@@ -29,7 +29,8 @@ public:
 	std::bitset<No_K> key;
 	std::bitset<No_T> topic;
 	std::set<int> nbrs;
-	std::set<int> myedges;
+
+	std::unordered_set<int> myedges;
 	int truss;
 	std::unordered_set<int> out_nbrs;
 	std::unordered_set<int> in_nbrs;

@@ -48,7 +48,8 @@ double quality(int v, int piv) {
 		sn_dist_rslt = hash_sn_dist[std::make_pair(piv, v)];
 	}
 
-	return (rn_dist_for_users(piv, v) + sn_dist_rslt);
+	return sn_dist_rslt;
+	//return (rn_dist_for_users(piv, v) + sn_dist_rslt);
 }
 
 std::unordered_map<int, std::set<int>> gen_subgraphs(int cand_index_piv[]) {
@@ -112,11 +113,14 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 		labelA:
 			int git = uniform(0, No_sn_V - 1);
 			if (!isInTheArray(S_p, No_index_piv, git))
-				S_p[i] = git;
+ 				S_p[i] = git;
 			else
 				goto labelA;
 		}
 		// get subgraphs based on pivots
+		for (int i = 0; i < No_index_piv; ++i)
+			std::cerr << S_p[i] << " ";
+
 		GG = gen_subgraphs(S_p);
 
 		// evaluate the cost function
@@ -463,23 +467,21 @@ label2:
 	hp->~Heap();
 
 	// assign sup of truss values
+	
 	for (int i = 0; i < No_sn_V; ++i) {
-		Heap* hp = new Heap();
-		hp->init(2);
+		int max = -INT_MAX;
+		
+		for (std::unordered_set<int>::iterator it = sn_vrtx[i].myedges.begin();
+						it != sn_vrtx[i].myedges.end(); ++it) {
 
-		for (std::set<int>::iterator it = sn_vrtx[i].myedges.begin();
-			it != sn_vrtx[i].myedges.end(); ++it) {
-			HeapEntry* he = new HeapEntry();
-			he->son1 = *it;
-			he->key = -snEdges[*it].sup;
-			hp->insert(he);
-			delete he;
+			if (max < snEdges[*it].sup) {
+				max = snEdges[*it].sup;
+			}
+
 		}
-		HeapEntry* he = new HeapEntry();
-		hp->remove(he);
-		sn_vrtx[i].truss = he->son1;
-		delete he;
-		hp->~Heap();
+
+		sn_vrtx[i].truss = max;
+
 	}
 }
 
@@ -642,11 +644,11 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 void find_social_network_pivots() {
 
 	const int h = No_SN_piv;
-	int globelIter = 3, max = No_sn_V, min = -INT_MAX;
+	int globelIter = 2, max = No_sn_V, min = -INT_MAX;
 	double cost = 0;
 	double d1, d2, diff, maxEva = 0;
 	double localCost, newCost = 0;
-	int swapIter = 100;
+	int swapIter = 5;
 	int rand_piv, npiv;
 	double globaCost = -INT_MAX;
 
@@ -715,9 +717,9 @@ double evaluate_SN_pivots(int S_p[], int no_pivs) {
 	double diff = -INT_MAX;
 	double temp = -INT_MAX;
 
-	for (int i = 0; i < No_sn_V; i++) {
+	for (int i = 0; i < 100; i++) {
 
-		for (int j = 0; j < No_sn_V; j++) {
+		for (int j = 100; j < 200; j++) {
 
 			for (int k = 0; k < no_pivs; k++) {
 
@@ -827,7 +829,8 @@ double rn_dist_rnPiv_to_user(int r_piv, int user) {
 		rslt = rslt + temp;
 
 	}
-	return rslt;
+
+	return rslt/No_CKINs;
 }
 
 double evaluate_RN_pivots(int S_p[], int no_pivs) {
@@ -836,11 +839,11 @@ double evaluate_RN_pivots(int S_p[], int no_pivs) {
 	double diff = -INT_MAX;
 	double temp = -INT_MAX;
 
-	for (int i = 0; i < No_sn_V; i++) {
+	for (int i = 0; i < 10; i++) { // for each social network vrtx
 
-		for (int j = 0; j < No_sn_V; j++) {
+		for (int j = 10; j < 20; j++) { // for each social network vrtx
 
-			for (int k = 0; k < no_pivs; k++) {
+			for (int k = 0; k < no_pivs; k++) { // for each road network pivot
 
 				temp = abs(rn_dist_rnPiv_to_user(S_p[k], i) - rn_dist_rnPiv_to_user(S_p[k], j));
 
@@ -867,7 +870,8 @@ double evaluate_RN_pivots(int S_p[], int no_pivs) {
 //////////////////////////////////////////////////////////////////////
 void indexing() {
 	// compute the truss for each user in the social network
-	truss_decomposition();
+	
+	//truss_decomposition();
 
 	//define a graph
 	std::unordered_map<int, std::set<int>> GGG;
@@ -986,6 +990,88 @@ void setParentOfNodes() {
 }
 
 
+/*
+	GIVEN	:: a social network
+	ENSURES :: this social netowk is connected, if not, then add more edges to make it connected
+
+*/
+void get_socialNetwork_connected(){
+
+	std::unordered_set<int>* sett = new std::unordered_set<int>[100000];
+	int* havingSet = new int[No_sn_V];
+	bool* check_havingSet = new bool[No_sn_V];
+	int setCou = 0;
+	
+	for (int i = 0; i < No_sn_V; ++i)
+		check_havingSet[i] = false;
+
+	for (int i = 0; i < No_sn_V; ++i) {
+		if ( !check_havingSet[i]) { // if the vrtx have no group
+
+			Heap* hp = new Heap();
+			hp->init(2);
+
+			HeapEntry* he = new HeapEntry();
+			he->son1 = i;
+			he->key = 0;
+			hp->insert(he);
+			delete he;
+
+			
+			while (hp->used > 0) {
+				HeapEntry* he = new HeapEntry();
+				hp->remove(he);
+
+				int vr = he->son1;
+
+				delete he;
+				sett[setCou].insert(vr);
+				havingSet[vr] = setCou;
+				check_havingSet[vr] = true;
+				
+				for (std::list<int>::iterator it = snGraph[vr].begin(); it != snGraph[vr].end(); ++it) {
+					
+					if (!check_havingSet[*it]) { // we put it into the heap if it was not explored before
+						HeapEntry* he = new HeapEntry();
+						he->son1 = *it;
+						he->key = 1;
+						hp->insert(he);
+						delete he;
+					
+					}
+				}
+		
+			}
+
+			setCou++;
+			hp->~Heap();
+
+		}
+
+
+	}
+
+	
+	std::cerr << setCou;
+	
+	std::ofstream fout;
+	fout.open("e_____.txt");
+	
+	std::unordered_set<int>::iterator it;
+	std::unordered_set<int>::iterator it2;
+	
+	for (int i = 0; i < setCou - 1; i++) {
+			it = sett[i].begin();
+			it2 = sett[i + 1].begin();
+			fout << *it << " " << *it2 <<" " <<((double)rand() / (RAND_MAX)) << " " << ((double)rand() / (RAND_MAX)) << " " << ((double)rand() / (RAND_MAX)) << "\n";
+	}
+	
+	fout.close();
+
+	delete[] sett;
+	delete[] havingSet;
+	delete[] check_havingSet;
+}
 
 
 
