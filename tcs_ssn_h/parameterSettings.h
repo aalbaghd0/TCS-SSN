@@ -41,11 +41,13 @@ int set_parameters(char filename[]) {
 #define No_sn_E				set_parameters(sn_E_file) * 2
 #define No_rn_V				set_parameters(rn_V_file)
 #define No_rn_E				set_parameters(rn_E_file) * 2
+
 #define No_index_piv			20
+#define No_subgraphs			No_index_piv
+
 #define No_SN_piv				4
 #define No_RN_piv				4
-#define No_subgraphs			4
-#define No_CKINs				6
+#define No_CKINs				2
 
 
 
@@ -152,7 +154,7 @@ int number_nodes(int a, int b, int& c) {
 }
 
 // control the number of pivots in tree layers
-#define		NO_INTER_PIVS		2
+#define		NO_INTER_PIVS		5
 
 int INDEXSIZE = 0;
 int b = number_nodes(No_index_piv, NO_INTER_PIVS, INDEXSIZE);

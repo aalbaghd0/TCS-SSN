@@ -25,11 +25,11 @@
 double sn_dist(int src, int dst);
 double rn_dist(int src, int dst);
 double rn_dist_for_users(int src, int dst);
-double X_sc(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
-double X_st(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
-double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
-double evaluate_subgraphs(std::unordered_map<int, std::set<int>> G, int pivots[], int number_subgraphs);
-double evaluate_Indexsubgraphs(std::set<int> G[], int no_of_subgraphs);
+double X_sc(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int number_subgraphs);
+double X_st(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int number_subgraphs);
+double X_inf(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int number_subgraphs);
+double evaluate_subgraphs(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int number_subgraphs);
+double evaluate_Indexsubgraphs(std::unordered_set<int> G[], int no_of_subgraphs);
 double inf_score_users(int src, int dst);
 double evaluate_SN_pivots(int S_p[], int no_pivs);
 double evaluate_RN_pivots(int S_p[], int no_pivs);
@@ -52,12 +52,12 @@ double quality(int v, int piv) {
 	return (rn_dist_for_users(piv, v) + sn_dist_rslt);
 }
 
-std::unordered_map<int, std::set<int>> gen_subgraphs(int cand_index_piv[]) {
+std::unordered_map<int, std::unordered_set<int>> gen_subgraphs(int cand_index_piv[]) {
 	double qual_rslt;
 	int best_quality;
 	int assign;
 
-	std::unordered_map<int, std::set<int>> GG;
+	std::unordered_map<int, std::unordered_set<int>> GG;
 
 	for (int v = 0; v < No_sn_V; v++) {
 		best_quality = INT_MAX;
@@ -76,23 +76,27 @@ std::unordered_map<int, std::set<int>> gen_subgraphs(int cand_index_piv[]) {
 	/*
 	for (int i = 0; i < No_index_piv; ++i) {
 		std::cerr << "Index_Piv " << cand_index_piv[i] << " --->> ";
-		for (std::set<int>::iterator it = GG[cand_index_piv[i]].begin(); it != GG[cand_index_piv[i]].end(); ++it) {
+		for (std::unordered_set<int>::iterator it = GG[cand_index_piv[i]].begin(); it != GG[cand_index_piv[i]].end(); ++it) {
 			std::cerr << *it << " ";
 		}
 		std::cerr << "\n" << "\n";
 	}
 	*/
+	std::cerr << "\n";
+	for (int i = 0; i < No_index_piv; ++i) {
+		std::cerr<< GG[cand_index_piv[i]].size() << " ";
+	}
 	return GG;
 }
 
-std::unordered_map<int, std::set<int>> sn_piv_select() {
+std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 	double global_cost = -INT_MAX;
 	int* S_p = new int[No_index_piv];
 	int* new_S_p = new int[No_index_piv];
 	double final_cost;
-	std::unordered_map<int, std::set<int>> GG;
-	std::unordered_map<int, std::set<int>> new_GG;
-	std::unordered_map<int, std::set<int>> G;
+	std::unordered_map<int, std::unordered_set<int>> GG;
+	std::unordered_map<int, std::unordered_set<int>> new_GG;
+	std::unordered_map<int, std::unordered_set<int>> G;
 
 
 	double cost_G = 0.0;
@@ -167,38 +171,39 @@ std::unordered_map<int, std::set<int>> sn_piv_select() {
 	}
 
 
+	/*
 	for (int i = 0; i < No_index_piv; ++i) {
 		std::cerr << "Index_Piv " << index_piv[i] << " --->> ";
-		for (std::set<int>::iterator it = G[index_piv[i]].begin(); it != G[index_piv[i]].end(); ++it) {
+		for (std::unordered_set<int>::iterator it = G[index_piv[i]].begin(); it != G[index_piv[i]].end(); ++it) {
 			std::cerr << *it << " ";
 		}
 		std::cerr << "\n" << "\n";
 	}
 	std::cerr << "THe Evaluation :: " << global_cost << "\n \n";
-
+	*/
 	return G;
 }
 
 
-double evaluate_subgraphs(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_subgraphs) {
-	double rslt1 = W1 * X_sc(G, pivots, no_of_subgraphs);
-	double rslt2 = W2 * (1 - X_st(G, pivots, no_of_subgraphs));
-	double rslt3 = W1 * (1 - X_inf(G, pivots, no_of_subgraphs));
+double evaluate_subgraphs(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int no_of_subgraphs) {
+	double rslt1 = 0;//W1 * X_sc(G, pivots, no_of_subgraphs);
+	double rslt2 = 0;//W2 * (1 - X_st(G, pivots, no_of_subgraphs));
+	double rslt3 = 0;//W1 * (1 - X_inf(G, pivots, no_of_subgraphs));
 
 	return rslt1 + rslt2 + rslt3;
 }
 
 
 
-double X_sc(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_subgraphs) {
+double X_sc(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int no_of_subgraphs) {
 	std::unordered_map<pair, bool, pair_hash> map;
 
 	double sub_rslt = 0.0;
 	double rslt = 0.0;
 
 	for (int g = 0; g < no_of_subgraphs; g++) {
-		for (std::set<int>::iterator it = G[pivots[g]].begin(); it != G[pivots[g]].end(); ++it) {
-			for (std::set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
+		for (std::unordered_set<int>::iterator it = G[pivots[g]].begin(); it != G[pivots[g]].end(); ++it) {
+			for (std::unordered_set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
 				if (*it != *it2) {
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) { // to make sure not to compute distance more than once
 						sub_rslt = rn_dist_for_users(*it, *it2);
@@ -208,21 +213,21 @@ double X_sc(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_su
 				}
 			}
 		}
-		rslt = rslt + sub_rslt;
+ 		rslt = rslt + sub_rslt;
 		sub_rslt = 0.0;
 	}
 	return rslt;
 }
 
-double X_st(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_subgraphs) {
+double X_st(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int no_of_subgraphs) {
 	std::unordered_map<pair, bool, pair_hash> map;
 
 	double sub_rslt = 0.0;
 	double rslt = 0.0;
 
 	for (int g = 0; g < no_of_subgraphs; g++) {
-		for (std::set<int>::iterator it = G[pivots[g]].begin(); it != G[pivots[g]].end(); ++it) {
-			for (std::set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
+		for (std::unordered_set<int>::iterator it = G[pivots[g]].begin(); it != G[pivots[g]].end(); ++it) {
+			for (std::unordered_set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
 				if (*it != *it2) {
 
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
@@ -241,15 +246,15 @@ double X_st(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_su
 	return rslt;
 }
 
-double X_inf(std::unordered_map<int, std::set<int>> G, int pivots[], int no_of_subgraphs) {
+double X_inf(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int no_of_subgraphs) {
 	std::unordered_map<pair, bool, pair_hash> map;
 
 	double sub_rslt = 0.0;
 	double rslt = 0.0;
 
 	for (int g = 0; g < no_of_subgraphs; g++) {
-		for (std::set<int>::iterator it = G[g].begin(); it != G[g].end(); ++it) {
-			for (std::set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
+		for (std::unordered_set<int>::iterator it = G[g].begin(); it != G[g].end(); ++it) {
+			for (std::unordered_set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
 				if (*it != *it2) {
 
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) {
@@ -303,8 +308,8 @@ double rn_dist_for_users(int src, int dst) {
 	}
 	else { // else, compute them and store the result
 
-		for (int i = 0; i < No_CKINs - 1; ++i) {// for all user locations
-			for (int j = 0; j < No_CKINs - 1; j++) {
+		for (int i = 0; i < No_CKINs ; ++i) {// for all user locations
+			for (int j = 0; j < No_CKINs ; j++) {
 				// map the user location to the from the social to the road network, match the 
 				// user location to a vertex on the road network
 				int src_map = sn_vrtx[src].ckins[i];
@@ -364,10 +369,10 @@ ENSURE ::		rslt--> is the itersection set of edges with the edge a--b
 				we return the number of intersected vertices
 */
 ///////////////////////////////////////////////////////////////////////
-int intersect(std::set<int>* common_edges, int a, int b) {
+int intersect(std::unordered_set<int>* common_edges, int a, int b) {
 
 	double rslt = 0.0;
-	std::set<int> intersect;
+	std::unordered_set<int> intersect;
 	common_edges->clear();
 	set_intersection(sn_vrtx[a].nbrs.begin(), sn_vrtx[a].nbrs.end(),
 		sn_vrtx[b].nbrs.begin(), sn_vrtx[b].nbrs.end(),
@@ -375,7 +380,7 @@ int intersect(std::set<int>* common_edges, int a, int b) {
 	rslt = intersect.size();
 	// v -- a, v -- b, a -- v, b -- v
 
-	for (std::set<int>::iterator it = intersect.begin();
+	for (std::unordered_set<int>::iterator it = intersect.begin();
 		it != intersect.end(); ++it) {
 
 		common_edges->insert(hash_edge[std::make_pair(a, *it)]);
@@ -395,7 +400,7 @@ void truss_decomposition() {
 	int k = 3;
 	Heap* hp = new Heap();
 	hp->init(2);
-	std::set<int>* pool = new std::set<int>;
+	std::unordered_set<int>* pool = new std::unordered_set<int>;
 	int e;
 
 	for (int e = 0; e < No_sn_E; e++) {
@@ -421,7 +426,7 @@ label2:
 
 		intersect(pool, snEdges[e].from, snEdges[e].to);
 
-		std::set<int>::iterator it2;
+		std::unordered_set<int>::iterator it2;
 
 		it2 = sn_vrtx[snEdges[e].from].nbrs.find(snEdges[e].to);
 		if (it2 != sn_vrtx[snEdges[e].from].nbrs.end())
@@ -437,7 +442,7 @@ label2:
 		delete he;
 		if (snEdges[e].sup < (k - 2)) {
 
-			for (std::set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
+			for (std::unordered_set<int>::iterator it = pool->begin(); it != pool->end(); ++it) {
 				//std::cerr << *it << " ";
 				hp->deleteEntry(*it);
 
@@ -494,13 +499,13 @@ ENSURES  :: build the hybrid index
 */
 
 //امرر كراف كامل, وامرر 
-std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no_piv_set, int
+std::unordered_map<int, std::unordered_set<int>> get_index_subgraphs(int piv_set[], int no_piv_set, int
 	new_pivots[], int no_new_piv) {
 	double qual_rslt;
 	int best_quality;
 	int assign;
 
-	std::unordered_map<int, std::set<int>> Gr;
+	std::unordered_map<int, std::unordered_set<int>> Gr;
 	for (int v = 0; v < no_piv_set; v++) {
 		best_quality = INT_MAX;
 		qual_rslt = 0.0;
@@ -518,7 +523,7 @@ std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no
 	/*
 	for (int i = 0; i < no_new_piv; ++i) {
 		std::cerr << "Index_Piv " << new_pivots[i] << " --->> ";
-		for (std::set<int>::iterator it = Gr[new_pivots[i]].begin(); it != Gr[new_pivots[i]].end(); ++it) {
+		for (std::unordered_set<int>::iterator it = Gr[new_pivots[i]].begin(); it != Gr[new_pivots[i]].end(); ++it) {
 			std::cerr << *it << " ";
 		}
 		std::cerr << "\n" << "\n";
@@ -535,15 +540,15 @@ std::unordered_map<int, std::set<int>> get_index_subgraphs(int piv_set[], int no
 	ENSURES :: find level_index pivots
 */
 
-std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv, int f_piv[]) {
+std::unordered_map<int, std::unordered_set<int>> Index_piv_select(int no_new_piv, int prev_piv[], int no_prev_piv, int f_piv[]) {
 	// define variables
 	double global_cost = -INT_MAX;
 	int* S_p = new int[No_index_piv];
 	int* new_S_p = new int[No_index_piv];
 	double final_cost;
-	std::unordered_map<int, std::set<int>> GG;
-	std::unordered_map<int, std::set<int>> new_GG;
-	std::unordered_map<int, std::set<int>> GGG;
+	std::unordered_map<int, std::unordered_set<int>> GG;
+	std::unordered_map<int, std::unordered_set<int>> new_GG;
+	std::unordered_map<int, std::unordered_set<int>> GGG;
 
 
 	memset(f_piv, -1, sizeof(f_piv[0]) * No_index_piv);
@@ -625,7 +630,7 @@ std::unordered_map<int, std::set<int>> Index_piv_select(int no_new_piv, int prev
 	// get the new assigned fathers in a hashmap
 	for (int i = 0; i < no_new_piv; ++i) {
 		std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
-		for (std::set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
+		for (std::unordered_set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
 			std::cerr << *it << " ";
 		}
 		std::cerr << "\n" << "\n";
@@ -874,7 +879,7 @@ void indexing() {
 	//truss_decomposition();
 
 	//define a graph
-	std::unordered_map<int, std::set<int>> GGG;
+	std::unordered_map<int, std::unordered_set<int>> GGG;
 
 	// get the index pivots set (index_piv[])
 	// and devide the subgraph based on those pivots and return the subgraphs in GGG
@@ -886,7 +891,7 @@ void indexing() {
 	// for subgraph, # of subgraphs == # of index pivots
 	for (int j = 0; j < No_index_piv; ++j) {
 		// for each subgraph
-		for (std::set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
+		for (std::unordered_set<int>::iterator it = GGG[index_piv[j]].begin(); it != GGG[index_piv[j]].end(); ++it) {
 			//store all children of the node in the tree, position assign_counter
 			tree[assign_counter].child.insert(*it);
 
@@ -919,7 +924,7 @@ void indexing() {
 		/*
 		for (int i = 0; i < no_new_piv; ++i) {
 			std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
-			for (std::set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
+			for (std::unordered_set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
 				std::cerr << *it << " ";
 			}
 			std::cerr << "\n" << "\n";
@@ -929,7 +934,7 @@ void indexing() {
 
 		for (int j = 0; j < no_new_piv; ++j) {
 			//trying to assign the children to the node
-			for (std::set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
+			for (std::unordered_set<int>::iterator it = GGG[f_piv[j]].begin(); it != GGG[f_piv[j]].end(); ++it) {
 
 				tree[assign_counter].child.insert(hash_my_position_in_tree[*it]);
 				
@@ -954,6 +959,7 @@ void indexing() {
 
 	}
 
+	
 	std::cerr << " --------------------------- " << "\n";
 	for (int i = 0; i < INDEXSIZE; i++) {
 		std::cerr << "the node is " << i << " --> ";
@@ -1155,9 +1161,6 @@ void get_roadNetwork_connected() {
 	delete[] havingSet;
 	delete[] check_havingSet;
 }
-
-
-
 
 
 #endif // !INDEX_HPP

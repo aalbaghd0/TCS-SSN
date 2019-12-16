@@ -28,7 +28,7 @@ public:
 	int ckins[CKINS];
 	std::bitset<No_K> key;
 	std::bitset<No_T> topic;
-	std::set<int> nbrs;
+	std::unordered_set<int> nbrs;
 
 	std::unordered_set<int> myedges;
 	int truss;
@@ -72,7 +72,7 @@ public:
 class Gnode {
 public:
 	std::unordered_set<int> child;
-	std::set<int> ptr;
+	std::unordered_set<int> ptr;
 	int parent;
 	int start;
 	int end;
