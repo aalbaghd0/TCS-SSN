@@ -31,7 +31,7 @@ void main() {
 	//find_road_network_pivots();
 	//find_social_network_pivots();
 
-	get_socialNetwork_connected();
+	//get_socialNetwork_connected();
 	indexing();
 	setParentOfNodes();
 
