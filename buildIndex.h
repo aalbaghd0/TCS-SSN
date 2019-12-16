@@ -48,8 +48,8 @@ double quality(int v, int piv) {
 		sn_dist_rslt = hash_sn_dist[std::make_pair(piv, v)];
 	}
 
-	return sn_dist_rslt;
-	//return (rn_dist_for_users(piv, v) + sn_dist_rslt);
+	
+	return (rn_dist_for_users(piv, v) + sn_dist_rslt);
 }
 
 std::unordered_map<int, std::set<int>> gen_subgraphs(int cand_index_piv[]) {
@@ -1066,6 +1066,89 @@ void get_socialNetwork_connected(){
 			fout << *it << " " << *it2 <<" " <<((double)rand() / (RAND_MAX)) << " " << ((double)rand() / (RAND_MAX)) << " " << ((double)rand() / (RAND_MAX)) << "\n";
 	}
 	
+	fout.close();
+
+	delete[] sett;
+	delete[] havingSet;
+	delete[] check_havingSet;
+}
+
+/*
+	GIVEN	:: a road network
+	ENSURES :: this road netowk is connected, if not, then add more edges to make it connected
+
+*/
+void get_roadNetwork_connected() {
+
+	std::unordered_set<int>* sett = new std::unordered_set<int>[100000];
+	int* havingSet = new int[No_rn_V];
+	bool* check_havingSet = new bool[No_rn_V];
+	int setCou = 0;
+
+	for (int i = 0; i < No_rn_V; ++i)
+		check_havingSet[i] = false;
+
+	for (int i = 0; i < No_rn_V; ++i) {
+		if (!check_havingSet[i]) { // if the vrtx have no group
+
+			Heap* hp = new Heap();
+			hp->init(2);
+
+			HeapEntry* he = new HeapEntry();
+			he->son1 = i;
+			he->key = 0;
+			hp->insert(he);
+			delete he;
+
+
+			while (hp->used > 0) {
+				HeapEntry* he = new HeapEntry();
+				hp->remove(he);
+
+				int vr = he->son1;
+
+				delete he;
+				sett[setCou].insert(vr);
+				havingSet[vr] = setCou;
+				check_havingSet[vr] = true;
+
+				for (std::list<int>::iterator it = rnGraph[vr].begin(); it != rnGraph[vr].end(); ++it) {
+
+					if (!check_havingSet[*it]) { // we put it into the heap if it was not explored before
+						HeapEntry* he = new HeapEntry();
+						he->son1 = *it;
+						he->key = 1;
+						hp->insert(he);
+						delete he;
+
+					}
+				}
+
+			}
+
+			setCou++;
+			hp->~Heap();
+
+		}
+
+
+	}
+
+
+	std::cerr << setCou;
+
+	std::ofstream fout;
+	fout.open("rne_____.txt");
+
+	std::unordered_set<int>::iterator it;
+	std::unordered_set<int>::iterator it2;
+
+	for (int i = 0; i < setCou - 1; i++) {
+		it = sett[i].begin();
+		it2 = sett[i + 1].begin();
+		fout << *it << " " << *it2 << "\n";
+	}
+
 	fout.close();
 
 	delete[] sett;

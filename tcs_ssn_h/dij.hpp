@@ -317,7 +317,7 @@ double sn_Dij_to_all_vertices(int src) {
 			//cost = he->key;
 			//break;
 		//}
-		if (dist[e] < INT_MAX + 100) {
+		if (dist[e] < INT_MAX) {
 			hash_sn_dist[std::make_pair(src, e)] = dist[e];
 			check_hash_sn_dist[std::make_pair(src, e)] = true;
 
