@@ -65,12 +65,13 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs(int cand_index_pi
 		for (int piv = 0; piv < No_index_piv; piv++) {
 			qual_rslt = quality(v, cand_index_piv[piv]);
 
-			if (qual_rslt < best_quality) {
+			if ((qual_rslt < best_quality) && (GG[cand_index_piv[piv]].size() < 100)) {
 				assign = cand_index_piv[piv];
 				best_quality = qual_rslt;
 			}
 		}
 		GG[assign].insert(v);
+		//std::cerr << sizeof(GG[assign]);
 	}
 
 	/*
@@ -82,7 +83,7 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs(int cand_index_pi
 		std::cerr << "\n" << "\n";
 	}
 	*/
-	std::cerr << "\n";
+	std::cerr << "\n" << "------- size of each node -------"<<"\n";
 	for (int i = 0; i < No_index_piv; ++i) {
 		std::cerr<< GG[cand_index_piv[i]].size() << " ";
 	}
@@ -103,8 +104,8 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 	double local_cost = 0.0;
 	double new_cost = 0.0;
 
-	int global_iter = 3;
-	int swap_iter = 4;
+	int global_iter = 2;
+	int swap_iter = 3;
 
 	int get_piv = 0;
 	int new_piv = 0;
@@ -186,7 +187,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 
 
 double evaluate_subgraphs(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int no_of_subgraphs) {
-	double rslt1 = 0;//W1 * X_sc(G, pivots, no_of_subgraphs);
+	double rslt1 = W1 * X_sc(G, pivots, no_of_subgraphs);
 	double rslt2 = 0;//W2 * (1 - X_st(G, pivots, no_of_subgraphs));
 	double rslt3 = 0;//W1 * (1 - X_inf(G, pivots, no_of_subgraphs));
 
@@ -908,7 +909,12 @@ void indexing() {
 
 
 	int* f_piv = new int[No_index_piv];
-	int no_new_piv = No_index_piv / NO_INTER_PIVS;
+	
+	int PivsAtLevelCou = 1;
+	int no_new_piv = PivsInLevelTree[PivsAtLevelCou];
+	PivsAtLevelCou++;
+
+
 
 	int no_prev_piv = No_index_piv;
 	int* layer_piv = new int[No_index_piv];
@@ -921,7 +927,7 @@ void indexing() {
 		GGG = Index_piv_select(no_new_piv, layer_piv, no_prev_piv, f_piv);
 
 		//printing
-		/*
+		//*
 		for (int i = 0; i < no_new_piv; ++i) {
 			std::cerr << "Index_Piv " << f_piv[i] << " --->> ";
 			for (std::unordered_set<int>::iterator it = GGG[f_piv[i]].begin(); it != GGG[f_piv[i]].end(); ++it) {
@@ -929,7 +935,7 @@ void indexing() {
 			}
 			std::cerr << "\n" << "\n";
 		}
-		*/
+		//*/
 
 
 		for (int j = 0; j < no_new_piv; ++j) {
@@ -953,18 +959,26 @@ void indexing() {
 		// get a new level
 		level = level + 1;
 
-		no_prev_piv = no_new_piv;
-		no_new_piv = no_new_piv / NO_INTER_PIVS;
+		if (PivsAtLevelCou < LengthOfPivLevels) {
+			no_prev_piv = no_new_piv;
+			no_new_piv = PivsInLevelTree[PivsAtLevelCou];
+			PivsAtLevelCou++;
+		}
+		else {
+			no_new_piv = 0;
+		}
+		
+
 		std::memcpy(layer_piv, f_piv, sizeof(f_piv[0]) * no_prev_piv);
 
 	}
 
 	
 	std::cerr << " --------------------------- " << "\n";
-	for (int i = 0; i < INDEXSIZE; i++) {
+	for (int i = 0; i < INDEXSIZE - No_index_piv; i++) {
 		std::cerr << "the node is " << i << " --> ";
 		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
-			std::cerr << *it;
+			std::cerr << *it << " ";
 		}
 		std::cerr << std::endl;
 	}
