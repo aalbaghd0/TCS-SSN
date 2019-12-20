@@ -69,7 +69,7 @@ int* index_piv = new int[No_index_piv];
 
 /// some globale structurs 
 vertex* sn_vrtx = new vertex[No_sn_V];
-vertex* rn_vrtx = new vertex[No_rn_V];
+rn_vertices* rn_vrtx = new rn_vertices[No_rn_V];
 
 
 

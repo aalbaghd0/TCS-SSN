@@ -9,7 +9,7 @@
 #include <set>
 #include "tcs_ssn_h/heap.h"
 #include <set>
-#include <unordered_map>
+
 #include "tcs_ssn_h/dij.hpp"
 #include"tcs_ssn_h/vertex.h"
 #include "tcs_ssn_h/heap.h"
@@ -18,6 +18,9 @@
 #include <algorithm>
 #include <iterator>
 #include <utility>
+#include <limits>
+
+
 
 /*
 	functions prototypes
@@ -38,7 +41,7 @@ double evaluate_RN_pivots(int S_p[], int no_pivs);
 double quality(int v, int piv) {
 	double sn_dist_rslt = 0.0, rn_dist_rslt = 0.0;
 
-
+/*
 	if (!check_hash_sn_dist[std::make_pair(piv, v)]) { // if we don't have the distance, the we will compute it
 		sn_Dij_to_all_vertices(piv); // find distance to all other vertices
 									 // at the same time store distances to all other vertices
@@ -48,8 +51,8 @@ double quality(int v, int piv) {
 		sn_dist_rslt = hash_sn_dist[std::make_pair(piv, v)];
 	}
 
-	
-	return (rn_dist_for_users(piv, v) + sn_dist_rslt);
+	*/
+	return (rn_dist_for_users(piv, v));// + sn_dist_rslt);
 }
 
 std::unordered_map<int, std::unordered_set<int>> gen_subgraphs(int cand_index_piv[]) {
@@ -1177,4 +1180,124 @@ void get_roadNetwork_connected() {
 }
 
 
+void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtition,
+		Heap& pivHeap, std::unordered_map<pair, bool, pair_hash>& isSeen, int cand_piv[]) {
+
+	int tt = 0;
+	while (hp[v].used > 0) {
+		HeapEntry* he = new HeapEntry();
+		hp[v].remove(he);
+
+		int cand = he->son1;
+		int w = he->key;
+		delete he;
+
+		int min_key = INT_MAX;
+
+		if (assign[cand] == -1) {
+			assign[cand] = v;
+			tt = 1;
+			condtition++;
+			for (std::list<int>::iterator it = rnGraph[cand].begin(); it != rnGraph[cand].end(); it++) {
+
+
+				if (assign[*it] == -1) {
+					if (!(isSeen[std::make_pair(v, *it)])) {
+						if (!isInTheArray(cand_piv, No_index_piv, *it)) {
+
+							HeapEntry* he = new HeapEntry();
+							he->son1 = *it;
+							he->key = w + rn_edge_info[std::make_pair(cand, *it)].weight;
+
+							if (min_key > he->key)
+								min_key = he->key;
+
+							hp[v].insert(he);
+							delete he;
+
+							isSeen[std::make_pair(v, *it)] = true;
+						}
+					}
+				}
+
+			}
+		}
+		if (min_key< INT_MAX) {
+			HeapEntry* he2 = new HeapEntry();
+			he2->son1 = v;
+			he2->key = min_key;
+			pivHeap.insert(he2);
+			delete he2;
+			break;
+		}
+	}
+
+}
+
+void gen_subgraphs_update(int cand_piv[]) {
+
+	std::unordered_map<int, Heap> hpp;
+	Heap pivHeap;
+	pivHeap.init(2);
+	std::unordered_map<pair, bool, pair_hash> isSeen;
+
+	for (int piv = 0; piv < No_index_piv; piv++) {
+		hpp[cand_piv[piv]].init(2);
+		HeapEntry* he = new HeapEntry();
+		he->son1 = cand_piv[piv];
+		he->key = 0;
+		hpp[cand_piv[piv]].insert(he);
+
+		HeapEntry* he2 = new HeapEntry();
+		he2->son1 = cand_piv[piv];
+		he2->key = 0;
+		pivHeap.insert(he2);
+		delete he2;
+
+	}
+
+
+	// create an array to assign vrtices to pivots
+	// initiate it with -1
+	int* assign = new int[No_rn_V];
+	std::memset(assign, -1, sizeof(assign[0]) * No_rn_V);
+
+
+	int piv = 0;
+	int condtition = 0;
+	while (condtition < No_rn_V) {
+		
+		HeapEntry* he = new HeapEntry();
+		pivHeap.remove(he);
+		piv = he->son1;
+		delete he;
+
+		expand(piv, hpp, assign, condtition, pivHeap, isSeen, cand_piv);
+
+	}
+
+
+	std::unordered_map<int, std::unordered_set<int>> GG;
+	for (int i = 0; i < No_rn_V; i++) {
+
+		for (std::unordered_set<int>::iterator it = rn_vrtx[i].myUsers.begin(); it != rn_vrtx[i].myUsers.end(); ++it) {
+			GG[assign[i]].insert(*it);
+		}
+
+	}
+
+	/*
+	for (int p = 0; p < No_index_piv; p++) {
+		std::cerr << cand_piv[p] << " -->> ";
+		for (std::unordered_set<int>::iterator it = GG[cand_piv[p]].begin(); it != GG[cand_piv[p]].end(); ++it) {
+			std::cerr << *it << " ";
+		}
+		std::cerr << "\n";
+	}
+	*/
+
+	for (int i = 0; i < No_rn_V; i++) {
+		std::cerr << i << " " << assign[i]<< "\n" ;
+	} 
+}
 #endif // !INDEX_HPP

@@ -33,6 +33,23 @@ void main() {
 
 	//get_socialNetwork_connected();
 	//get_roadNetwork_connected();
+	
+	int* cand_piv = new int[No_index_piv];
+
+	std::cerr << "\n pivots------ ";
+	for (int i = 0; i < No_index_piv; ++i) {
+	labelA:
+		int git = uniform(0, No_rn_V - 1);
+		if (!isInTheArray(cand_piv, No_index_piv, git)) {
+			cand_piv[i] = git;
+			std::cerr << git << " ";
+		}
+
+		else
+			goto labelA;
+	}
+
+	gen_subgraphs_update(cand_piv);
 	indexing();
 	setParentOfNodes();
 

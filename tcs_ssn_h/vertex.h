@@ -21,6 +21,11 @@ const int No_T = 10;
 
 #define No_of_TOPICS	    3
 
+class rn_vertices {
+public:
+	std::unordered_set<int> myUsers;
+};
+
 
 class vertex {
 public:
