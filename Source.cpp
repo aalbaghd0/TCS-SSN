@@ -42,14 +42,14 @@ void main() {
 		int git = uniform(0, No_rn_V - 1);
 		if (!isInTheArray(cand_piv, No_index_piv, git)) {
 			cand_piv[i] = git;
-			std::cerr << git << " ";
+			//std::cerr << git << " ";
 		}
 
 		else
 			goto labelA;
 	}
 
-	gen_subgraphs_update(cand_piv);
+	//gen_subgraphs_update(cand_piv);
 	indexing();
 	setParentOfNodes();
 

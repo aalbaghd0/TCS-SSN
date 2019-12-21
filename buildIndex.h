@@ -36,6 +36,10 @@ double evaluate_Indexsubgraphs(std::unordered_set<int> G[], int no_of_subgraphs)
 double inf_score_users(int src, int dst);
 double evaluate_SN_pivots(int S_p[], int no_pivs);
 double evaluate_RN_pivots(int S_p[], int no_pivs);
+std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_piv[]);
+void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtition,
+	Heap& pivHeap, std::unordered_map<pair, bool, pair_hash>& isSeen, int cand_piv[]);
+double rn_dist_for_users_NoT_BFS(int src, int dst);
 
 
 double quality(int v, int piv) {
@@ -129,7 +133,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 		for (int i = 0; i < No_index_piv; ++i)
 			std::cerr << S_p[i] << " ";
 
-		GG = gen_subgraphs(S_p);
+		GG = gen_subgraphs_update(S_p);
 
 		// evaluate the cost function
 		local_cost = evaluate_subgraphs(GG, S_p, No_subgraphs);
@@ -151,7 +155,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 
 			new_S_p[get_piv] = new_piv;
 
-			new_GG = gen_subgraphs(new_S_p);
+			new_GG = gen_subgraphs_update(new_S_p);
 
 
 
@@ -210,9 +214,11 @@ double X_sc(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], in
 			for (std::unordered_set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
 				if (*it != *it2) {
 					if (!map[std::make_pair(*it, *it2)] && !map[std::make_pair(*it2, *it)]) { // to make sure not to compute distance more than once
-						sub_rslt = rn_dist_for_users(*it, *it2);
-						map[std::make_pair(*it, *it2)] = true;
-						map[std::make_pair(*it2, *it)] = true;
+
+							sub_rslt = rn_dist_for_users_NoT_BFS(*it, *it2);
+							map[std::make_pair(*it, *it2)] = true;
+							map[std::make_pair(*it2, *it)] = true;
+						
 					}
 				}
 			}
@@ -321,6 +327,49 @@ double rn_dist_for_users(int src, int dst) {
 
 				if (!check_hash_rn_dist[std::make_pair(src_map, dst_map)]) { // if we don't have the distance, the we will compute it
 					rn_Dij_to_all_vertices(src_map); // find distance to all other vertices
+													 // at the same time store distances to all other vertices
+					temp = hash_rn_dist[std::make_pair(src_map, dst_map)];
+				}
+				else {
+					temp = hash_rn_dist[std::make_pair(src_map, dst_map)];
+				}
+
+				temp_rslt = temp_rslt + temp;
+			}
+		}
+
+		check_hash_rnToUser_dist[std::make_pair(src, dst)] = true;
+		hash_rnToUser_dist[std::make_pair(src, dst)] = temp_rslt / (No_CKINs * No_CKINs);
+
+		check_hash_rnToUser_dist[std::make_pair(dst, src)] = true;
+		hash_rnToUser_dist[std::make_pair(dst, src)] = temp_rslt / (No_CKINs * No_CKINs);
+
+		return temp_rslt / (No_CKINs * No_CKINs);
+	}
+}
+
+/*
+GIVEN::     RN, src, and dst
+ENSURE::    shortest path distance between src and dst
+*/
+double rn_dist_for_users_NoT_BFS(int src, int dst) {
+	double temp_rslt = 0.0;
+	double temp = 0.0;
+
+	if (check_hash_rnToUser_dist[std::make_pair(src, dst)]) { // if we already computed those two users
+		return hash_rnToUser_dist[std::make_pair(src, dst)];
+	}
+	else { // else, compute them and store the result
+
+		for (int i = 0; i < No_CKINs; ++i) {// for all user locations
+			for (int j = 0; j < No_CKINs; j++) {
+				// map the user location to the from the social to the road network, match the 
+				// user location to a vertex on the road network
+				int src_map = sn_vrtx[src].ckins[i];
+				int dst_map = sn_vrtx[dst].ckins[j];
+
+				if (!check_hash_rn_dist[std::make_pair(src_map, dst_map)]) { // if we don't have the distance, the we will compute it
+					rn_Dij(src_map, dst_map); // find distance to all other vertices
 													 // at the same time store distances to all other vertices
 					temp = hash_rn_dist[std::make_pair(src_map, dst_map)];
 				}
@@ -1234,7 +1283,7 @@ void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtit
 
 }
 
-void gen_subgraphs_update(int cand_piv[]) {
+std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_piv[]) {
 
 	std::unordered_map<int, Heap> hpp;
 	Heap pivHeap;
@@ -1287,17 +1336,26 @@ void gen_subgraphs_update(int cand_piv[]) {
 	}
 
 	/*
+
+	std::cerr << "\n" << "---- size of parts ----" << "\n";
 	for (int p = 0; p < No_index_piv; p++) {
-		std::cerr << cand_piv[p] << " -->> ";
-		for (std::unordered_set<int>::iterator it = GG[cand_piv[p]].begin(); it != GG[cand_piv[p]].end(); ++it) {
-			std::cerr << *it << " ";
-		}
-		std::cerr << "\n";
+		//std::cerr << cand_piv[p] << " -->> ";
+		//for (std::unordered_set<int>::iterator it = GG[cand_piv[p]].begin(); it != GG[cand_piv[p]].end(); ++it) {
+		//	std::cerr << *it << " ";
+		//}
+		//std::cerr << "\n";
+
+		std::cerr << GG[cand_piv[p]].size() << "\n";
 	}
 	*/
 
+	/*
+	std::cerr <<"\n" <<"----all assignments----" << "\n";
 	for (int i = 0; i < No_rn_V; i++) {
 		std::cerr << i << " " << assign[i]<< "\n" ;
-	} 
+	}
+	*/
+
+	return GG;
 }
 #endif // !INDEX_HPP

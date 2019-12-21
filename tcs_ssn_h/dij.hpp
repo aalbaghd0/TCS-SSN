@@ -42,6 +42,13 @@ double rn_Dij(int src, int dst) {
 		hp->remove(he);
 		int e = he->son1;
 		if (dst == e) {
+
+			hash_rn_dist[std::make_pair(src, e)] = dist[e];
+			check_hash_rn_dist[std::make_pair(src, e)] = true;
+
+			hash_rn_dist[std::make_pair(e, src)] = dist[e];
+			check_hash_rn_dist[std::make_pair(e, src)] = true;
+
 			cost = he->key;
 			break;
 		}
@@ -70,7 +77,7 @@ double rn_Dij(int src, int dst) {
 	/*
 	this is a printing function
 	*/
-	///*
+	/*
 	if (cost != 0) {// if cost ==0, no path exsists
 		int p = parent[dst];
 		std::cerr << std::endl << dst << " " << p << " ";
@@ -80,7 +87,7 @@ double rn_Dij(int src, int dst) {
 			std::cerr << p << " ";
 		}
 	}
-	//*/
+	*/
 	delete[] s;
 	delete[] f;
 	delete[] dist;
@@ -217,6 +224,7 @@ double inf_score(int src, int dst) {
 		hp->remove(he);
 		int v = he->son1;
 		if (dst == v) {
+			
 			cost = he->key;
 			break;
 		}
