@@ -1358,4 +1358,10 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_p
 
 	return GG;
 }
+
+void print_sn_vrtx_coordinates() {
+	for (int i = 0; i < No_sn_V; ++i) {
+
+	}
+}
 #endif // !INDEX_HPP
