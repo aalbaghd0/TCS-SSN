@@ -19,7 +19,7 @@
 #include <iterator>
 #include <utility>
 #include <limits>
-
+#include <fstream>
 
 
 /*
@@ -116,19 +116,41 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 
 	int get_piv = 0;
 	int new_piv = 0;
+	bool readInitialPivots = true;
+
+	FILE* fi = fopen("rn_init_pivots.txt", "r");
 
 	bool cost_was_updated = false;
 	for (int a = 1; a < global_iter; a++) {
 
-		// select random pivots at first
-		for (int i = 0; i < No_index_piv; ++i) {
-		labelA:
-			int git = uniform(0, No_rn_V - 1);
-			if (!isInTheArray(S_p, No_index_piv, git))
- 				S_p[i] = git;
-			else
-				goto labelA;
+		// for the first round, we read pivots from the file
+		if (readInitialPivots) {
+			if (fi == NULL) {
+				std::cout << "The edge file cannot be open";
+			}
+			else {
+				int i = 0;
+				int getRide;
+				fscanf(fi, "%d", &getRide);
+
+				while (!feof(fi)) {
+					fscanf(fi, "%d", S_p[i]);
+					++i;
+				}
+			}
 		}
+		else { // for the second round, we generate pivots rendomly
+			// select random pivots at first
+			for (int i = 0; i < No_index_piv; ++i) {
+			labelA:
+				int git = uniform(0, No_rn_V - 1);
+				if (!isInTheArray(S_p, No_index_piv, git))
+					S_p[i] = git;
+				else
+					goto labelA;
+			}
+		}
+		readInitialPivots = false;
 		// get subgraphs based on pivots
 		for (int i = 0; i < No_index_piv; ++i)
 			std::cerr << S_p[i] << " ";
@@ -1248,7 +1270,7 @@ void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtit
 			assign[cand] = v;
 			tt = 1;
 			condtition++;
-			for (std::list<int>::iterator it = rnGraph[cand].begin(); it != rnGraph[cand].end(); it++) {
+			for (std::list<int>::iterator it = snGraph[cand].begin(); it != snGraph[cand].end(); it++) {
 
 
 				if (assign[*it] == -1) {
@@ -1257,8 +1279,8 @@ void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtit
 
 							HeapEntry* he = new HeapEntry();
 							he->son1 = *it;
-							he->key = w + rn_edge_info[std::make_pair(cand, *it)].weight;
-
+							//he->key = w + rn_edge_info[std::make_pair(cand, *it)].weight;
+							he->key = w + 1;
 							if (min_key > he->key)
 								min_key = he->key;
 
@@ -1284,6 +1306,14 @@ void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtit
 
 }
 
+/*
+
+Gen. subgraphs function
+Given a pivot set and a network,
+The gen_subgraph_update, will 
+
+*/
+
 std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_piv[]) {
 
 	std::unordered_map<int, Heap> hpp;
@@ -1308,13 +1338,13 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_p
 
 	// create an array to assign vrtices to pivots
 	// initiate it with -1
-	int* assign = new int[No_rn_V];
-	std::memset(assign, -1, sizeof(assign[0]) * No_rn_V);
+	int* assign = new int[No_sn_V];
+	std::memset(assign, -1, sizeof(assign[0]) * No_sn_V);
 
 
 	int piv = 0;
 	int condtition = 0;
-	while (condtition < No_rn_V) {
+	while (condtition < No_sn_V) {
 		
 		HeapEntry* he = new HeapEntry();
 		pivHeap.remove(he);
@@ -1327,7 +1357,7 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_p
 
 
 	std::unordered_map<int, std::unordered_set<int>> GG;
-	for (int i = 0; i < No_rn_V; i++) {
+	for (int i = 0; i < No_sn_V; i++) {
 
 		for (std::unordered_set<int>::iterator it = rn_vrtx[i].myUsers.begin(); it != rn_vrtx[i].myUsers.end(); ++it) {
 			GG[assign[i]].insert(*it);

@@ -49,7 +49,9 @@ void main() {
 			goto labelA;
 	}
 
-	//gen_subgraphs_update(cand_piv);
+	gen_subgraphs_update(cand_piv);
+	
+	
 	indexing();
 	setParentOfNodes();
 
