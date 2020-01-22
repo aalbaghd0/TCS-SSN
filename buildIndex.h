@@ -123,7 +123,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 		// select random pivots at first
 		for (int i = 0; i < No_index_piv; ++i) {
 		labelA:
-			int git = uniform(0, No_sn_V - 1);
+			int git = uniform(0, No_rn_V - 1);
 			if (!isInTheArray(S_p, No_index_piv, git))
  				S_p[i] = git;
 			else
@@ -144,7 +144,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 			get_piv = uniform(0, No_index_piv - 1);
 
 		labelB:
-			int git = uniform(0, No_sn_V - 1);
+			int git = uniform(0, No_rn_V - 1);
 			if (!isInTheArray(S_p, No_index_piv, git))
 				new_piv = git;
 			else
@@ -210,6 +210,7 @@ double X_sc(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], in
 	double rslt = 0.0;
 
 	for (int g = 0; g < no_of_subgraphs; g++) {
+		std::cerr << g << "\n";
 		for (std::unordered_set<int>::iterator it = G[pivots[g]].begin(); it != G[pivots[g]].end(); ++it) {
 			for (std::unordered_set<int>::iterator it2 = G[pivots[g]].begin(); it2 != G[pivots[g]].end(); ++it2) {
 				if (*it != *it2) {
@@ -1302,7 +1303,6 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_p
 		he2->key = 0;
 		pivHeap.insert(he2);
 		delete he2;
-
 	}
 
 
@@ -1335,7 +1335,7 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_p
 
 	}
 
-	/*
+	///*
 
 	std::cerr << "\n" << "---- size of parts ----" << "\n";
 	for (int p = 0; p < No_index_piv; p++) {
@@ -1345,9 +1345,9 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_p
 		//}
 		//std::cerr << "\n";
 
-		std::cerr << GG[cand_piv[p]].size() << "\n";
+		std::cerr << GG[cand_piv[p]].size() << " ";
 	}
-	*/
+	//*/
 
 	/*
 	std::cerr <<"\n" <<"----all assignments----" << "\n";
