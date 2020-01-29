@@ -1446,7 +1446,7 @@ void mapping_socialVertices_to_roads(char* sn_users, char* rn_users, char* outpu
 	std::ofstream out_;
 	out_.open(output);
 
-	rn_vertecies* rn_v = new rn_vertecies[No_rn_V];
+	rn_vertecies* rn_v = new rn_vertecies[22000];
 	rn_vertecies* sn_v = new rn_vertecies[No_sn_V];
 
 	FILE* snFile = fopen(sn_users, "r");
@@ -1482,7 +1482,7 @@ void mapping_socialVertices_to_roads(char* sn_users, char* rn_users, char* outpu
 		double min = +INT_MAX;
 		Heap* hp = new Heap();
 		hp->init(2);
-		for (int r = 0; r < No_rn_V; r++) {
+		for (int r = 0; r < 21000; r++) {
 
 			double E_dist = Ecl(sn_v[s].x, sn_v[s].y, rn_v[r].x, rn_v[r].y);
 
