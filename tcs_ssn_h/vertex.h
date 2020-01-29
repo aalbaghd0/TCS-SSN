@@ -33,19 +33,33 @@ public:
 	int ckins[CKINS];
 	std::bitset<No_K> key;
 	std::bitset<No_T> topic;
+
 	std::unordered_set<int> nbrs;
+	
+	// for the intersection function purpose
+	std::set<int> nbrs_set;
+
+
 
 	std::unordered_set<int> myedges;
 	int truss;
 	std::unordered_set<int> out_nbrs;
 	std::unordered_set<int> in_nbrs;
+
 	std::unordered_map<pair, double, pair_hashh> rn_distToPiv;
 	std::unordered_map<pair, double, pair_hashh> sn_distToPiv;
 
 	/// need to be defined
 	double in_inf [No_of_TOPICS];
 	double out_inf [No_of_TOPICS];
+};
 
+
+class rn_vertecies {
+public:
+	int id;
+	double x;
+	double y;
 };
 
 class RN_edges {
@@ -87,11 +101,16 @@ public:
 
 	std::unordered_map<pair, double, pair_hashh> rn_min_dist_to_piv;
 	std::unordered_map<pair, double, pair_hashh> rn_max_dist_to_piv;
+
+	std::unordered_map<pair, double, pair_hashh> sn_min_dist_to_piv;
+	std::unordered_map<pair, double, pair_hashh> sn_max_dist_to_piv;
+
+
 	int rn_minimum_piv;
 	int rn_maximum_piv;
 
-	double sn_min_dist_to_piv;
-	double sn_max_dist_to_piv;
+	//double sn_min_dist_to_piv;
+	//double sn_max_dist_to_piv;
 	int sn_minimum_piv;
 	int sn_maximum_piv;
 

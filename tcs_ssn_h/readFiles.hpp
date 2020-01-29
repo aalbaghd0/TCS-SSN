@@ -66,9 +66,12 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 
 void sn_read_edges(std::list<int> edge[], char Efile[]) {
 	FILE* file = fopen(Efile, "r");
-	int from, to, e_id = 0;
+	int from, to;
 	double  pr0, pr1, pr2;
 	int max_vrtx = -INT_MAX;
+	
+	int e_num = 0;
+
 
 	if (file == NULL) {
 		std::cout << "The edge file cannot be open";
@@ -86,11 +89,15 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		sn_vrtx[from].nbrs.insert(to);
 		sn_vrtx[to].nbrs.insert(from);
 
+		sn_vrtx[from].nbrs_set.insert(to);
+		sn_vrtx[to].nbrs_set.insert(from);
+
+
 		//get edges associated with each 
-		sn_vrtx[from].myedges.insert(e_id);
-		sn_vrtx[to].myedges.insert(e_id);
-		sn_vrtx[from].myedges.insert((No_sn_E / 2) + e_id);
-		sn_vrtx[to].myedges.insert((No_sn_E / 2) + e_id);
+		sn_vrtx[from].myedges.insert(e_num);
+		sn_vrtx[to].myedges.insert(e_num);
+		sn_vrtx[from].myedges.insert(e_num + 1);
+		sn_vrtx[to].myedges.insert(e_num + 1);
 
 		//get maximum vrtx in the file
 		max_vrtx = max(max_vrtx, from);
@@ -105,8 +112,8 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 
 
 
-		snEdges[e_id].from = from;
-		snEdges[e_id].to = to;
+		snEdges[e_num].from = from;
+		snEdges[e_num].to = to;
 
 		sn_edge_info[std::make_pair(from, to)].topics[0] = pr0;
 		sn_edge_info[std::make_pair(from, to)].topics[1] = pr1;
@@ -119,15 +126,19 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		
 
 
-		snEdges[(No_sn_E / 2) + e_id].from = to;
-		snEdges[(No_sn_E / 2) + e_id].to = from;
+		snEdges[e_num + 1].from = to;
+		snEdges[e_num + 1].to = from;
 
-		hash_edge[std::make_pair(from, to)] = e_id;
-		hash_edge[std::make_pair(to, from)] = (No_sn_E / 2) + e_id;
+		
+
+		hash_edge[std::make_pair(from, to)] = e_num;
+		hash_edge[std::make_pair(to, from)] = e_num + 1;
+
+		e_num = e_num + 2;
 
 		//std::cerr << "e_id " << e_id << " from: " << from << " to: " << to << std::endl;
 		//std::cerr << "e_id " << (No_sn_E / 2) + e_id << " from: " << to << " to: " << from << std::endl;
-		e_id++;
+		
 	}
 	fclose(file);
 	std::cout << "The maximum vrtx is: " << max_vrtx << std::endl;

@@ -20,6 +20,13 @@
 // this is a good code
 // the main function
 void main() {
+	 
+	 //gaussian(0.3, 0.1) 
+
+	char user_file[100] = "data/real_Gowalla+San Joaquin/gowalla_ver.txt";
+	char road_file[100] = "data/real_Gowalla+San Joaquin/SanJoaquin_vertices.txt";
+	char output_file[100] = "data/real_Gowalla+San Joaquin/mapped_social_users.txt";
+	mapping_socialVertices_to_roads(user_file, road_file, output_file);
 
 	read_vertices(sn_vrtx, 10, sn_V_file);
 	sn_read_edges(snGraph, sn_E_file);
@@ -28,12 +35,13 @@ void main() {
 	
 	
 /***********  Build Index Functions  *************/
-	//find_road_network_pivots();
-	//find_social_network_pivots();
+	find_road_network_pivots();
+	find_social_network_pivots();
 
 	//get_socialNetwork_connected();
 	//get_roadNetwork_connected();
 	
+	/*
 	int* cand_piv = new int[No_index_piv];
 
 	std::cerr << "\n pivots------ ";
@@ -48,6 +56,7 @@ void main() {
 		else
 			goto labelA;
 	}
+	*/
 
 	//gen_subgraphs_update(cand_piv);
 	indexing();
@@ -65,10 +74,8 @@ void main() {
 
 
 /***********  INDEX TRAVERSAL  *************************/
-	indexTrav(4);
-
-
-
+	std::bitset<No_K> key_set;
+	indexTrav(4, key_set);
 
 }
 

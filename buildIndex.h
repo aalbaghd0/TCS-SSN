@@ -40,6 +40,8 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_p
 void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtition,
 	Heap& pivHeap, std::unordered_map<pair, bool, pair_hash>& isSeen, int cand_piv[]);
 double rn_dist_for_users_NoT_BFS(int src, int dst);
+double rn_dist_rnPiv_to_user(int r_piv, int user);
+float gaussian(float mean, float sigma);
 
 
 double quality(int v, int piv) {
@@ -112,13 +114,13 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 	double new_cost = 0.0;
 
 	int global_iter = 2;
-	int swap_iter = 3;
+	int swap_iter = 2;
 
 	int get_piv = 0;
 	int new_piv = 0;
 	bool readInitialPivots = true;
 
-	FILE* fi = fopen("rn_init_pivots.txt", "r");
+	FILE* fi = fopen("data/sn_init_pivots.txt", "r");
 
 	bool cost_was_updated = false;
 	for (int a = 1; a < global_iter; a++) {
@@ -134,7 +136,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 				fscanf(fi, "%d", &getRide);
 
 				while (!feof(fi)) {
-					fscanf(fi, "%d", S_p[i]);
+					fscanf(fi, "%d", &S_p[i]);
 					++i;
 				}
 			}
@@ -152,8 +154,8 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 		}
 		readInitialPivots = false;
 		// get subgraphs based on pivots
-		for (int i = 0; i < No_index_piv; ++i)
-			std::cerr << S_p[i] << " ";
+		//for (int i = 0; i < No_index_piv; ++i)
+		//	std::cerr << S_p[i] << " ";
 
 		GG = gen_subgraphs_update(S_p);
 
@@ -216,7 +218,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 
 
 double evaluate_subgraphs(std::unordered_map<int, std::unordered_set<int>> G, int pivots[], int no_of_subgraphs) {
-	double rslt1 = W1 * X_sc(G, pivots, no_of_subgraphs);
+	double rslt1 = 0;//W1 * X_sc(G, pivots, no_of_subgraphs);
 	double rslt2 = 0;//W2 * (1 - X_st(G, pivots, no_of_subgraphs));
 	double rslt3 = 0;//W1 * (1 - X_inf(G, pivots, no_of_subgraphs));
 
@@ -448,15 +450,16 @@ ENSURE ::		rslt--> is the itersection set of edges with the edge a--b
 int intersect(std::unordered_set<int>* common_edges, int a, int b) {
 
 	double rslt = 0.0;
-	std::unordered_set<int> intersect;
+	std::set<int> intersect;
 	common_edges->clear();
-	set_intersection(sn_vrtx[a].nbrs.begin(), sn_vrtx[a].nbrs.end(),
-		sn_vrtx[b].nbrs.begin(), sn_vrtx[b].nbrs.end(),
+	set_intersection(sn_vrtx[a].nbrs_set.begin(), sn_vrtx[a].nbrs_set.end(),
+		sn_vrtx[b].nbrs_set.begin(), sn_vrtx[b].nbrs_set.end(),
 		std::inserter(intersect, intersect.begin()));
+	
 	rslt = intersect.size();
 	// v -- a, v -- b, a -- v, b -- v
 
-	for (std::unordered_set<int>::iterator it = intersect.begin();
+	for (std::set<int>::iterator it = intersect.begin();
 		it != intersect.end(); ++it) {
 
 		common_edges->insert(hash_edge[std::make_pair(a, *it)]);
@@ -509,10 +512,25 @@ label2:
 			sn_vrtx[snEdges[e].from].nbrs.erase(it2);
 
 
+
 		it2 = sn_vrtx[snEdges[e].to].nbrs.find(snEdges[e].from);
 
 		if (it2 != sn_vrtx[snEdges[e].to].nbrs.end())
 			sn_vrtx[snEdges[e].to].nbrs.erase(it2);
+
+
+		std::set<int>::iterator it22;
+
+		it22 = sn_vrtx[snEdges[e].from].nbrs_set.find(snEdges[e].to);
+		if (it22 != sn_vrtx[snEdges[e].from].nbrs_set.end())
+			sn_vrtx[snEdges[e].from].nbrs_set.erase(it22);
+
+
+
+		it22 = sn_vrtx[snEdges[e].to].nbrs_set.find(snEdges[e].from);
+
+		if (it22 != sn_vrtx[snEdges[e].to].nbrs_set.end())
+			sn_vrtx[snEdges[e].to].nbrs_set.erase(it22);
 
 
 		delete he;
@@ -633,8 +651,8 @@ std::unordered_map<int, std::unordered_set<int>> Index_piv_select(int no_new_piv
 	double local_cost = 0.0;
 	double new_cost = 0.0;
 
-	int global_iter = 5;
-	int swap_iter = 10;
+	int global_iter = 2;
+	int swap_iter = 2;
 
 	int get_piv = 0;
 	int new_piv = 0;
@@ -729,7 +747,7 @@ void find_social_network_pivots() {
 	double cost = 0;
 	double d1, d2, diff, maxEva = 0;
 	double localCost, newCost = 0;
-	int swapIter = 5;
+	int swapIter = 2;
 	int rand_piv, npiv;
 	double globaCost = -INT_MAX;
 
@@ -824,7 +842,7 @@ double evaluate_SN_pivots(int S_p[], int no_pivs) {
 void find_road_network_pivots() {
 
 	int globelIter = 2;
-	int swapIter = 5;
+	int swapIter = 2;
 
 	double cost = 0;
 	double localCost, newCost = 0;
@@ -879,10 +897,30 @@ void find_road_network_pivots() {
 	// save the distance from pivots to all other vertices
 	for (int v = 0; v < No_sn_V; ++v) {
 		for (int piv = 0; piv < No_RN_piv; piv++) {
-			sn_vrtx[v].rn_distToPiv[std::make_pair(v, RN_piv_set[piv])] = rn_dist_for_users(v, RN_piv_set[piv]);
+			sn_vrtx[v].rn_distToPiv[std::make_pair(v, RN_piv_set[piv])] = rn_dist_rnPiv_to_user(RN_piv_set[piv], v);
 		}
 	}
 
+	/* REQUIRES :: reoad network and social network users, each social network user 
+				   has multiple locations over the road network.
+	//ENSURES :: find the average road network distance (with ckins) from each user check-in locations to 
+				 the road network pivot.
+	
+
+	for (int piv = 0; piv < No_RN_piv; piv++) {
+
+		// run bfs to get distance to all other road network vertices
+		rn_Dij_to_all_vertices(RN_piv_set[piv]);
+
+		// compute the average distance from the road network pivot to all
+		// social netwok users
+		for (int s = 0; s < No_sn_V; ++s) {
+			for (int c = 0; c < No_CKINs; c++) {
+
+			}
+		}
+	}
+	*/
 	std::cerr << "\n ------ rn pivots ------ \n";
 	for (int i = 0; i < No_RN_piv; ++i) {
 		std::cerr << RN_piv_set[i] << " --- ";
@@ -952,7 +990,7 @@ double evaluate_RN_pivots(int S_p[], int no_pivs) {
 void indexing() {
 	// compute the truss for each user in the social network
 	
-	//truss_decomposition();
+	truss_decomposition();
 
 	//define a graph
 	std::unordered_map<int, std::unordered_set<int>> GGG;
@@ -1065,23 +1103,19 @@ ENSURES  :: assigns the parent to each node, parent of root = -1;
 */
 void setParentOfNodes() {
 	
-	bool* check = new bool[INDEXSIZE];
-
-	int i = 1;
+	
 	// set the parent to the root
 	tree[0].parent = -1;
 
+	int i = 1;
 	while (!(tree[i].level == 0)) {
+		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
+			
+			tree[*it].parent = i;
 
-		if (!check[i]) { // we have not set the parent for this node
-			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) {
-				tree[*it].parent = i;
-				check[*it] = true;
-			}
 		}
 		i++;
 	}
-	delete[] check;
 }
 
 
@@ -1358,11 +1392,7 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update(int cand_p
 
 	std::unordered_map<int, std::unordered_set<int>> GG;
 	for (int i = 0; i < No_sn_V; i++) {
-
-		for (std::unordered_set<int>::iterator it = rn_vrtx[i].myUsers.begin(); it != rn_vrtx[i].myUsers.end(); ++it) {
-			GG[assign[i]].insert(*it);
-		}
-
+		GG[assign[i]].insert(i);
 	}
 
 	///*
@@ -1393,5 +1423,135 @@ void print_sn_vrtx_coordinates() {
 	for (int i = 0; i < No_sn_V; ++i) {
 
 	}
+}
+
+
+////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////
+
+double Ecl(double x1, double y1, double x2, double y2) {
+	double x = x1 - x2; //calculating number to square in next step
+	double y = y1 - y2;
+	double dist;
+
+	dist = pow(x, 2) + pow(y, 2);       //calculating Euclidean distance
+	dist = sqrt(dist);
+
+	return dist;
+}
+
+void mapping_socialVertices_to_roads(char* sn_users, char* rn_users, char* output) {
+	std::ofstream out_;
+	out_.open(output);
+
+	rn_vertecies* rn_v = new rn_vertecies[No_rn_V];
+	rn_vertecies* sn_v = new rn_vertecies[No_sn_V];
+
+	FILE* snFile = fopen(sn_users, "r");
+	FILE* rnFile = fopen(rn_users, "r");
+	
+	if (snFile == NULL || rnFile == NULL) {
+		std::cout << "could not open the file to read social network vertices";
+		return;
+	}
+
+	int getRide;
+	fscanf(snFile, "%d", &getRide);
+	int cont = 0;
+	while (!feof(snFile)) {
+		fscanf(snFile, "%d %lf %lf", &sn_v[cont].id, &sn_v[cont].x, &sn_v[cont].y);
+		cont++;
+	}
+
+	fscanf(rnFile, "%d", &getRide);
+	cont = 0;
+	while (!feof(rnFile)) {
+		fscanf(rnFile, "%d %lf %lf", &rn_v[cont].id, &rn_v[cont].x, &rn_v[cont].y);
+		cont++;
+	}
+
+
+
+	int* ass = new int[No_sn_V];
+	
+	
+
+	for (int s = 0; s < No_sn_V; s++) {
+		double min = +INT_MAX;
+		Heap* hp = new Heap();
+		hp->init(2);
+		for (int r = 0; r < No_rn_V; r++) {
+
+			double E_dist = Ecl(sn_v[s].x, sn_v[s].y, rn_v[r].x, rn_v[r].y);
+
+			if (hp->used < 6) {		
+				HeapEntry* he = new HeapEntry();
+				he->son1 = r;
+				he->key = - E_dist;
+				hp->insert(he);
+				delete he;
+			}
+			else {
+				HeapEntry* he = new HeapEntry();
+				hp->remove(he);
+
+				if ((-he->key) > E_dist) {
+					delete he;
+					HeapEntry* he = new HeapEntry();
+					he->son1 = r;
+					he->key = -E_dist;
+					hp->insert(he);
+				}
+				else {
+					hp->insert(he);
+					delete he;
+				}
+			}
+		}
+		
+		out_ << s;
+		int a[6];
+		int i = 5;
+		HeapEntry* he = new HeapEntry();
+		while (hp->used> 0) {
+			hp->remove(he);
+			a[i] = he->son1;
+			--i;
+		}
+
+		for (int i = 0; i < 6; i++)
+			out_ << " " << a[i];
+		for (int i = 0; i < 10; i++)
+			out_ << " " << uniform (0, 9);
+
+		out_ << "\n";
+		delete he;
+		delete hp;
+	}
+	
+	delete[] sn_v;
+	delete[] rn_v;
+}
+
+
+float gaussian(float mean, float sigma) {
+	float v1, v2;
+	float s;
+	float x;
+
+	do {
+		v1 = 2 * uniform_dou(0, 1) - 1;
+		v2 = 2 * uniform_dou(0, 1) - 1;
+		s = v1 * v1 + v2 * v2;
+	} while (s >= 1.);
+
+	x = v1 * sqrt(-2. * log(s) / s);
+
+	/*  x is normally distributed with mean 0 and sigma 1.  */
+	x = x * sigma + mean;
+
+	return (x);
 }
 #endif // !INDEX_HPP

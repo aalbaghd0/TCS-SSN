@@ -50,12 +50,14 @@ void summraize_RN_lb_dist() {
 			int max_dist = -INT_MAX;
 			int max_piv = -1;
 
-			for (int r_piv = 0; r_piv > No_RN_piv; r_piv++) { // for all RN pivots
+			for (int r_piv = 0; r_piv < No_RN_piv; r_piv++) { // for all RN pivots
 
 				for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all children in the node
+					double val;
 
-
-					double val = rn_dist_for_users(*it, RN_piv_set[r_piv]); // get the distance from vertices to pivots
+					val = sn_vrtx[*it].rn_distToPiv[std::make_pair(*it, RN_piv_set[r_piv])];
+					
+					//double val = rn_dist_for_users(*it, RN_piv_set[r_piv]); // get the distance from vertices to pivots
 
 					if (min_dist > val) { // grt the min
 						min_dist = val;
@@ -90,7 +92,7 @@ void summraize_RN_lb_dist() {
 			double max_dist = -INT_MAX;
 			int max_piv = -1;
 
-			for (int r_piv = 0; r_piv > No_RN_piv; r_piv++) { // for all RN pivots
+			for (int r_piv = 0; r_piv < No_RN_piv; r_piv++) { // for all RN pivots
 
 				for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all node children in the node
 
@@ -129,76 +131,87 @@ void summraize_RN_lb_dist() {
 */
 void summraize_SN_lb_dist() {
 
-	for (int i = INDEXSIZE - 1; i >= 0; i--) { // for all nodes from the bottom up
+		for (int i = INDEXSIZE - 1; i >= 0; i--) { // for all nodes from the bottom up
 
-		if (tree[i].level == 0) { // if the node is a leaf
+			if (tree[i].level == 0) { // if the node is a leaf
 
-			int min_dist = INT_MAX;
-			int min_piv = -1;
+				double min_dist = INT_MAX;
+				int min_piv = -1;
 
-			int max_dist = -INT_MAX;
-			int max_piv = -1;
+				int max_dist = -INT_MAX;
+				int max_piv = -1;
 
-			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all children in the node
+				for (int s_piv = 0; s_piv < No_SN_piv; s_piv++) { // for all RN pivots
 
-				for (int s_piv = 0; s_piv > No_RN_piv; s_piv++) { // for all RN pivots
+					for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all children in the node
 
-					int val = sn_dist(*it, RN_piv_set[s_piv]); // get the distance from vertices to pivots
+						//double val = rn_dist_for_users(*it, RN_piv_set[s_piv]); // get the distance from vertices to pivots
 
-					if (min_dist > val) { // grt the min
-						min_dist = val;
-						min_piv = RN_piv_set[s_piv];
+						double val = sn_vrtx[*it].sn_distToPiv[std::make_pair(*it, SN_piv_set[s_piv])];
+
+						if (min_dist > val) { // grt the min
+							min_dist = val;
+							//min_piv = RN_piv_set[r_piv];
+						}
+
+						if (max_dist < val) { // get the maximum distance
+							max_dist = val;
+							//max_piv = RN_piv_set[r_piv];
+						}
 					}
 
-					if (max_dist < val) { // get the maximum distance
-						max_dist = val;
-						max_piv = RN_piv_set[s_piv];
+					tree[i].sn_min_dist_to_piv[std::make_pair(i, min_piv)] = min_dist;
+					tree[i].sn_max_dist_to_piv[std::make_pair(i, max_piv)] = max_dist;
+
+				}
+
+				// here we save the distances
+				//tree[i].rn_min_dist_to_piv = min_dist;
+				//tree[i].rn_minimum_piv = min_piv;
+
+				//tree[i].rn_max_dist_to_piv = max_dist;
+				//tree[i].rn_maximum_piv = max_piv;
+
+
+			}
+			else { // if it is an intermediate node
+
+				double min_dist = INT_MAX;
+				int min_piv = -1;
+
+				double max_dist = -INT_MAX;
+				int max_piv = -1;
+
+				for (int s_piv = 0; s_piv < No_SN_piv; s_piv++) { // for all RN pivots
+
+					for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all node children in the node
+
+						if (min_dist > tree[*it].sn_min_dist_to_piv[std::make_pair(*it, SN_piv_set[s_piv])]) { // grt the min
+							min_dist = tree[*it].sn_min_dist_to_piv[std::make_pair(*it, SN_piv_set[s_piv])];
+							//min_piv = tree[i].rn_minimum_piv;
+						}
+
+						if (max_dist < tree[*it].sn_max_dist_to_piv[std::make_pair(*it, SN_piv_set[s_piv])]) { // grt the min
+							max_dist = tree[*it].sn_max_dist_to_piv[std::make_pair(*it, SN_piv_set[s_piv])];
+							//min_piv = tree[i].rn_minimum_piv;
+						}
 					}
-
+					tree[i].sn_min_dist_to_piv[std::make_pair(i, SN_piv_set[s_piv])] = min_dist;
+					tree[i].sn_max_dist_to_piv[std::make_pair(i, SN_piv_set[s_piv])] = max_dist;
 				}
+
+				// here we save the distances
+				//tree[i].rn_min_dist_to_piv[std::make_pair(RN_piv_set[r_piv], *it)]
+
+
+				//tree[i].rn_min_dist_to_piv = min_dist;
+				//tree[i].rn_minimum_piv = min_piv;
+
+				//tree[i].rn_max_dist_to_piv = max_dist;
+				//tree[i].rn_maximum_piv = max_piv;
 
 			}
-
-			// here we save the distances
-			tree[i].sn_min_dist_to_piv = min_dist;
-			tree[i].sn_minimum_piv = min_piv;
-
-			tree[i].sn_max_dist_to_piv = max_dist;
-			tree[i].sn_maximum_piv = max_piv;
-
-
 		}
-		else { // if it is an intermediate node
-
-			int min_dist = INT_MAX;
-			int min_piv = -1;
-
-			int max_dist = -INT_MAX;
-			int max_piv = -1;
-
-			for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); ++it) { // for all node children in the node
-
-				if (min_dist > tree[i].sn_min_dist_to_piv) { // grt the min
-					min_dist = tree[i].sn_min_dist_to_piv;
-					min_piv = tree[i].sn_minimum_piv;
-				}
-
-				if (max_dist < tree[i].sn_max_dist_to_piv) { // grt the min
-					min_dist = tree[i].sn_max_dist_to_piv;
-					min_piv = tree[i].sn_maximum_piv;
-				}
-
-			}
-
-			// here we save the distances
-			tree[i].sn_min_dist_to_piv = min_dist;
-			tree[i].sn_minimum_piv = min_piv;
-
-			tree[i].sn_max_dist_to_piv = max_dist;
-			tree[i].sn_maximum_piv = max_piv;
-
-		}
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -371,7 +384,7 @@ std::unordered_map<pair, int, pair_hash> get_queryNode(int q) {
 
 	// first, we find the query node at leaf level (level == 0)
 	bool found = false;
-	for (int i = INDEXSIZE - 1; i >= 0; ++i) {
+	for (int i = INDEXSIZE - 1; i >= 0; --i) {
 
 		for (std::unordered_set<int>::iterator it = tree[i].child.begin(); it != tree[i].child.end(); it++) {
 			if (q == *it) {
@@ -385,22 +398,24 @@ std::unordered_map<pair, int, pair_hash> get_queryNode(int q) {
 	}
 	// we build an array of the query vertex
 	std::unordered_map<pair, int, pair_hash> queryNodeLevel;
-	queryNodeIndex[treeHeight - 1] = git;
-	queryNodeLevel[std::make_pair(q, treeHeight - 1)] = git;
+
+	int lev = 0;
+	queryNodeLevel[std::make_pair(q, lev)] = git;
 
 
-	for (int i = treeHeight - 2; i >= 0; --i) {
-		if (i > 0) {
-			queryNodeIndex[i] = tree[queryNodeIndex[i - 1]].parent;
-			queryNodeLevel[std::make_pair(q, i)] = tree[queryNodeLevel[std::make_pair(q, i - 1)]].parent;
+	for (int i = 0; i < treeHeight; ++i) {
+		if (lev < treeHeight - 1) {
+			lev++;
+			queryNodeLevel[std::make_pair(q, lev)] = tree[queryNodeLevel[std::make_pair(q, lev - 1)]].parent;
 		}
-		else if(i == 0){
-			queryNodeIndex[i] = 0;
-			queryNodeLevel[std::make_pair(q, i)] = 0;
+		else {
+			queryNodeLevel[std::make_pair(q, lev)] = 0;
 		}
-
 
 	}
+
+	for (int i = 0; i < treeHeight; ++i)
+		std::cerr << "level -- " << i << " the node :: " << queryNodeLevel[std::make_pair(q, i)] << "\n";
 
 	return queryNodeLevel;
 }

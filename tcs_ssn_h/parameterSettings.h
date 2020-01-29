@@ -7,7 +7,7 @@
 
 
 char sn_V_file[100] = "data/SN_vertices.txt";
-char sn_E_file[100] = "data/SN_edges.txt";
+char sn_E_file[100] = "data/gowalla_edges.txt";
 char rn_V_file[100] = "data/RN_vertices.txt";
 char rn_E_file[100] = "data/RN_edges.txt";
 
@@ -29,7 +29,8 @@ int set_parameters(char filename[]) {
 /*        parameters        */
 #define			SIGMA			5 
 #define			THETA			2
-#define			No_Hops			3
+#define			No_Hops			3 // the value of d
+#define			Ktruss			3 // the truss k 
 
 
 
@@ -42,7 +43,7 @@ int set_parameters(char filename[]) {
 #define No_rn_V				set_parameters(rn_V_file)
 #define No_rn_E				set_parameters(rn_E_file) * 2
 
-#define No_index_piv			400
+#define No_index_piv			597
 #define No_subgraphs			No_index_piv
 
 #define No_SN_piv				4
@@ -87,6 +88,15 @@ std::set<int>* index = new std::set<int>[1000];
 int GlobalIndexIter = 0;
 /// some global functions
 int uniform(int _min, int _max) {
+	//	cout<<_min<<"  "<<_max<<endl;
+	int int_r = rand();
+	long base = RAND_MAX - 1;
+	float f_r = ((float)int_r) / base;
+	return (int)(_max - _min) * f_r + _min;
+}
+
+/// some global functions
+double uniform_dou(int _min, int _max) {
 	//	cout<<_min<<"  "<<_max<<endl;
 	int int_r = rand();
 	long base = RAND_MAX - 1;
@@ -162,9 +172,6 @@ int number_nodes(int a, int b, int& c, int PivsInLevelTree[]) {
 			count++;
 			PivsInLevelTree[j] = 1;
 		}
-
-		
-
 	}
 
 	for (int i = 0; i <= count; i++) {
@@ -177,12 +184,11 @@ int number_nodes(int a, int b, int& c, int PivsInLevelTree[]) {
 int PivsInLevelTree[1000];
 
 // control the number of pivots in tree layers
-#define		NO_INTER_PIVS		11
+#define		NO_INTER_PIVS		13
 
 int INDEXSIZE = 0;
 int LengthOfPivLevels = number_nodes(No_index_piv, NO_INTER_PIVS, INDEXSIZE, PivsInLevelTree) + 1;
 Gnode* tree = new Gnode[INDEXSIZE];
-
 
 
 #endif // !SETTINGS_HPP

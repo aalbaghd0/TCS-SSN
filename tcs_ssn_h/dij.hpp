@@ -493,7 +493,7 @@ double rn_Dij_to_all_vertices(int src) {
 	}
 	delete[] s;
 	delete[] f;
-	delete[] dist;
+ 	delete[] dist;
 	delete[] parent;
 	return cost;
 };

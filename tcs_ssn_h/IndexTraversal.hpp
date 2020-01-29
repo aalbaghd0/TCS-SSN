@@ -16,16 +16,23 @@ bool SocialDistancePruning(int q, int candV);
 double ub_SocialDistance(int q, int candV);
 bool Index_SpatialDistancePruning(int q, int theNode);
 bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtopic);
-double Index_lb_dist_RN(int qVrtx, int theNode);
-bool SpatialDistancePruning(int q, int candV);
-bool SpatialDistancePruning(int q, int candV);
+double Index_lb_dist_SN(int qVrtx, int theNode);
+bool SocialDistancePruning(int q, int candV);
 double Index_lb_infScore_in(int q, int theNode, int Qtopic[], int SizeQtopic);
 double Index_lb_infScore_out(int q, int theNode, int Qtopic[], int SizeQtopic);
+double Index_lb_dist_RN(int qVrtx, int theNode);
+double ub_SocialDistance(int q, int candV);
+bool SpatialDistancePruning(int q, int candV);
+bool Index_SocialDistancePruning(int q, int theNode);
+bool IndexStructuralCohesivenessPruning(int q, int theNode);
+bool IndexKeywordbasedPruning (int q, int it, std::bitset<No_K> tt);
+bool KeywordbasedPruning(int v, std::bitset<No_K> k_set);
+bool StructuralCohesivenessPruning(int v);
+bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic);
 
 
 
-void indexTrav(int q) {
-
+void indexTrav(int q, std::bitset<No_K> k_set) {
 	// here we set the query topics set, they are just an index 0, 1, 2, ..
 	int SizeQtopic = 2;
 	int* Qtopic = new int[SizeQtopic];
@@ -33,14 +40,16 @@ void indexTrav(int q) {
 	Qtopic[1] = 1;
 
 
+
+
 	Heap* hp = new Heap();
 	hp->init(2);
-	
+
 	std::unordered_set<int> S;
 
 	int treeHeight = getTreeHight();
 	int* queryNode = new int[treeHeight];
-	
+
 	std::unordered_map<pair, int, pair_hash> queryNodeLevel;
 	queryNodeLevel = get_queryNode(q);
 
@@ -58,7 +67,7 @@ void indexTrav(int q) {
 	while (hp->used > 0) {
 		HeapEntry* he = new HeapEntry();
 		hp->remove(he);
-		
+
 		int theNode = he->son1;
 		int key = he->key;
 		delete he;
@@ -71,7 +80,8 @@ void indexTrav(int q) {
 
 			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
 
-				if (!(SpatialDistancePruning(q, *it) && SocialDistancePruning(q, *it))) { // if the object cannot be pruned
+				if (!InfluenceScorePruning(q, *it, Qtopic, SizeQtopic) && !StructuralCohesivenessPruning(*it) && !KeywordbasedPruning(*it, k_set) && !SocialDistancePruning(q, *it)
+					&& !SpatialDistancePruning(q, *it)) { // if the object cannot be pruned
 
 					S.insert(*it);
 
@@ -84,10 +94,12 @@ void indexTrav(int q) {
 
 			// optain the tree node that contains the query vertex
 			int queryNode = queryNodeLevel[std::make_pair(q, tree[theNode].level)];
-			
+
 			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
 
-				if (!Index_SpatialDistancePruning(q, *it) && !Index_InfluenceScorePruning(q, *it, Qtopic, SizeQtopic)) {
+				if (!Index_InfluenceScorePruning(q, *it, Qtopic, SizeQtopic) && !IndexKeywordbasedPruning(q, *it, k_set) 
+					&& !IndexStructuralCohesivenessPruning(q, *it) && !Index_SocialDistancePruning(q, *it) 
+					&& !Index_SpatialDistancePruning(q, *it)) {
 
 					HeapEntry* he = new HeapEntry();
 
@@ -96,18 +108,19 @@ void indexTrav(int q) {
 
 					hp->insert(he);
 					delete he;
+
 				}
+
 			}
 
 		}
 
+		//S = Refine(S);
+
+		//return S;
 	}
 
-	//S = Refine(S);
-
-	//return S;
 }
-
 
 
 /////////////////////////////////////////
@@ -172,23 +185,104 @@ bool SocialDistancePruning(int q, int candV) {
 	ENSURES	:: the lower bound of the social network distance between them
 */
 double ub_SocialDistance(int q, int candV) {
-	double dist = 0.0;
+	double ub_dist = 0.0;
 	double min = INT_MAX;
 	
 	for (int i = 0; i < No_SN_piv; i++) {
 
-		dist = sn_vrtx[q].sn_distToPiv[std::make_pair(q, SN_piv_set[i])] + sn_vrtx[candV].sn_distToPiv[std::make_pair(candV, SN_piv_set[i])];
+		ub_dist = sn_vrtx[q].sn_distToPiv[std::make_pair(q, SN_piv_set[i])] + sn_vrtx[candV].sn_distToPiv[std::make_pair(candV, SN_piv_set[i])];
 
-		if (min > dist)
-			min = dist;
+		if (min > ub_dist)
+			min = ub_dist;
 
 	}
 
-	return dist;
+	return ub_dist;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+	::::::  KEYWORD PRUNING  ::::::
+	GIVEN	:: social network vrtx and a query set of keywords
+	ENSURES :: there exists at least one keyword (element) incommon between the candidate vertex and the query keyword set
+
+*/
+bool KeywordbasedPruning(int v, std::bitset<No_K> k_set) {
 
 
+	k_set &= sn_vrtx[v].key;
+
+	if (k_set.count() > 0)
+		return false;
+	else
+		return true;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+	::::::  Stractural Pruning  ::::::
+	GIVEN	:: social network vrtx
+	ENSURES :: there exists at least one keyword (element) incommon between the candidate vertex and the query keyword set
+
+*/
+bool StructuralCohesivenessPruning(int v) {
+
+	if (sn_vrtx[v].truss < Ktruss - 2)
+		return true;
+	else
+		return false;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+	::::::  Influence Score Pruning  ::::::
+	GIVEN	:: social network vrtx, a query vrtx, and a set of topics
+	ENSURES :: there exists at least one keyword (element) incommon between the candidate vertex and the query keyword set
+
+*/
+
+double lb_infScore_in(int q, int v, int Qtopic[], int SizeQtopic) {
+	
+	double lb_inf_in = 0.0;
+
+	for (int i = 0; i < No_of_TOPICS; ++i) {
+
+		if (isInTheArray(Qtopic, SizeQtopic, i)) {
+
+			lb_inf_in = sn_vrtx[q].out_inf[i] * sn_vrtx[q].in_inf[i];
+
+		}
+	}
+	return lb_inf_in;
+}
+
+double lb_infScore_out(int q, int v, int Qtopic[], int SizeQtopic) {
+
+	double lb_inf_in = 0.0;
+
+	for (int i = 0; i < No_of_TOPICS; ++i) {
+
+		if (isInTheArray(Qtopic, SizeQtopic, i)) {
+
+			lb_inf_in = sn_vrtx[q].in_inf[i] * sn_vrtx[q].out_inf[i];
+
+		}
+	}
+	return lb_inf_in;
+}
+
+bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic) {
+
+	double lb_inf_in = lb_infScore_in(q, v, Qtopic, SizeQtopic);
+	double lb_inf_out = lb_infScore_out(q, v, Qtopic, SizeQtopic);
+
+
+	if ((lb_inf_in > THETA) && (lb_inf_out > THETA))
+		return true;
+	else
+		return false;
+
+}
 ////////////////////////////////////////////////////////
 
 
@@ -234,10 +328,7 @@ double Index_lb_infScore_in(int q, int theNode, int Qtopic[], int SizeQtopic) {
 			lb_inf_in = lb_inf_in + sn_vrtx[q].in_inf[i] * tree[theNode].out_topics_prob[i];
 
 		}
-		
-			
 	}
-	
 	return lb_inf_in;
 }
 
@@ -293,8 +384,91 @@ double Index_lb_dist_RN(int qVrtx, int theNode) {
 }
 
 
+/*
+
+	Lemma 9, Social Distance Based Prining -- INDEX LEVEL
 
 
+*/
 
+bool Index_SocialDistancePruning(int q, int theNode) {
+
+	double lb_dist = Index_lb_dist_SN(q, theNode);
+
+	if (lb_dist > No_Hops)
+		return true;
+	else
+		return false;
+
+}
+
+double Index_lb_dist_SN(int qVrtx, int theNode) {
+
+	double git_max = -INT_MAX;
+
+	for (int s_piv = 0; s_piv < No_SN_piv; ++s_piv) {
+		double dst;
+		if (sn_vrtx[qVrtx].sn_distToPiv[std::make_pair(qVrtx, SN_piv_set[s_piv])]
+			< tree[theNode].sn_min_dist_to_piv[std::make_pair(theNode, SN_piv_set[s_piv])]) {
+
+			dst = abs(sn_vrtx[qVrtx].sn_distToPiv[std::make_pair(qVrtx, SN_piv_set[s_piv])]
+				- tree[theNode].sn_min_dist_to_piv[std::make_pair(theNode, SN_piv_set[s_piv])]);
+
+		}
+		else if (sn_vrtx[qVrtx].sn_distToPiv[std::make_pair(qVrtx, SN_piv_set[s_piv])]
+			> tree[theNode].sn_max_dist_to_piv[std::make_pair(theNode, SN_piv_set[s_piv])]) {
+
+			dst = abs(sn_vrtx[qVrtx].sn_distToPiv[std::make_pair(qVrtx, SN_piv_set[s_piv])]
+				- tree[theNode].sn_max_dist_to_piv[std::make_pair(theNode, SN_piv_set[s_piv])]);
+
+		}
+		else {
+
+			dst = 0;
+
+		}
+
+		if (git_max < dst) {
+			git_max = dst;
+		}
+
+	}
+
+	return git_max;
+}
+
+
+/*
+
+  Lemma 10 Index Structural Cohesiveness Pruning
+
+*/
+
+bool IndexStructuralCohesivenessPruning(int q, int theNode) {
+	
+	double lb_w = tree[theNode].truss;
+
+	if (lb_w < Ktruss)
+		return true;
+	else
+		return false;
+}
+
+
+/*
+	
+	Lemma 1-- Keyword based pruning   -- INDEX LEVEL
+
+*/
+
+bool IndexKeywordbasedPruning(int q, int theNode, std::bitset<No_K> k_set) {
+	
+	k_set &= tree[theNode].keys;
+
+	if (k_set.count() > 0)
+		return false;
+	else
+		return true;
+}
 #endif // !INDEX_TRAV
 
