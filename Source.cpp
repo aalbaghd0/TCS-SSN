@@ -24,8 +24,8 @@ void main() {
 	 //gaussian(0.3, 0.1) 
 
 	char user_file[100] = "data/real_Gowalla+San Joaquin/gowalla_ver.txt";
-	char road_file[100] = "data/real_Gowalla+San Joaquin/SanJoaquin_vertices.txt";
-	char output_file[100] = "data/real_Gowalla+San Joaquin/mapped_social_users.txt";
+	char road_file[100] = "data/real_Gowalla+San Joaquin/cali_ver.txt";
+	char output_file[100] = "data/real_Gowalla+San Joaquin/mapped_social_users_caliAndGow.txt";
 	mapping_socialVertices_to_roads(user_file, road_file, output_file);
 
 	read_vertices(sn_vrtx, 10, sn_V_file);
