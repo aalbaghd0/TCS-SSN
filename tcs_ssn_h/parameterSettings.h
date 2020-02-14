@@ -6,10 +6,10 @@
 #include<fstream>
 
 
-char sn_V_file[100] = "data/SN_vertices.txt";
-char sn_E_file[100] = "data/gowalla_edges.txt";
-char rn_V_file[100] = "data/RN_vertices.txt";
-char rn_E_file[100] = "data/RN_edges.txt";
+char sn_V_file[100] = "data/new_real_data/New_mapping_By_groups.txt";
+char sn_E_file[100] = "data/new_real_data/SN_Gwo_edges.txt";
+char rn_V_file[100] = "data/new_real_data/RN_cali_vertices.txt";
+char rn_E_file[100] = "data/new_real_data/RN_cali_edges.txt";
 
 
 int set_parameters(char filename[]) {
@@ -27,8 +27,8 @@ int set_parameters(char filename[]) {
 }
 //////////////////////////////////
 /*        parameters        */
-#define			SIGMA			5 
-#define			THETA			2
+#define			SIGMA			0.5
+#define			THETA			0.5
 #define			No_Hops			3 // the value of d
 #define			Ktruss			3 // the truss k 
 
@@ -43,7 +43,7 @@ int set_parameters(char filename[]) {
 #define No_rn_V				set_parameters(rn_V_file)
 #define No_rn_E				set_parameters(rn_E_file) * 2
 
-#define No_index_piv			597
+#define No_index_piv			273
 #define No_subgraphs			No_index_piv
 
 #define No_SN_piv				4
@@ -184,7 +184,7 @@ int number_nodes(int a, int b, int& c, int PivsInLevelTree[]) {
 int PivsInLevelTree[1000];
 
 // control the number of pivots in tree layers
-#define		NO_INTER_PIVS		13
+#define		NO_INTER_PIVS		8
 
 int INDEXSIZE = 0;
 int LengthOfPivLevels = number_nodes(No_index_piv, NO_INTER_PIVS, INDEXSIZE, PivsInLevelTree) + 1;

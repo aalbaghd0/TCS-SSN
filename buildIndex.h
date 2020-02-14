@@ -61,7 +61,7 @@ double quality(int v, int piv) {
 	return (rn_dist_for_users(piv, v));// + sn_dist_rslt);
 }
 
-std::unordered_map<int, std::unordered_set<int>> gen_subgraphs(int cand_index_piv[]) {
+std::unordered_map<int, std::unordered_set<int>> gen_subgraphs (int cand_index_piv[]) {
 	double qual_rslt;
 	int best_quality;
 	int assign;
@@ -120,7 +120,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 	int new_piv = 0;
 	bool readInitialPivots = true;
 
-	FILE* fi = fopen("data/sn_init_pivots.txt", "r");
+	FILE* fi = fopen("data/new_real_data/initial_pivots_road_network.txt", "r");
 
 	bool cost_was_updated = false;
 	for (int a = 1; a < global_iter; a++) {
@@ -128,7 +128,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 		// for the first round, we read pivots from the file
 		if (readInitialPivots) {
 			if (fi == NULL) {
-				std::cout << "The edge file cannot be open";
+				std::cout << "The initial index pivots file cannot be open";
 			}
 			else {
 				int i = 0;
@@ -606,6 +606,7 @@ std::unordered_map<int, std::unordered_set<int>> get_index_subgraphs(int piv_set
 		for (int piv = 0; piv < no_new_piv; piv++) {
 
 			qual_rslt = quality(piv_set[v], new_pivots[piv]);
+			//std::cerr << "qual_rslt " << qual_rslt <<"\n";
 
 			if (qual_rslt < best_quality) {
 				assign = new_pivots[piv];
@@ -747,7 +748,7 @@ void find_social_network_pivots() {
 	double cost = 0;
 	double d1, d2, diff, maxEva = 0;
 	double localCost, newCost = 0;
-	int swapIter = 2;
+	int swapIter = 10;
 	int rand_piv, npiv;
 	double globaCost = -INT_MAX;
 
@@ -1552,6 +1553,172 @@ float gaussian(float mean, float sigma) {
 	/*  x is normally distributed with mean 0 and sigma 1.  */
 	x = x * sigma + mean;
 
-	return (x);
+	if (x < 0)
+		return 0;
+	if (x > 0.9)
+		return (0.9);
+	return x;
+}
+
+
+void mapping_social_to_road(char *social, char *road, char *outFile, char *file_rnE) {
+
+	std::ofstream out_;
+	out_.open(outFile);
+
+	int no_sn_vertices = 40000;
+	int no_rn_vertices = 21048;
+	int no_sn_edges = 198001;
+	int no_rn_edges = 21693;
+	
+
+	rn_vertecies* rn_v = new rn_vertecies[no_rn_vertices];
+	rn_vertecies* sn_v = new rn_vertecies[no_sn_vertices];
+
+	//list for road network vertices
+	std::list<int>* lst = new std::list<int>[no_rn_vertices];
+	
+	FILE* snFile = fopen(social, "r");
+	FILE* rnFile = fopen(road, "r");
+	FILE* rn_E_File = fopen(file_rnE, "r");
+
+	if (snFile == NULL || rnFile == NULL || file_rnE == NULL) {
+		std::cout << "could not open the file to read social network vertices";
+		return;
+	}
+
+
+	std::string getRide; int numSn, numRn, num;
+	fscanf(snFile, "%s %d", &getRide, &numSn);
+	std::cerr << " " << numSn << "\n";
+	fscanf(rnFile, "%s %d", &getRide, &numRn);
+	std::cerr << " " << numRn << "\n";
+
+	std::unordered_set<int> *sn_set = new std::unordered_set<int> [numSn];
+	std::unordered_set<int> *rn_set = new std::unordered_set<int> [numRn];
+
+	fscanf(rn_E_File, "%d", &getRide);
+	while (!feof(rn_E_File)) {
+		int from, to, rid1;
+		double	rid2;
+		fscanf(rn_E_File, "%d %d %d %f", &rid1, &from, &to, &rid2);
+		lst[from].push_back(to);
+		lst[to].push_back(from);
+	}
+
+	
+	int set_num = 0;
+	while (!feof(snFile)) {
+		fscanf(snFile, "%s %d", &getRide, &num);
+		int id;
+		while (num > 0) {
+			fscanf(snFile, "%d", &id);
+			fscanf(snFile, "%lf %lf", &sn_v[id].x, &sn_v[id].y);
+			num--;
+
+			//std::cerr << id << "\n";
+			sn_set[set_num].insert(id);
+		}
+		set_num++;
+	}
+
+	set_num = 0;
+	while (!feof(rnFile)) {
+		fscanf(rnFile, "%s %d", &getRide, &num);
+		int id;
+		while (num > 0) {
+			fscanf(rnFile, "%d", &id);
+			//std::cerr << id << std::endl;
+			fscanf(rnFile, "%lf %lf", &rn_v[id].x, &rn_v[id].y);
+			num--;
+
+			rn_set[set_num].insert(id);
+		}
+		set_num++;
+	}
+	int cont = 0;
+	int *mappingArr = new int [no_sn_vertices];
+
+	// for the number of social network groups  ##numSN
+	for (int i = 0; i < numSn ; ++i) {
+		int *randArry = new int [1000];
+
+		int c = 0;
+	
+		for (std::unordered_set<int>::iterator it2 = rn_set[cont].begin();
+			it2 != rn_set[cont].end(); ++it2) {
+			randArry[c] = *it2;
+			c++;
+		}
+
+		for (std::unordered_set<int>::iterator it = sn_set[i].begin();
+			it != sn_set[i].end(); ++it) {
+
+			int getRand = rand() % (c-1);
+			//std::cerr << " getRand "<<getRand << std::endl;
+			mappingArr[*it] = randArry[getRand];
+		
+			out_ << *it << " " << mappingArr[*it];
+			
+			//std::cerr << randArry[getRand] << "\n";
+
+			std::list<int>::iterator itr = lst[randArry[getRand]].begin();
+			int first_element = *itr;
+			
+			for (int j = 0; j < 3; ++j) {
+				if (itr != lst[randArry[getRand]].end()) {
+
+					if (*itr < 0) {
+						out_ << " " << first_element;
+					}
+					else if (*itr > no_rn_vertices) {
+						out_ << " " << first_element;
+					}
+					else {
+						out_ << " " << *itr;
+					}
+					itr++;
+				}
+				else{
+					out_ <<" "<< first_element;
+				}
+			}
+			for (int j = 0; j < 10; j++) {
+				out_ << " " << rand() % 8;
+			}
+			out_ << "\n";
+		}
+		cont++;
+		if (cont >= numRn)
+			cont = 0;
+		delete[] randArry;
+	}
+
+	delete [] rn_v ;
+	delete [] sn_v;
+	delete[] lst;
+
+	out_.close();
+	
+}
+
+void gen_edge_probability(char* file, char* output) {
+
+	std::ofstream out_;
+	out_.open(output);
+	
+	FILE* f_ = fopen(file, "r");
+
+	int getRide;
+	fscanf(f_, "%d", &getRide);
+
+	while (!feof(f_)) {
+		int from, to;
+		fscanf(f_, "%d %d", &from, &to);
+		
+		std::cerr<< from << " " << to << " " << uniform_dou(0.0, 0.8) << " " << uniform_dou(0.0, 0.8)
+			<< " " << uniform_dou(0.0, 0.8) << "\n";
+	}
+
 }
 #endif // !INDEX_HPP

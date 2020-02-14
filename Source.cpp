@@ -20,19 +20,24 @@
 // this is a good code
 // the main function
 void main() {
-	 
-	 //gaussian(0.3, 0.1) 
 
-	char user_file[100] = "data/real_Gowalla+San Joaquin/gowalla_ver.txt";
-	char road_file[100] = "data/real_Gowalla+San Joaquin/cali_ver.txt";
-	char output_file[100] = "data/real_Gowalla+San Joaquin/mapped_social_users_caliAndGow.txt";
-	mapping_socialVertices_to_roads(user_file, road_file, output_file);
+	//char user_file[100] = "data/new_real_data/RT_groups_social_network.txt";
+	//char road_file[100] = "data/new_real_data/RT_groups_road_network.txt";
+	//char output_file[100] = "data/new_real_data/New_mapping_By_groups.txt";
+	//char rn_Edges_file[100] = "data/new_real_data/RN_cali_edges.txt";
+
+	
+	//mapping_social_to_road(user_file, road_file, output_file, rn_Edges_file);
+
+	//char the_sn_edges_file[100] = "data/real_Gowalla+San Joaquin/gowalla_edges.txt";
+	//char read_the_sn_edges_file[100]  = "data/real_Gowalla+San Joaquin/Gow_edges_ready.txt";
+	//gen_edge_probability(the_sn_edges_file, read_the_sn_edges_file);
 
 	read_vertices(sn_vrtx, 10, sn_V_file);
 	sn_read_edges(snGraph, sn_E_file);
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
 
-	
+	std::cerr<< "  "<<sn_Dij(28420, 9);
 	
 /***********  Build Index Functions  *************/
 	find_road_network_pivots();
@@ -75,7 +80,8 @@ void main() {
 
 /***********  INDEX TRAVERSAL  *************************/
 	std::bitset<No_K> key_set;
-	indexTrav(4, key_set);
+	key_set.set(0); key_set.set(2); key_set.set(7);
+	indexTrav(9, key_set);
 
 }
 

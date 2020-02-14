@@ -70,8 +70,8 @@ void summraize_RN_lb_dist() {
 					}
 				}
 
-				tree[i].rn_min_dist_to_piv[std::make_pair(i, min_piv)] = min_dist;
-				tree[i].rn_max_dist_to_piv[std::make_pair(i, max_piv)] = max_dist;
+				tree[i].rn_min_dist_to_piv[std::make_pair(i, RN_piv_set[r_piv])] = min_dist;
+				tree[i].rn_max_dist_to_piv[std::make_pair(i, RN_piv_set[r_piv])] = max_dist;
 
 			}
 
@@ -160,8 +160,8 @@ void summraize_SN_lb_dist() {
 						}
 					}
 
-					tree[i].sn_min_dist_to_piv[std::make_pair(i, min_piv)] = min_dist;
-					tree[i].sn_max_dist_to_piv[std::make_pair(i, max_piv)] = max_dist;
+					tree[i].sn_min_dist_to_piv[std::make_pair(i, SN_piv_set[s_piv])] = min_dist;
+					tree[i].sn_max_dist_to_piv[std::make_pair(i, SN_piv_set[s_piv])] = max_dist;
 
 				}
 

@@ -28,8 +28,10 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 
 	while (!feof(file)) {
 		fscanf(file, "%d", &v_id);
+		//std::cerr << v_id << "\n";
+
 		//std::cerr << v_id << " ";
-		for (i = 0; i < 12; i++) {
+		for (i = 0; i < 4; i++) {
 			fscanf(file, "%d", &r2);
 			vrtx[v_id].ckins[i] = r2;
 			rn_vrtx[r2].myUsers.insert(v_id);

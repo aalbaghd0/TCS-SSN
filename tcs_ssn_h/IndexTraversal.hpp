@@ -61,7 +61,7 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 	he->key = 0;
 	hp->insert(he);
 	delete he;
-
+	int no_nodes_notPruned = 0;
 	Heap* hp_p = new Heap();
 	hp_p->init(2);
 	while (hp->used > 0) {
@@ -71,7 +71,6 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 		int theNode = he->son1;
 		int key = he->key;
 		delete he;
-
 		// if key greater than threshold, treminate the loop
 		if (key > SIGMA)
 			break;
@@ -82,7 +81,7 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 
 				if (!InfluenceScorePruning(q, *it, Qtopic, SizeQtopic) && !StructuralCohesivenessPruning(*it) && !KeywordbasedPruning(*it, k_set) && !SocialDistancePruning(q, *it)
 					&& !SpatialDistancePruning(q, *it)) { // if the object cannot be pruned
-
+					no_nodes_notPruned++;
 					S.insert(*it);
 
 				}
@@ -115,11 +114,14 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 
 		}
 
+
+
 		//S = Refine(S);
 
 		//return S;
-	}
+	} 
 
+	std::cerr << "the size of ths candidate set"<< S.size();
 }
 
 
@@ -249,7 +251,7 @@ double lb_infScore_in(int q, int v, int Qtopic[], int SizeQtopic) {
 
 		if (isInTheArray(Qtopic, SizeQtopic, i)) {
 
-			lb_inf_in = sn_vrtx[q].out_inf[i] * sn_vrtx[q].in_inf[i];
+			lb_inf_in = sn_vrtx[q].out_inf[i] * sn_vrtx[v].in_inf[i];
 
 		}
 	}
@@ -264,7 +266,7 @@ double lb_infScore_out(int q, int v, int Qtopic[], int SizeQtopic) {
 
 		if (isInTheArray(Qtopic, SizeQtopic, i)) {
 
-			lb_inf_in = sn_vrtx[q].in_inf[i] * sn_vrtx[q].out_inf[i];
+			lb_inf_in = sn_vrtx[q].in_inf[i] * sn_vrtx[v].out_inf[i];
 
 		}
 	}
@@ -277,7 +279,7 @@ bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic) {
 	double lb_inf_out = lb_infScore_out(q, v, Qtopic, SizeQtopic);
 
 
-	if ((lb_inf_in > THETA) && (lb_inf_out > THETA))
+	if ((lb_inf_in < THETA) && (lb_inf_out < THETA))
 		return true;
 	else
 		return false;
@@ -312,7 +314,7 @@ bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtop
 	double lb_inf_out = Index_lb_infScore_out(q, theNode, Qtopic, SizeQtopic);
 
 
-	if ( (lb_inf_in > THETA) && (lb_inf_out > THETA) )
+	if ( (lb_inf_in < THETA) && (lb_inf_out < THETA) )
 		return true;
 	else
 		return false;
@@ -417,12 +419,14 @@ double Index_lb_dist_SN(int qVrtx, int theNode) {
 		}
 		else if (sn_vrtx[qVrtx].sn_distToPiv[std::make_pair(qVrtx, SN_piv_set[s_piv])]
 			> tree[theNode].sn_max_dist_to_piv[std::make_pair(theNode, SN_piv_set[s_piv])]) {
-
+			
+			//std::cerr <<"max dist " <<tree[theNode].sn_max_dist_to_piv[std::make_pair(theNode, SN_piv_set[s_piv])];
 			dst = abs(sn_vrtx[qVrtx].sn_distToPiv[std::make_pair(qVrtx, SN_piv_set[s_piv])]
 				- tree[theNode].sn_max_dist_to_piv[std::make_pair(theNode, SN_piv_set[s_piv])]);
 
 		}
 		else {
+			//std::cerr << "max dist " << tree[theNode].sn_max_dist_to_piv[std::make_pair(theNode, SN_piv_set[s_piv])];
 
 			dst = 0;
 

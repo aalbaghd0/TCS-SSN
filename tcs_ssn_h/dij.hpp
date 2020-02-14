@@ -12,7 +12,7 @@
 
 double rn_Dij(int src, int dst) {
 
-	int* dist = new int[No_rn_V];
+	double* dist = new double[No_rn_V];
 	int* parent = new int[No_rn_V];
 	bool* s = new bool[No_rn_V];
 	bool* f = new bool[No_rn_V];
@@ -401,9 +401,9 @@ double sn_Dij_to_all_vertices(int src) {
 //////////////////////////////////////////////////////////////////////////
 double rn_Dij_to_all_vertices(int src) {
 
-	int dst = INT_MAX;
+	double dst = INT_MAX;
 
-	int* dist = new int[No_rn_V];
+	double* dist = new double[No_rn_V];
 	int* parent = new int[No_rn_V];
 	bool* s = new bool[No_rn_V];
 	bool* f = new bool[No_rn_V];
@@ -724,7 +724,7 @@ double To_Print_rn_Dij_to_all_vertices(int src, std::ofstream& f_out) {
 
 	int dst = INT_MAX;
 
-	int* dist = new int[No_rn_V];
+	double* dist = new double[No_rn_V];
 	int* parent = new int[No_rn_V];
 	bool* s = new bool[No_rn_V];
 	bool* f = new bool[No_rn_V];
@@ -826,4 +826,4 @@ double To_Print_rn_Dij_to_all_vertices(int src, std::ofstream& f_out) {
 };
 
 
-#endif // !1
+#endif // !
