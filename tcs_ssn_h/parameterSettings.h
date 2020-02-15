@@ -48,7 +48,7 @@ int set_parameters(char filename[]) {
 
 #define No_SN_piv				4
 #define No_RN_piv				4
-#define No_CKINs				2
+#define No_CKINs				1
 
 
 

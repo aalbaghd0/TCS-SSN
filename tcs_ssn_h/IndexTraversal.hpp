@@ -5,15 +5,15 @@
 #include"heap.h"
 #include"../buildIndex.h"
 #include "IndexSummurizing.h"
-
+#include <ctime>
 
 /*
 	This pice of the code will traverse the index to get the solution
 */
 bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtopic);
-double ub_SpatialDistance(int q, int candV);
+double lb_SpatialDistance(int q, int candV);
 bool SocialDistancePruning(int q, int candV);
-double ub_SocialDistance(int q, int candV);
+double lb_SocialDistance(int q, int candV);
 bool Index_SpatialDistancePruning(int q, int theNode);
 bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtopic);
 double Index_lb_dist_SN(int qVrtx, int theNode);
@@ -21,7 +21,7 @@ bool SocialDistancePruning(int q, int candV);
 double Index_lb_infScore_in(int q, int theNode, int Qtopic[], int SizeQtopic);
 double Index_lb_infScore_out(int q, int theNode, int Qtopic[], int SizeQtopic);
 double Index_lb_dist_RN(int qVrtx, int theNode);
-double ub_SocialDistance(int q, int candV);
+double lb_SocialDistance(int q, int candV);
 bool SpatialDistancePruning(int q, int candV);
 bool Index_SocialDistancePruning(int q, int theNode);
 bool IndexStructuralCohesivenessPruning(int q, int theNode);
@@ -40,6 +40,12 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 	Qtopic[1] = 1;
 
 
+	// set of counters
+	int no_nodes_not_pruned = 0;
+	int no_nodes_all = 0;
+
+	int no_obj = 0;
+
 
 
 	Heap* hp = new Heap();
@@ -47,8 +53,8 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 
 	std::unordered_set<int> S;
 
-	int treeHeight = getTreeHight();
-	int* queryNode = new int[treeHeight];
+	//int treeHeight = getTreeHight();
+	//int* queryNode = new int[treeHeight];
 
 	std::unordered_map<pair, int, pair_hash> queryNodeLevel;
 	queryNodeLevel = get_queryNode(q);
@@ -64,6 +70,11 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 	int no_nodes_notPruned = 0;
 	Heap* hp_p = new Heap();
 	hp_p->init(2);
+
+
+	//start recording the time
+	std::clock_t c_start = std::clock();
+
 	while (hp->used > 0) {
 		HeapEntry* he = new HeapEntry();
 		hp->remove(he);
@@ -78,7 +89,7 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 		if (tree[theNode].level == 0) { // if a leaf node
 
 			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
-
+				no_obj++;
 				if (!InfluenceScorePruning(q, *it, Qtopic, SizeQtopic) && !StructuralCohesivenessPruning(*it) && !KeywordbasedPruning(*it, k_set) && !SocialDistancePruning(q, *it)
 					&& !SpatialDistancePruning(q, *it)) { // if the object cannot be pruned
 					no_nodes_notPruned++;
@@ -92,10 +103,10 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 		else { // non-leaf node
 
 			// optain the tree node that contains the query vertex
-			int queryNode = queryNodeLevel[std::make_pair(q, tree[theNode].level)];
+			//int queryNode = queryNodeLevel[std::make_pair(q, tree[theNode].level)];
 
 			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
-
+				no_nodes_all++;
 				if (!Index_InfluenceScorePruning(q, *it, Qtopic, SizeQtopic) && !IndexKeywordbasedPruning(q, *it, k_set) 
 					&& !IndexStructuralCohesivenessPruning(q, *it) && !Index_SocialDistancePruning(q, *it) 
 					&& !Index_SpatialDistancePruning(q, *it)) {
@@ -104,14 +115,12 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 
 					he->son1 = *it;
 					he->key = Index_lb_dist_RN(q, *it);
-
+					no_nodes_not_pruned ++;
 					hp->insert(he);
 					delete he;
 
 				}
-
 			}
-
 		}
 
 
@@ -120,8 +129,14 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 
 		//return S;
 	} 
+	std::clock_t c_end = std::clock();
+	long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
+	std::cout << "CPU time used: " << time_elapsed_ms / 1000.0 << " s\n";
 
-	std::cerr << "the size of ths candidate set"<< S.size();
+	std::cerr << "\n the size of ths candidate set"<< S.size()<<"\n";
+	std::cerr << " \n # all nodes = " << no_nodes_all << " \n # all nodes = " << no_nodes_not_pruned << " \n";
+
+	std::cerr << "nomber of objects survived the object pruning: " << no_obj << "\n";
 }
 
 
@@ -138,7 +153,7 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 */
 bool SpatialDistancePruning(int q, int candV) {
 
-	double dist = ub_SpatialDistance(q, candV);
+	double dist = lb_SpatialDistance(q, candV);
 
 	if (dist > SIGMA)
 		return true;
@@ -151,19 +166,19 @@ bool SpatialDistancePruning(int q, int candV) {
 	GIVEN	:: two social network vertices
 	ENSURES	:: the lower bound of the spatial road network distance between them
 */
-double ub_SpatialDistance(int q, int candV) {
+double lb_SpatialDistance(int q, int candV) {
 	double dist = 0.0;
-	double min = INT_MAX;
+	double max = 0;
 	for (int i = 0; i < No_RN_piv; i++) {
 
-		dist = sn_vrtx[q].rn_distToPiv[std::make_pair(q, RN_piv_set[i])] + sn_vrtx[candV].rn_distToPiv[std::make_pair(candV, RN_piv_set[i])];
+		dist = abs(sn_vrtx[q].rn_distToPiv[std::make_pair(q, RN_piv_set[i])] - sn_vrtx[candV].rn_distToPiv[std::make_pair(candV, RN_piv_set[i])]);
 
-		if (min > dist)
-			min = dist;
+		if (max < dist)
+			max = dist;
 
 	}
 
-	return dist;
+	return max;
 }
 
 /*
@@ -173,7 +188,7 @@ double ub_SpatialDistance(int q, int candV) {
 */
 bool SocialDistancePruning(int q, int candV) {
 
-	double dist = ub_SocialDistance(q, candV);
+	double dist = lb_SocialDistance(q, candV);
 
 	if (dist > No_Hops)
 		return true;
@@ -186,20 +201,21 @@ bool SocialDistancePruning(int q, int candV) {
 	GIVEN	:: two social network vertices
 	ENSURES	:: the lower bound of the social network distance between them
 */
-double ub_SocialDistance(int q, int candV) {
-	double ub_dist = 0.0;
-	double min = INT_MAX;
+double lb_SocialDistance(int q, int candV) {
+	double lb_dist = 0.0;
+	double max = - INT_MAX;
 	
 	for (int i = 0; i < No_SN_piv; i++) {
 
-		ub_dist = sn_vrtx[q].sn_distToPiv[std::make_pair(q, SN_piv_set[i])] + sn_vrtx[candV].sn_distToPiv[std::make_pair(candV, SN_piv_set[i])];
+		lb_dist = abs(sn_vrtx[q].sn_distToPiv[std::make_pair(q, SN_piv_set[i])] - 
+					sn_vrtx[candV].sn_distToPiv[std::make_pair(candV, SN_piv_set[i])]);
 
-		if (min > ub_dist)
-			min = ub_dist;
+		if (max < lb_dist)
+			max = lb_dist;
 
 	}
 
-	return ub_dist;
+	return max;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +267,7 @@ double lb_infScore_in(int q, int v, int Qtopic[], int SizeQtopic) {
 
 		if (isInTheArray(Qtopic, SizeQtopic, i)) {
 
-			lb_inf_in = sn_vrtx[q].out_inf[i] * sn_vrtx[v].in_inf[i];
+			lb_inf_in = lb_inf_in + sn_vrtx[q].out_inf[i] * sn_vrtx[v].in_inf[i];
 
 		}
 	}
@@ -266,7 +282,7 @@ double lb_infScore_out(int q, int v, int Qtopic[], int SizeQtopic) {
 
 		if (isInTheArray(Qtopic, SizeQtopic, i)) {
 
-			lb_inf_in = sn_vrtx[q].in_inf[i] * sn_vrtx[v].out_inf[i];
+			lb_inf_in = lb_inf_in + sn_vrtx[q].in_inf[i] * sn_vrtx[v].out_inf[i];
 
 		}
 	}
@@ -275,11 +291,12 @@ double lb_infScore_out(int q, int v, int Qtopic[], int SizeQtopic) {
 
 bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic) {
 
-	double lb_inf_in = lb_infScore_in(q, v, Qtopic, SizeQtopic);
+	//double lb_inf_in = lb_infScore_in(q, v, Qtopic, SizeQtopic);
 	double lb_inf_out = lb_infScore_out(q, v, Qtopic, SizeQtopic);
 
 
-	if ((lb_inf_in < THETA) && (lb_inf_out < THETA))
+	//if ((lb_inf_in < THETA) && (lb_inf_out < THETA))
+	if (lb_inf_out < THETA)
 		return true;
 	else
 		return false;
@@ -355,7 +372,13 @@ double Index_lb_dist_RN(int qVrtx, int theNode) {
 	double git_max = - INT_MAX;
 
 	for (int r_piv = 0; r_piv < No_RN_piv; ++ r_piv) {
-		double dst;
+		double dst = 0;
+		//std::cerr << "sn_vrtx[qVrtx].rn_distToPiv: "<< sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+		//	<< "\n tree[theNode].rn_min_dist_to_piv"<< tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]<<
+			//"\n sn_vrtx[qVrtx].rn_distToPiv - tree[theNode].rn_min_dist_to_piv: " << abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+			//- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]) << "\nl -------------------- \n";
+
+		/*
 		if (sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
 							< tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]) {
 			
@@ -371,16 +394,33 @@ double Index_lb_dist_RN(int qVrtx, int theNode) {
 
 		}else{
 
-			dst = 0;
-
+			std::cerr << "\n sn_vrtx[qVrtx].rn_distToPiv: " << sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])] <<
+				"\n tree[theNode].rn_min_dist_to_piv: " << tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]
+				<< "\n sn_vrtx[qVrtx].rn_distToPiv: " << sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])] <<
+				"\n tree[theNode].rn_max_dist_to_piv: " << tree[theNode].rn_max_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])] << "----------\n ";
+			
+			//dst = 0;
+			//std::cerr << "\n sn_vrtx[qVrtx].rn_distToPiv - tree[theNode].rn_min_dist_to_piv" << abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+				//- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]) << "\nl";
+			dst = abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+				- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]);
 		}
-		 
+		
 		if (git_max < dst) {
 			git_max = dst;
 		}
+		*/
+
+		dst = abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+			- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]);
+		if (git_max < dst) {
+			git_max = dst;
+		}
+		
 
 	}
-
+	//std::cerr << "\n"<< git_max;
+	
 	return git_max;
 
 }

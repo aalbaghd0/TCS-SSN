@@ -1038,6 +1038,7 @@ void indexing() {
 	int level = 1;
 	while (no_new_piv > 0) {
 		// layer the graph and get 
+
 		GGG = Index_piv_select(no_new_piv, layer_piv, no_prev_piv, f_piv);
 
 		//printing
@@ -1286,22 +1287,32 @@ void get_roadNetwork_connected() {
 	delete[] check_havingSet;
 }
 
+/*
+	__expand__ pass a vertex v, a map of heaps, assign array, int condition, 
+	a heap pivHeap, a hashtable isSeen, and an array can_piv
 
+*/
 void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtition,
 		Heap& pivHeap, std::unordered_map<pair, bool, pair_hash>& isSeen, int cand_piv[]) {
 
 	int tt = 0;
 	while (hp[v].used > 0) {
+		// create a heapEntry
 		HeapEntry* he = new HeapEntry();
+		// remove an element from the passed heap
 		hp[v].remove(he);
-
+		
+		// set the candidate to the removed node
 		int cand = he->son1;
+		// set the wight to the key weight
 		int w = he->key;
 		delete he;
 
 		int min_key = INT_MAX;
 
+		// if the candidate vertex has not been assighned yet
 		if (assign[cand] == -1) {
+			// then assign it to v,
 			assign[cand] = v;
 			tt = 1;
 			condtition++;
@@ -1315,7 +1326,7 @@ void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtit
 							HeapEntry* he = new HeapEntry();
 							he->son1 = *it;
 							//he->key = w + rn_edge_info[std::make_pair(cand, *it)].weight;
-							he->key = w + 1;
+							he->key = w + rn_dist_for_users(cand, *it);//+ 1;
 							if (min_key > he->key)
 								min_key = he->key;
 

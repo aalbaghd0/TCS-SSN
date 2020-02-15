@@ -117,13 +117,13 @@ void sn_read_edges(std::list<int> edge[], char Efile[]) {
 		snEdges[e_num].from = from;
 		snEdges[e_num].to = to;
 
-		sn_edge_info[std::make_pair(from, to)].topics[0] = pr0;
-		sn_edge_info[std::make_pair(from, to)].topics[1] = pr1;
-		sn_edge_info[std::make_pair(from, to)].topics[2] = pr2;
+		sn_edge_info[std::make_pair(from, to)].topics[0] = pr0 * 0.8;
+		sn_edge_info[std::make_pair(from, to)].topics[1] = pr1 * 0.8;
+		sn_edge_info[std::make_pair(from, to)].topics[2] = pr2 * 0.8;
 
-		sn_edge_info[std::make_pair(to, from)].topics[0] = pr0;
-		sn_edge_info[std::make_pair(to, from)].topics[1] = pr1;
-		sn_edge_info[std::make_pair(to, from)].topics[2] = pr2;
+		sn_edge_info[std::make_pair(to, from)].topics[0] = pr0 * 0.8;
+		sn_edge_info[std::make_pair(to, from)].topics[1] = pr1 * 0.8;
+		sn_edge_info[std::make_pair(to, from)].topics[2] = pr2 * 0.8;
 		
 		
 
