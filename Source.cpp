@@ -36,8 +36,6 @@ void main() {
 	read_vertices(sn_vrtx, 10, sn_V_file);
 	sn_read_edges(snGraph, sn_E_file);
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
-
-	std::cerr<< "  "<<sn_Dij(28420, 9);
 	
 /***********  Build Index Functions  *************/
 	find_road_network_pivots();
@@ -46,26 +44,10 @@ void main() {
 	//get_socialNetwork_connected();
 	//get_roadNetwork_connected();
 	
-	/*
-	int* cand_piv = new int[No_index_piv];
-
-	std::cerr << "\n pivots------ ";
-	for (int i = 0; i < No_index_piv; ++i) {
-	labelA:
-		int git = uniform(0, No_rn_V - 1);
-		if (!isInTheArray(cand_piv, No_index_piv, git)) {
-			cand_piv[i] = git;
-			//std::cerr << git << " ";
-		}
-
-		else
-			goto labelA;
-	}
-	*/
 
 	//gen_subgraphs_update(cand_piv);
 	indexing();
-	setParentOfNodes();
+	setParentOfNodes(); 
 
 
 /**********  summurizin the index functions  *************/
@@ -81,7 +63,7 @@ void main() {
 /***********  INDEX TRAVERSAL  *************************/
 	std::bitset<No_K> key_set;
 	key_set.set(0); key_set.set(2); key_set.set(7);
-	indexTrav(4444, key_set);
+	indexTrav(9, key_set);
 
 }
 

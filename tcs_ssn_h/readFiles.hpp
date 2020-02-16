@@ -36,6 +36,7 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 			vrtx[v_id].ckins[i] = r2;
 			rn_vrtx[r2].myUsers.insert(v_id);
 			//std::cerr << vrtx[v_id].ckins[i] << " ";
+
 		}
 		//std::cerr << "\n";
 		for (i = 1; i <= 5; i++) {

@@ -373,12 +373,13 @@ double Index_lb_dist_RN(int qVrtx, int theNode) {
 
 	for (int r_piv = 0; r_piv < No_RN_piv; ++ r_piv) {
 		double dst = 0;
-		//std::cerr << "sn_vrtx[qVrtx].rn_distToPiv: "<< sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
-		//	<< "\n tree[theNode].rn_min_dist_to_piv"<< tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]<<
-			//"\n sn_vrtx[qVrtx].rn_distToPiv - tree[theNode].rn_min_dist_to_piv: " << abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
-			//- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]) << "\nl -------------------- \n";
-
 		/*
+		std::cerr << "sn_vrtx[qVrtx].rn_distToPiv: "<< sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+			<< "\n tree[theNode].rn_min_dist_to_piv"<< tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]<<
+			"\n sn_vrtx[qVrtx].rn_distToPiv - tree[theNode].rn_min_dist_to_piv: " << abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+			- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]) << "\nl -------------------- \n";
+*/
+		///*
 		if (sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
 							< tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]) {
 			
@@ -394,25 +395,18 @@ double Index_lb_dist_RN(int qVrtx, int theNode) {
 
 		}else{
 
-			std::cerr << "\n sn_vrtx[qVrtx].rn_distToPiv: " << sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])] <<
-				"\n tree[theNode].rn_min_dist_to_piv: " << tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]
-				<< "\n sn_vrtx[qVrtx].rn_distToPiv: " << sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])] <<
-				"\n tree[theNode].rn_max_dist_to_piv: " << tree[theNode].rn_max_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])] << "----------\n ";
-			
-			//dst = 0;
+			dst = 0;
 			//std::cerr << "\n sn_vrtx[qVrtx].rn_distToPiv - tree[theNode].rn_min_dist_to_piv" << abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
 				//- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]) << "\nl";
-			dst = abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
-				- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]);
+			//dst = abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+				//- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]);
 		}
 		
-		if (git_max < dst) {
-			git_max = dst;
-		}
-		*/
+		
+		//*/
 
-		dst = abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
-			- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]);
+		//dst = abs(sn_vrtx[qVrtx].rn_distToPiv[std::make_pair(qVrtx, RN_piv_set[r_piv])]
+			///- tree[theNode].rn_min_dist_to_piv[std::make_pair(theNode, RN_piv_set[r_piv])]);
 		if (git_max < dst) {
 			git_max = dst;
 		}

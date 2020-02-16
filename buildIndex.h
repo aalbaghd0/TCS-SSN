@@ -42,7 +42,7 @@ void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtit
 double rn_dist_for_users_NoT_BFS(int src, int dst);
 double rn_dist_rnPiv_to_user(int r_piv, int user);
 float gaussian(float mean, float sigma);
-
+std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update_By_Road_Network(int Index_road_piv[]);
 
 double quality(int v, int piv) {
 	double sn_dist_rslt = 0.0, rn_dist_rslt = 0.0;
@@ -120,7 +120,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 	int new_piv = 0;
 	bool readInitialPivots = true;
 
-	FILE* fi = fopen("data/new_real_data/initial_pivots_road_network.txt", "r");
+	FILE* fi = fopen("data/new_real_data/initial_Index_pivots.txt", "r");
 
 	bool cost_was_updated = false;
 	for (int a = 1; a < global_iter; a++) {
@@ -157,7 +157,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 		//for (int i = 0; i < No_index_piv; ++i)
 		//	std::cerr << S_p[i] << " ";
 
-		GG = gen_subgraphs_update(S_p);
+		GG = gen_subgraphs_update_By_Road_Network(S_p);
 
 		// evaluate the cost function
 		local_cost = evaluate_subgraphs(GG, S_p, No_subgraphs);
@@ -179,9 +179,7 @@ std::unordered_map<int, std::unordered_set<int>> sn_piv_select() {
 
 			new_S_p[get_piv] = new_piv;
 
-			new_GG = gen_subgraphs_update(new_S_p);
-
-
+			new_GG = gen_subgraphs_update_By_Road_Network(new_S_p);
 
 			new_cost = evaluate_subgraphs(new_GG, new_S_p, No_subgraphs);
 			//std::cerr << "THe Evaluation :: " << new_cost << "\n \n";
@@ -933,7 +931,7 @@ double rn_dist_rnPiv_to_user(int r_piv, int user) {
 	double rslt = 0.0;
 	double temp = 0.0;
 
-	for (int i = 0; i < No_CKINs - 1; ++i) {
+	for (int i = 0; i < No_CKINs; ++i) {
 
 		int src_map = sn_vrtx[user].ckins[i];
 
@@ -1326,7 +1324,7 @@ void expand(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtit
 							HeapEntry* he = new HeapEntry();
 							he->son1 = *it;
 							//he->key = w + rn_edge_info[std::make_pair(cand, *it)].weight;
-							he->key = w + rn_dist_for_users(cand, *it);//+ 1;
+							he->key = w + rn_dist_for_users_NoT_BFS(cand, *it);//+ 1;
 							if (min_key > he->key)
 								min_key = he->key;
 
@@ -1732,4 +1730,184 @@ void gen_edge_probability(char* file, char* output) {
 	}
 
 }
+
+
+
+/*
+	__expand__ pass a vertex v, a map of heaps, assign array, int condition,
+	a heap pivHeap, a hashtable isSeen, and an array can_piv
+
+*/
+void expand_By_Road_Network(int v, std::unordered_map<int, Heap>& hp, int assign[], int& condtition,
+	Heap& pivHeap, std::unordered_map<pair, bool, pair_hash>& isSeen, int Index_road_piv[]) {
+
+	int tt = 0;
+	while (hp[v].used > 0) {
+		// create a heapEntry
+		HeapEntry* he = new HeapEntry();
+		// remove an element from the passed heap
+		hp[v].remove(he);
+		// set the candidate to the removed node
+		int cand = he->son1;
+		// set the wight to the key weight
+		double w = he->key;
+		delete he;
+
+		double min_key = INT_MAX;
+
+		// if the candidate vertex has not been assighned yet
+		if (assign[cand] == -1) {
+			// then assign it to v,
+			assign[cand] = v;
+			tt = 1;
+			condtition++;
+			for (std::list<int>::iterator it = rnGraph[cand].begin(); it != rnGraph[cand].end(); it++) {
+
+				if (assign[*it] == -1) {
+					if (!(isSeen[std::make_pair(v, *it)])) {
+						if (!isInTheArray(Index_road_piv, No_index_piv, *it)) {
+
+							HeapEntry* he = new HeapEntry();
+							he->son1 = *it;
+							//he->key = w + rn_edge_info[std::make_pair(cand, *it)].weight;
+							//he->key = w + rn_dist_for_users_NoT_BFS(cand, *it);//+ 1;
+
+							he->key = w + rn_edge_info[std::make_pair(cand, *it)].weight;
+
+							if (min_key > he->key)
+								min_key = he->key;
+
+							hp[v].insert(he);
+							delete he;
+
+							isSeen[std::make_pair(v, *it)] = true;
+						}
+					}
+				}
+
+			}
+		}
+		if (min_key < INT_MAX) {
+			HeapEntry* he2 = new HeapEntry();
+			he2->son1 = v;
+			he2->key = min_key;
+			pivHeap.insert(he2);
+			delete he2;
+			break;
+		}
+	}
+
+}
+
+/*
+
+Gen. subgraphs function
+Given a pivot set and a network,
+The gen_subgraph_update, will
+
+*/
+
+std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update_By_Road_Network(int Index_road_piv[]) {
+
+	
+	// we need to get a road network pivots instear
+
+	std::unordered_map<int, Heap> hpp;
+	Heap pivHeap;
+	pivHeap.init(2);
+	std::unordered_map<pair, bool, pair_hash> isSeen;
+
+	// we creat a map of heaps
+	for (int piv = 0; piv < No_index_piv; piv++) {
+		// for each pivot, we genetate a minimum heap
+		// we insert the pivot in the heap, with key = 0
+		hpp[Index_road_piv[piv]].init(2);
+		HeapEntry* he = new HeapEntry();
+		he->son1 = Index_road_piv[piv];
+		he->key = 0;
+		hpp[Index_road_piv[piv]].insert(he);
+
+		// we create a heap (or of pivots)
+		// this heap leeps track of the pivot with smallest distance so far
+		// the minumum one will be expanded first
+		HeapEntry* he2 = new HeapEntry();
+		he2->son1 = Index_road_piv[piv];
+		he2->key = 0;
+		pivHeap.insert(he2);
+		delete he2;
+	}
+
+
+	// create an array to assign vrtices to pivots
+	// initiate it with -1
+	int* assign = new int[No_rn_V];
+	std::memset(assign, -1, sizeof(assign[0]) * No_rn_V);
+
+
+	int piv = 0;
+	int condtition = 0;
+	while (condtition < No_rn_V) {
+
+		HeapEntry* he = new HeapEntry();
+		pivHeap.remove(he);
+		piv = he->son1;
+		delete he;
+
+		expand_By_Road_Network(piv, hpp, assign, condtition, pivHeap, isSeen, Index_road_piv);
+
+	}
+
+
+	std::unordered_map<int, std::unordered_set<int>> GG2;
+	for (int i = 0; i < No_rn_V; ++i) {
+		GG2[assign[i]].insert(i);
+	}
+
+	std::cerr << "\n" << "---- the road network partition sizes ----" << "\n";
+	for (int p = 0; p < No_index_piv; p++) {
+		std::cerr << GG2[Index_road_piv[p]].size() << " ";
+	}
+
+	// here we store retrieve the social network based on the road network partitioning
+	std::unordered_map<int, std::unordered_set<int>> GG;
+	int* was_assigned = new int[No_sn_V];
+	std::memset(was_assigned, -1, sizeof(was_assigned[0]) * No_sn_V);
+	for (int i = 0; i < No_rn_V; i++) {
+
+		for (std::unordered_set<int>::iterator it = rn_vrtx[i].myUsers.begin();
+										it != rn_vrtx[i].myUsers.end(); ++it) {
+			if (was_assigned[*it] == -1) {
+				GG[assign[i]].insert(*it);
+				was_assigned[*it] = 1;
+			}
+		}
+
+	}
+
+	///*
+
+	std::cerr << "\n" << "---- size of parts ----" << "\n";
+	for (int p = 0; p < No_index_piv; p++) {
+		//std::cerr << cand_piv[p] << " -->> ";
+		//for (std::unordered_set<int>::iterator it = GG[cand_piv[p]].begin(); it != GG[cand_piv[p]].end(); ++it) {
+		//	std::cerr << *it << " ";
+		//}
+		//std::cerr << "\n";
+
+		std::cerr << GG[Index_road_piv[p]].size() << " ";
+	}
+	//*/
+
+	/*
+	std::cerr <<"\n" <<"----all assignments----" << "\n";
+	for (int i = 0; i < No_rn_V; i++) {
+		std::cerr << i << " " << assign[i]<< "\n" ;
+	}
+	*/
+	delete[] was_assigned;
+	delete[] assign;
+
+	return GG;
+}
+
 #endif // !INDEX_HPP
