@@ -1906,6 +1906,7 @@ std::unordered_map<int, std::unordered_set<int>> gen_subgraphs_update_By_Road_Ne
 	*/
 	delete[] was_assigned;
 	delete[] assign;
+	
 
 	return GG;
 }

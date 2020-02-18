@@ -10,133 +10,169 @@
 /*
 	This pice of the code will traverse the index to get the solution
 */
-bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtopic);
+
 double lb_SpatialDistance(int q, int candV);
-bool SocialDistancePruning(int q, int candV);
+bool SocialDistancePruning(int q, int candV, int noOfHops);
 double lb_SocialDistance(int q, int candV);
-bool Index_SpatialDistancePruning(int q, int theNode);
-bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtopic);
+bool Index_SpatialDistancePruning(int q, int theNode, int sigma);
+bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtopic, int theta);
 double Index_lb_dist_SN(int qVrtx, int theNode);
 bool SocialDistancePruning(int q, int candV);
 double Index_lb_infScore_in(int q, int theNode, int Qtopic[], int SizeQtopic);
 double Index_lb_infScore_out(int q, int theNode, int Qtopic[], int SizeQtopic);
 double Index_lb_dist_RN(int qVrtx, int theNode);
 double lb_SocialDistance(int q, int candV);
-bool SpatialDistancePruning(int q, int candV);
-bool Index_SocialDistancePruning(int q, int theNode);
-bool IndexStructuralCohesivenessPruning(int q, int theNode);
+bool SpatialDistancePruning(int q, int candV, int sigma);
+bool Index_SocialDistancePruning(int q, int theNode, int noOfHops);
+bool IndexStructuralCohesivenessPruning(int q, int theNode, int truss_val);
 bool IndexKeywordbasedPruning (int q, int it, std::bitset<No_K> tt);
 bool KeywordbasedPruning(int v, std::bitset<No_K> k_set);
-bool StructuralCohesivenessPruning(int v);
-bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic);
+bool StructuralCohesivenessPruning(int v, int truss_val);
+bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic, int theta);
 
 
 
-void indexTrav(int q, std::bitset<No_K> k_set) {
+void indexTrav() {
 	// here we set the query topics set, they are just an index 0, 1, 2, ..
-	int SizeQtopic = 2;
-	int* Qtopic = new int[SizeQtopic];
-	Qtopic[0] = 0;
-	Qtopic[1] = 1;
+	
+	while (TRUE) {
+		int noOfHops;
+		double sigma;
+		double theta;
+		int SizeQtopic = 2;
+		int* Qtopic = new int[SizeQtopic];
+		int length_querySet;
+		int key_val;
+		std::bitset<No_K> k_set;
+		int q;
+		int truss_val = 0;
+		std::cerr << "input query vertex (q): ";
+		std::cin >> q;
+		std::cerr << "input number of social network distace (no of hops): ";
+		std::cin >> noOfHops;
+		std::cerr << "input the truss value (k-truss): ";
+		std::cin >> truss_val;
+		std::cerr << "input road network distance threshold (sigma): ";
+		std::cin >> sigma;
+		std::cerr << "input the influence threshold (theta): ";
+		std::cin >> theta;
+		std::cerr << "input query topics 2 vales between 1 and 0: ";
+		std::cin >> Qtopic[0];
+		std::cerr << "input again vale between 1 and 0: ";
+		std::cin >> Qtopic[1];
+		std::cerr << "the length of the query set: ";
+		std::cin >> length_querySet;
+		for (int i = 0; i < length_querySet; i++) {
+			std::cerr << "pick a random value between 0 and 9: ";
+			std::cin >> key_val;
+			k_set.set(key_val);
+		}
 
 
-	// set of counters
-	int no_nodes_not_pruned = 0;
-	int no_nodes_all = 0;
+		// set of counters
+		int no_nodes_not_pruned = 0;
+		int no_nodes_all = 0;
 
-	int no_obj = 0;
-
-
-
-	Heap* hp = new Heap();
-	hp->init(2);
-
-	std::unordered_set<int> S;
-
-	//int treeHeight = getTreeHight();
-	//int* queryNode = new int[treeHeight];
-
-	std::unordered_map<pair, int, pair_hash> queryNodeLevel;
-	queryNodeLevel = get_queryNode(q);
-
-	int root = 0;
-
-	HeapEntry* he = new HeapEntry();
-
-	he->son1 = root;
-	he->key = 0;
-	hp->insert(he);
-	delete he;
-	int no_nodes_notPruned = 0;
-	Heap* hp_p = new Heap();
-	hp_p->init(2);
+		int no_obj = 0;
 
 
-	//start recording the time
-	std::clock_t c_start = std::clock();
 
-	while (hp->used > 0) {
+		Heap* hp = new Heap();
+		hp->init(2);
+
+		std::unordered_set<int> S;
+
+		//int treeHeight = getTreeHight();
+		//int* queryNode = new int[treeHeight];
+
+		std::unordered_map<pair, int, pair_hash> queryNodeLevel;
+		queryNodeLevel = get_queryNode(q);
+
+		int root = 0;
+
 		HeapEntry* he = new HeapEntry();
-		hp->remove(he);
 
-		int theNode = he->son1;
-		int key = he->key;
+		he->son1 = root;
+		he->key = 0;
+		hp->insert(he);
 		delete he;
-		// if key greater than threshold, treminate the loop
-		if (key > SIGMA)
-			break;
+		int no_nodes_notPruned = 0;
+		Heap* hp_p = new Heap();
+		hp_p->init(2);
 
-		if (tree[theNode].level == 0) { // if a leaf node
 
-			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
-				no_obj++;
-				if (!InfluenceScorePruning(q, *it, Qtopic, SizeQtopic) && !StructuralCohesivenessPruning(*it) && !KeywordbasedPruning(*it, k_set) && !SocialDistancePruning(q, *it)
-					&& !SpatialDistancePruning(q, *it)) { // if the object cannot be pruned
-					no_nodes_notPruned++;
-					S.insert(*it);
+		//start recording the time
+		std::clock_t c_start = std::clock();
+
+		while (hp->used > 0) {
+			HeapEntry* he = new HeapEntry();
+			hp->remove(he);
+
+			int theNode = he->son1;
+			int key = he->key;
+			delete he;
+			// if key greater than threshold, treminate the loop
+			if (key > SIGMA)
+				break;
+
+			if (tree[theNode].level == 0) { // if a leaf node
+
+				for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
+					no_obj++;
+					if (!InfluenceScorePruning(q, *it, Qtopic, SizeQtopic, theta) && !StructuralCohesivenessPruning(*it, truss_val) && !KeywordbasedPruning(*it, k_set)
+						&& !SocialDistancePruning(q, *it, noOfHops) && !SpatialDistancePruning(q, *it, sigma)) { // if the object cannot be pruned
+						no_nodes_notPruned++;
+						S.insert(*it);
+
+					}
 
 				}
 
 			}
+			else { // non-leaf node
 
-		}
-		else { // non-leaf node
+				// optain the tree node that contains the query vertex
+				//int queryNode = queryNodeLevel[std::make_pair(q, tree[theNode].level)];
 
-			// optain the tree node that contains the query vertex
-			//int queryNode = queryNodeLevel[std::make_pair(q, tree[theNode].level)];
+				for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
+					no_nodes_all++;
+					if (!Index_InfluenceScorePruning(q, *it, Qtopic, SizeQtopic, theta) && !IndexKeywordbasedPruning(q, *it, k_set)
+						&& !IndexStructuralCohesivenessPruning(q, *it, truss_val) && !Index_SocialDistancePruning(q, *it, noOfHops)
+						&& !Index_SpatialDistancePruning(q, *it, sigma)) {
 
-			for (std::unordered_set<int>::iterator it = tree[theNode].child.begin(); it != tree[theNode].child.end(); ++it) {
-				no_nodes_all++;
-				if (!Index_InfluenceScorePruning(q, *it, Qtopic, SizeQtopic) && !IndexKeywordbasedPruning(q, *it, k_set) 
-					&& !IndexStructuralCohesivenessPruning(q, *it) && !Index_SocialDistancePruning(q, *it) 
-					&& !Index_SpatialDistancePruning(q, *it)) {
+						HeapEntry* he = new HeapEntry();
 
-					HeapEntry* he = new HeapEntry();
+						he->son1 = *it;
+						he->key = Index_lb_dist_RN(q, *it);
+						no_nodes_not_pruned++;
+						hp->insert(he);
+						delete he;
 
-					he->son1 = *it;
-					he->key = Index_lb_dist_RN(q, *it);
-					no_nodes_not_pruned ++;
-					hp->insert(he);
-					delete he;
-
+					}
 				}
 			}
+
+
+
+			//S = Refine(S);
+
+			//return S;
 		}
+		std::clock_t c_end = std::clock();
+		long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
+		std::cout << "CPU time used: " << time_elapsed_ms / 1000.0 << " s\n";
 
+		std::cerr << "\n the size of ths candidate set" << S.size() << "\n";
+		std::cerr << " \n # all nodes = " << no_nodes_all << " \n # all nodes = " << no_nodes_not_pruned << " \n";
 
+		std::cerr << "nomber of objects survived the object pruning: " << no_obj << "\n";
 
-		//S = Refine(S);
+		std::cerr << "\n---------------------------------------------------------------\n";
 
-		//return S;
-	} 
-	std::clock_t c_end = std::clock();
-	long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
-	std::cout << "CPU time used: " << time_elapsed_ms / 1000.0 << " s\n";
-
-	std::cerr << "\n the size of ths candidate set"<< S.size()<<"\n";
-	std::cerr << " \n # all nodes = " << no_nodes_all << " \n # all nodes = " << no_nodes_not_pruned << " \n";
-
-	std::cerr << "nomber of objects survived the object pruning: " << no_obj << "\n";
+		S.clear();
+		hp->~Heap();
+		delete[] Qtopic;
+	}
 }
 
 
@@ -151,11 +187,11 @@ void indexTrav(int q, std::bitset<No_K> k_set) {
 	GIVEN	:: q, and a candidate vertex candV
 	ENSURES :: true is it can be pruned, false, otherwise
 */
-bool SpatialDistancePruning(int q, int candV) {
+bool SpatialDistancePruning(int q, int candV, int sigma) {
 
 	double dist = lb_SpatialDistance(q, candV);
 
-	if (dist > SIGMA)
+	if (dist > sigma)
 		return true;
 	else
 		return false;
@@ -186,11 +222,11 @@ double lb_SpatialDistance(int q, int candV) {
 	GIVEN	:: q, and a candidate vertex candV
 	ENSURES :: true is it can be pruned, false, otherwise
 */
-bool SocialDistancePruning(int q, int candV) {
+bool SocialDistancePruning(int q, int candV, int noOfHops) {
 
 	double dist = lb_SocialDistance(q, candV);
 
-	if (dist > No_Hops)
+	if (dist > noOfHops)
 		return true;
 	else
 		return false;
@@ -243,9 +279,9 @@ bool KeywordbasedPruning(int v, std::bitset<No_K> k_set) {
 	ENSURES :: there exists at least one keyword (element) incommon between the candidate vertex and the query keyword set
 
 */
-bool StructuralCohesivenessPruning(int v) {
+bool StructuralCohesivenessPruning(int v, int truss_val) {
 
-	if (sn_vrtx[v].truss < Ktruss - 2)
+	if (sn_vrtx[v].truss < truss_val - 2)
 		return true;
 	else
 		return false;
@@ -289,14 +325,14 @@ double lb_infScore_out(int q, int v, int Qtopic[], int SizeQtopic) {
 	return lb_inf_in;
 }
 
-bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic) {
+bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic, int theta) {
 
 	//double lb_inf_in = lb_infScore_in(q, v, Qtopic, SizeQtopic);
 	double lb_inf_out = lb_infScore_out(q, v, Qtopic, SizeQtopic);
 
 
 	//if ((lb_inf_in < THETA) && (lb_inf_out < THETA))
-	if (lb_inf_out < THETA)
+	if (lb_inf_out < theta)
 		return true;
 	else
 		return false;
@@ -311,11 +347,11 @@ bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic) {
 /*
 	lemma 7, Index spatial distance pruning
 */
-bool Index_SpatialDistancePruning(int q, int theNode) {
+bool Index_SpatialDistancePruning(int q, int theNode, int sigma) {
 
 	double lb_dist = Index_lb_dist_RN(q, theNode);
 
-	if (lb_dist > SIGMA)
+	if (lb_dist > sigma)
 		return true;
 	else
 		return false;
@@ -325,13 +361,13 @@ bool Index_SpatialDistancePruning(int q, int theNode) {
 /*
 	lemma 8,  Influence  Score  Pruning 
 */
-bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtopic) {
+bool  Index_InfluenceScorePruning(int q, int theNode, int Qtopic[], int SizeQtopic, int theta) {
 
 	double lb_inf_in = Index_lb_infScore_in(q, theNode, Qtopic, SizeQtopic);
 	double lb_inf_out = Index_lb_infScore_out(q, theNode, Qtopic, SizeQtopic);
 
 
-	if ( (lb_inf_in < THETA) && (lb_inf_out < THETA) )
+	if ( (lb_inf_in < theta) && (lb_inf_out < theta) )
 		return true;
 	else
 		return false;
@@ -427,11 +463,11 @@ double Index_lb_dist_RN(int qVrtx, int theNode) {
 
 */
 
-bool Index_SocialDistancePruning(int q, int theNode) {
+bool Index_SocialDistancePruning(int q, int theNode, int noOfHops) {
 
 	double lb_dist = Index_lb_dist_SN(q, theNode);
 
-	if (lb_dist > No_Hops)
+	if (lb_dist > noOfHops)
 		return true;
 	else
 		return false;
@@ -482,11 +518,11 @@ double Index_lb_dist_SN(int qVrtx, int theNode) {
 
 */
 
-bool IndexStructuralCohesivenessPruning(int q, int theNode) {
+bool IndexStructuralCohesivenessPruning(int q, int theNode, int truss_val) {
 	
 	double lb_w = tree[theNode].truss;
 
-	if (lb_w < Ktruss)
+	if (lb_w < truss_val)
 		return true;
 	else
 		return false;

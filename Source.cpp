@@ -61,9 +61,8 @@ void main() {
 
 
 /***********  INDEX TRAVERSAL  *************************/
-	std::bitset<No_K> key_set;
-	key_set.set(0); key_set.set(2); key_set.set(7);
-	indexTrav(9, key_set);
+	
+	indexTrav();
 
 }
 
