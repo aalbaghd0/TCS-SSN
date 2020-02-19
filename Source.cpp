@@ -36,7 +36,7 @@ void main() {
 	read_vertices(sn_vrtx, 10, sn_V_file);
 	sn_read_edges(snGraph, sn_E_file);
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
-	
+
 /***********  Build Index Functions  *************/
 	find_road_network_pivots();
 	find_social_network_pivots();

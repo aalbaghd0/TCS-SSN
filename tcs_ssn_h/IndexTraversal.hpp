@@ -6,6 +6,7 @@
 #include"../buildIndex.h"
 #include "IndexSummurizing.h"
 #include <ctime>
+#include"../buildIndex.h"
 
 /*
 	This pice of the code will traverse the index to get the solution
@@ -29,6 +30,8 @@ bool IndexKeywordbasedPruning (int q, int it, std::bitset<No_K> tt);
 bool KeywordbasedPruning(int v, std::bitset<No_K> k_set);
 bool StructuralCohesivenessPruning(int v, int truss_val);
 bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic, int theta);
+void Refine(int q, int NoOfHops, double sigma, std::unordered_set<int> S, long double time_elapsed_s);
+void GreedyBaseLine(int q, int noOfHops, double sigma, int truss_val, double theta, int Qtopic[], std::bitset<No_K> k_set, int SizeQtopic);
 
 
 
@@ -159,8 +162,8 @@ void indexTrav() {
 			//return S;
 		}
 		std::clock_t c_end = std::clock();
-		long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
-		std::cout << "CPU time used: " << time_elapsed_ms / 1000.0 << " s\n";
+		long double time_elapsed_s = (c_end - c_start) / 1000.0;
+		std::cout << "CPU time used in Tree Traversal: " << time_elapsed_s << " s\n";
 
 		std::cerr << "\n the size of ths candidate set" << S.size() << "\n";
 		std::cerr << " \n # all nodes = " << no_nodes_all << " \n # all nodes = " << no_nodes_not_pruned << " \n";
@@ -169,9 +172,14 @@ void indexTrav() {
 
 		std::cerr << "\n---------------------------------------------------------------\n";
 
+
+		Refine(q, noOfHops, sigma, S, time_elapsed_s);
+		GreedyBaseLine(q, noOfHops, sigma, truss_val, theta, Qtopic, k_set, SizeQtopic);
+
 		S.clear();
 		hp->~Heap();
 		delete[] Qtopic;
+
 	}
 }
 
@@ -543,6 +551,199 @@ bool IndexKeywordbasedPruning(int q, int theNode, std::bitset<No_K> k_set) {
 		return false;
 	else
 		return true;
+}
+
+
+void Refine(int q, int noOfHops, double sigma, std::unordered_set<int> S, long double treeTime) {
+	// get the maximum subgraph using BFS
+
+	bool *pruned = new bool [No_sn_V];
+	bool *visited = new bool [No_sn_V];
+
+	for (int i = 0; i < No_sn_V; ++i) {
+		pruned[i] = true;
+		visited[i] = false;
+	}
+
+	for (std::unordered_set<int>::iterator it = S.begin(); it != S.end(); ++it) {
+		pruned[*it] = false;
+	}
+
+	std::unordered_set<int> finalSet;
+ 
+	Heap* hp = new Heap();
+	hp->init(2);
+	HeapEntry* he = new HeapEntry();
+	he->son1 = q;
+	he->key = 0;
+	hp->insert(he);
+	delete he;
+
+	finalSet.insert(q);
+
+	int cand, cand2;
+	double weight;
+	
+	int* dist = new int[No_sn_V];
+	
+	int pos = sn_vrtx[q].ckins[0];
+	//start recording the time
+	
+
+	long double rnTime = Refine_rn_Dij_to_all_vertices(pos, sigma);
+
+	std::clock_t c_start = std::clock();
+	while (hp->used > 0) {
+		
+		HeapEntry* he = new HeapEntry();
+		hp->remove(he);
+		
+		cand = he->son1;
+		weight = he->key;
+		delete he;
+
+		for (std::list<int>::iterator it = snGraph[cand].begin(); it != snGraph[cand].end(); ++it) {
+			if (!pruned[*it]) {
+				if (!visited[*it]) {
+					visited[*it] = true;
+					HeapEntry* he = new HeapEntry();
+					he->son1 = *it;
+					he->key = weight + 1;
+
+					int posDist = sn_vrtx[*it].ckins[0];
+
+					// social distance pruning
+					if (noOfHops >= he->key) {
+						if (check_hash_rn_dist[std::make_pair(pos, posDist)] && hash_rn_dist[std::make_pair(pos, posDist)] < sigma) {
+							hp->insert(he);
+							finalSet.insert(*it);
+						}
+					}
+					delete he;
+				}
+			}
+			
+		}
+	}
+
+	std::clock_t c_end = std::clock();
+	long double time_elapsed_ms = (c_end - c_start) / 1000.0;
+
+	std::cerr << "\n**********************************************************\n";
+	std::cout << "CPU time used for Refinment " << time_elapsed_ms << " s\n";
+	std::cerr << "the Total CPU Time: "  <<time_elapsed_ms + treeTime + rnTime << "s\n";
+	std::cerr << "the final set size:: " << finalSet.size() << std::endl;
+	std::cerr << "\n**********************************************************\n";
+	 
+	hp->~Heap();
+	delete[] visited;
+	delete[] pruned;
+}
+
+
+/*
+///////////////////////////////////////////////////////////////////////
+
+					THE GREEDY BASE ALGORITHM
+
+///////////////////////////////////////////////////////////////////////
+*/
+
+
+void GreedyBaseLine(int q, int noOfHops, double sigma, int truss_val, double theta, int Qtopic[], std::bitset<No_K> k_set, int SizeQtopic) {
+
+	std::clock_t c_start = std::clock();
+	// filter by social network
+	// filter by road network
+	// filter by  
+
+	// get the maximum subgraph using BFS
+
+	bool* pruned = new bool[No_sn_V];
+	bool* visited = new bool[No_sn_V];
+
+	for (int i = 0; i < No_sn_V; ++i) {
+		pruned[i] = false;
+		visited[i] = false;
+	}
+
+	std::unordered_set<int> finalSet;
+
+	Heap* hp = new Heap();
+	hp->init(2);
+	HeapEntry* he = new HeapEntry();
+	he->son1 = q;
+	he->key = 0;
+	hp->insert(he);
+	delete he;
+
+	finalSet.insert(q);
+
+	int cand, cand2;
+	double weight;
+
+	int* dist = new int[No_sn_V];
+
+	int pos = sn_vrtx[q].ckins[0];
+	//start recording the time
+
+
+	long double rnTime = Refine_rn_Dij_to_all_vertices(pos, sigma);
+	while (hp->used > 0) {
+
+		HeapEntry* he = new HeapEntry();
+		hp->remove(he);
+
+		cand = he->son1;
+		weight = he->key;
+		delete he;
+
+		for (std::list<int>::iterator it = snGraph[cand].begin(); it != snGraph[cand].end(); ++it) {
+			if (!pruned[*it]) {
+				if (!visited[*it]) {
+					visited[*it] = true;
+					HeapEntry* he = new HeapEntry();
+					he->son1 = *it;
+					he->key = weight + 1;
+
+					int posDist = sn_vrtx[*it].ckins[0];
+
+					// social distance pruning
+					if (noOfHops >= he->key) {
+						//spatial distance pruning
+						if (check_hash_rn_dist[std::make_pair(pos, posDist)] && hash_rn_dist[std::make_pair(pos, posDist)] < sigma) {
+							// structural pruning
+							if (!StructuralCohesivenessPruning(*it, truss_val)) {
+								// topic based pruning
+								if (!InfluenceScorePruning(q, *it, Qtopic, SizeQtopic, theta)) {
+									// keyword based pruning
+									if(!KeywordbasedPruning(*it, k_set))
+
+									hp->insert(he);
+									finalSet.insert(*it);
+								}
+							}
+						}
+					}
+					delete he;
+				}
+			}
+
+		}
+	}
+
+	std::clock_t c_end = std::clock();
+	long double time_elapsed_ms = (c_end - c_start) / 1000.0;
+
+	std::cerr << "\n**********************************************************\n";
+	std::cout << "CPU time used for GREEDY Baseline " << time_elapsed_ms << " s\n";
+	std::cerr << "the final set size:: " << finalSet.size() << std::endl;
+	std::cerr << "\n**********************************************************\n";
+
+	hp->~Heap();
+	delete[] visited;
+	delete[] pruned;
+
 }
 #endif // !INDEX_TRAV
 

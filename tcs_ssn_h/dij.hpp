@@ -8,6 +8,7 @@
 #include <list>
 #include "parameterSettings.h"
 #include <fstream>
+#include <ctime>
 
 
 double rn_Dij(int src, int dst) {
@@ -497,6 +498,124 @@ double rn_Dij_to_all_vertices(int src) {
 	delete[] parent;
 	return cost;
 };
+
+
+//////////////////////////////////////////////////////////////////////////
+/*
+	Given	::	a social network and a start point vertex
+	ENSURES ::  the shortest path distance to all the other social network vertices
+*/
+//////////////////////////////////////////////////////////////////////////
+long double Refine_rn_Dij_to_all_vertices(int src, double sigma) {
+
+	double dst = INT_MAX;
+
+	double* dist = new double[No_rn_V];
+	int* parent = new int[No_rn_V];
+	bool* s = new bool[No_rn_V];
+	bool* f = new bool[No_rn_V];
+
+	for (int v = 0; v < No_rn_V; v++) {
+		s[v] = false;
+		f[v] = false;
+		dist[v] = INT_MAX;
+		parent[v] = NULL;
+	}
+	Heap* hp = new Heap();
+	HeapEntry* he = new HeapEntry();
+
+
+
+	hp->used = 0; //clear the heap
+
+	hp->init(2);
+	dist[src] = 0;
+	he->key = 0;
+	he->son1 = src;
+	f[src] = true;
+	hp->insert(he);
+	parent[src] = NULL;
+	double cost = 0;
+	delete he;
+
+	std::clock_t c_start = std::clock();
+	while (hp->used > 0) {
+		HeapEntry* he = new HeapEntry();
+		hp->remove(he);
+		int e = he->son1;
+		//if (dst == e) {
+			//cost = he->key;
+			//break;
+		//}
+		if (dist[e] < INT_MAX) {
+			hash_rn_dist[std::make_pair(src, e)] = dist[e];
+			check_hash_rn_dist[std::make_pair(src, e)] = true;
+
+			hash_rn_dist[std::make_pair(e, src)] = dist[e];
+			check_hash_rn_dist[std::make_pair(e, src)] = true;
+
+		}
+		s[e] = true;
+		f[e] = false;
+		delete he;
+
+		for (std::list<int>::iterator it = rnGraph[e].begin(); it != rnGraph[e].end(); ++it) {
+			int to = *it;
+			if (s[to] == false) {
+				double new_dist = dist[e] + rn_edge_info[std::make_pair(e, to)].weight;
+				if (new_dist < dist[to] && new_dist < sigma) {
+					//std::cerr << new_dist << "\n";
+					dist[to] = new_dist;
+					HeapEntry* he = new HeapEntry();
+					parent[to] = e;
+					he->son1 = to;
+					he->key = new_dist;
+					hp->insert(he);
+					delete he;
+				}
+			}
+		}
+	}
+	hp->~Heap();
+
+	std::clock_t c_end = std::clock();
+	long double time_elapsed_s = (c_end - c_start) / 1000.0;
+	std::cout << "CPU time used for Refinment " << time_elapsed_s << " s\n";
+
+	/*
+	this is a printing function
+	*/
+	/*
+	if (cost != 0) {// if cost ==0, no path exsists
+		int p = parent[dst];
+		std::cerr << std::endl << dst << " " << p << " ";
+		while (true) {
+			if (p == src) break;
+			p = parent[p];
+			std::cerr << p << " ";
+		}
+	}
+	*/
+	// if we cannot hit the vertex, then we assign the distance to it to maximum
+	for (int i = 0; i < No_rn_V; ++i) {
+		if (!(check_hash_rn_dist[std::make_pair(src, i)] && check_hash_rn_dist[std::make_pair(i, src)])) {
+
+			check_hash_rn_dist[std::make_pair(src, i)] = true;
+			check_hash_rn_dist[std::make_pair(i, src)] = true;
+			hash_rn_dist[std::make_pair(src, i)] = +INT_MAX;
+			hash_rn_dist[std::make_pair(i, src)] = +INT_MAX;
+
+		}
+	}
+	delete[] s;
+	delete[] f;
+	delete[] dist;
+	delete[] parent;
+	return time_elapsed_s;
+};
+
+
+
 
 double inf_score_to_all_vertices(int src) {
 	//initialise all vertices as unexplored 
