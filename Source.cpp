@@ -37,18 +37,18 @@ void main() {
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
 
 /***********  Build Index Functions  *************/
-	get_socialNetwork_connected();
+	//get_socialNetwork_connected();
 	//get_roadNetwork_connected();
 	
-	//find_road_network_pivots();
-	//find_social_network_pivots();
+	find_road_network_pivots();
+	find_social_network_pivots();
 
 	
 	
 
 	//gen_subgraphs_update(cand_piv);
 	indexing();
-	setParentOfNodes(); 
+	//setParentOfNodes(); 
 
 
 /**********  summurizin the index functions  *************/
