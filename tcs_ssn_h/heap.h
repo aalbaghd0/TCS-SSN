@@ -42,6 +42,7 @@ public:
 	void insert(HeapEntry *_he);
 	bool remove(HeapEntry *_he);
 	bool deleteEntry(int a);
+	bool deleteHe(int a);
 };
 
 #endif

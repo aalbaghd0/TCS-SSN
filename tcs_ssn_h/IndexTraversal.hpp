@@ -605,11 +605,12 @@ void Refine(int q, int noOfHops, double sigma, int truss_val, std::unordered_set
 	
 	int test = 0;
 
+	int firstTime = 0;
 	// do BFS to get the road network distance starting from the query vertex
-	//long double rnTime = Refine_rn_Dij_to_all_vertices(pos, sigma);
+	long double rnTime = Refine_rn_Dij_to_all_vertices(pos, sigma);
 
 	std::clock_t c_del_1_s, c_del_1_e;
-	long double del1 = 0.0, del2 = 0.0, del3 = 0.0, del4 = 0.0, del5 = 0.0;
+	long double del1 = 0.0, del2 = 0.0, del3 = 0.0, del4 = 0.0, del5 = 0.0, del6 = 0.0;
 
 	int counter = 0;
 	std::clock_t c_start = std::clock();
@@ -631,7 +632,7 @@ void Refine(int q, int noOfHops, double sigma, int truss_val, std::unordered_set
 		del4 = del4 + ((c_del_1_e - c_del_1_s));
 
 		finalSet.insert(q);
-
+		
 		while (hp->used > 0) {
 
 			c_del_1_s = std::clock();
@@ -651,7 +652,7 @@ void Refine(int q, int noOfHops, double sigma, int truss_val, std::unordered_set
 					c_del_1_s = std::clock();
 					int posDist = sn_vrtx[*it].ckins[0];
 					HeapEntry* he = new HeapEntry();
-					std::cerr << "rn_dist_for_users(q, *it) < sigma: " << rn_dist_for_users(q, *it) << std::endl;
+					//std::cerr << "rn_dist_for_users(q, *it) < sigma: " << rn_dist_for_users(q, *it) << std::endl;
 					c_del_1_e = std::clock();
 					del5 = del5 + ((c_del_1_e - c_del_1_s));
 					
@@ -662,11 +663,21 @@ void Refine(int q, int noOfHops, double sigma, int truss_val, std::unordered_set
 		
 					// social distance pruning
 					if (noOfHops >= he->key
-						&& rn_dist_for_users(q, *it) < sigma) {
+						&& //rn_dist_for_users(q, *it) < sigma
+						check_hash_rn_dist[std::make_pair(pos, posDist)] && hash_rn_dist[std::make_pair(pos, posDist)] < sigma
+						) {
 						
 						hp->insert(he);
 						finalSet.insert(*it);
 					}
+
+					c_del_1_s = std::clock();
+					if (firstTime == 0) {
+						std::cerr << "\n**********************************************************\n";
+						std::cerr << "The size of candidate set after indexing and one BFS:: " << finalSet.size() << std::endl;
+					}
+					c_del_1_e = std::clock();
+					del1 = del1 + ((c_del_1_e - c_del_1_s));
 					if(intersect(cand, *it) < truss_val -2 ){
 						c_del_1_s = std::clock();
 						snGraph_fnl[*it].remove(cand);
@@ -682,15 +693,15 @@ void Refine(int q, int noOfHops, double sigma, int truss_val, std::unordered_set
 		c_del_1_s = std::clock();
 		hp->~Heap();
 		c_del_1_e = std::clock();
-		del2 = del2 + ((c_del_1_e - c_del_1_s));
+		del6 = del6 + ((c_del_1_e - c_del_1_s));
 	}
 
 	std::clock_t c_end = std::clock();
 	long double time_elapsed_ms = (c_end - c_start) / 1000.0;
 
-	std::cerr << "\n**********************************************************\n";
+	
 	std::cout << "CPU time used for Refinment " << time_elapsed_ms << " s\n";
-	std::cerr << "the Total CPU Time: "  <<time_elapsed_ms + treeTime - (del1/ 1000.0) - (del2/1000.0) - (del3 / 1000.0) - (del4 / 1000.0) - (del5 / 1000.0) << "s\n";
+	std::cerr << "the Total CPU Time: "  <<time_elapsed_ms + rnTime +treeTime - (del1/ 1000.0) - (del2/1000.0) - (del3 / 1000.0) - (del4 / 1000.0) - (del5 / 1000.0) - (del6 / 1000.0) << "s\n";
 	std::cerr << "the final set size:: " << finalSet.size() << std::endl;
 	std::cerr << "No Of times we refine " << counter << std::endl;
 

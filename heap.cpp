@@ -94,6 +94,8 @@ void Heap::insert(HeapEntry *_he)
 	//if (!check())
 	//	printf("testing...\n");
 }
+
+
 //------------------------------------------
 bool Heap::remove(HeapEntry *_he)
 //this function deheaps an entry. the return value indicates whether successful: false
@@ -153,6 +155,8 @@ bool Heap::deleteEntry(int a) {
 		}
 	}
 
+	// copy the last element and put it in the deleted one
+	// reuce the size of the heap --used
 	cont[pos].copy(&(cont[used - 1]));
 	used--;
 	
@@ -160,12 +164,8 @@ label1:
 	int parent = (pos - 1) / 2;
 	int child1 = (pos * 2) + 1;
 	int child2 = (pos * 2) + 1 + 1;
-	
-	if (cont[pos].key <= cont[parent].key && cont[pos].key >= cont[child1].key
-		    && cont[pos].key >= cont[child2].key) {
-		return true;
-	}
-	else if(cont[pos].key < cont[parent].key){
+
+	if(cont[pos].key < cont[parent].key){
 		HeapEntry* the = new HeapEntry();
 		the->init_HeapEntry(cont[parent].dim);
 				the->copy(&(cont[parent]));
@@ -175,29 +175,32 @@ label1:
 				goto label1;
 	}
 	else {
-		if (2 * pos <= used) {
-			int child;
-			if (2 * pos + 2 > used)
-				child = 2 * pos + 1;
+		if (parent == 0)
+			parent = 1;
+		while (2 * parent <= used) {
+			int child = 2 * parent;
+			if (2 * parent + 1 > used)
+				child = 2 * parent;
 			else
-				if (cont[child1].key < cont[child2].key)
-					child = child1;
+				if (cont[2 * parent - 1].key < cont[2 * parent].key)
+					child = 2 * parent;
 				else
-					child = child2;
+					child = 2 * parent + 1;
 
-			if (cont[pos].key > cont[child].key) {
+			if (cont[parent - 1].key > cont[child - 1].key) {
 				HeapEntry* the = new HeapEntry();
-				the->init_HeapEntry(cont[pos].dim);
-				the->copy(&(cont[pos]));
-				cont[pos].copy(&(cont[child]));
-				cont[child].copy(the);
+				the->init_HeapEntry(cont[parent - 1].dim);
+				the->copy(&(cont[parent - 1]));
+				cont[parent - 1].copy(&(cont[child - 1]));
+				cont[child - 1].copy(the);
 				delete the;
-				pos = child;
-				goto label1;
+				parent = child;
 			}
+			else
+				parent = used;
 		}
 	}
-
+	
 	// does not work
 }
 void Heap::clean(double _dist)

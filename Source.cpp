@@ -20,6 +20,53 @@
 // this is a good code
 // the main function
 void main() {
+	/*
+	Heap* hp = new Heap();
+	hp->init(1);
+	{
+		HeapEntry* he = new HeapEntry();
+		he->key = 0;
+		he->son1 = 0;
+		hp->insert(he);
+		delete he;
+	}
+	{
+		HeapEntry* he = new HeapEntry();
+		he->key = 5;
+		he->son1 = 5;
+		hp->insert(he);
+		delete he;
+	}
+	{
+		HeapEntry* he = new HeapEntry();
+		he->key = 7;
+		he->son1 = 7;
+		hp->insert(he);
+		delete he;
+	}
+	HeapEntry* he = new HeapEntry();
+	he->key = 3;
+	he->son1 = 3;
+	hp->insert(he);
+	delete he;
+
+	{
+		HeapEntry* he = new HeapEntry();
+		he->key = 1;
+		he->son1 = 1;
+		hp->insert(he);
+		delete he;
+	}
+	std::cerr << hp->check();
+	hp->deleteEntry(0);
+	while (hp->used > 0){
+		hp->remove(he);
+		std::cerr << he->son1<<" ";
+	}
+	*/
+	
+
+
 
 	//char user_file[100] = "data/200K_Gow_Cali/RT_groups_social_network.txt";
 	//char road_file[100] = "data/200K_Gow_Cali/RT_groups_road_network.txt";
@@ -40,15 +87,15 @@ void main() {
 	//get_socialNetwork_connected();
 	//get_roadNetwork_connected();
 	
-	find_road_network_pivots();
-	find_social_network_pivots();
+	//find_road_network_pivots();
+	//find_social_network_pivots();
 
 	
 	
 
 	//gen_subgraphs_update(cand_piv);
 	indexing();
-	//setParentOfNodes(); 
+	//setParentOfNodes(); 100
 
 
 /**********  summurizin the index functions  *************/

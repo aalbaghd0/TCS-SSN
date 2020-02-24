@@ -25,10 +25,10 @@ void read_vertices(vertex vrtx[], int size, char Vfile[]) {
 	// get ride of the number of lines in the file
 	int getRide;
 	fscanf(file, "%d", &getRide);
-	std::cerr << getRide << "\n";
+	//std::cerr << getRide << "\n";
 	while (!feof(file)) {
 		fscanf(file, "%d", &v_id);
-		std::cerr << v_id << "\n";
+		//std::cerr << v_id << "\n";
 
 		//std::cerr << v_id << " ";
 		for (i = 0; i < 4; i++) {
