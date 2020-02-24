@@ -21,12 +21,11 @@
 // the main function
 void main() {
 
-	//char user_file[100] = "data/new_real_data/RT_groups_social_network.txt";
-	//char road_file[100] = "data/new_real_data/RT_groups_road_network.txt";
-	//char output_file[100] = "data/new_real_data/New_mapping_By_groups.txt";
-	//char rn_Edges_file[100] = "data/new_real_data/RN_cali_edges.txt";
-
-	
+	//char user_file[100] = "data/200K_Gow_Cali/RT_groups_social_network.txt";
+	//char road_file[100] = "data/200K_Gow_Cali/RT_groups_road_network.txt";
+	//char output_file[100] = "data/200K_Gow_Cali/New_mapping_By_groups.txt";
+	//char rn_Edges_file[100] = "data/200K_Gow_Cali/RN_cali_edges.txt";
+	// this is what you will use BiDataset
 	//mapping_social_to_road(user_file, road_file, output_file, rn_Edges_file);
 
 	//char the_sn_edges_file[100] = "data/real_Gowalla+San Joaquin/gowalla_edges.txt";
@@ -38,11 +37,13 @@ void main() {
 	rn_read_edges(rnGraph, rnEdges, No_rn_E, 10, rn_E_file);
 
 /***********  Build Index Functions  *************/
-	find_road_network_pivots();
-	find_social_network_pivots();
-
-	//get_socialNetwork_connected();
+	get_socialNetwork_connected();
 	//get_roadNetwork_connected();
+	
+	//find_road_network_pivots();
+	//find_social_network_pivots();
+
+	
 	
 
 	//gen_subgraphs_update(cand_piv);

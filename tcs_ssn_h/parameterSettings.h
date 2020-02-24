@@ -6,10 +6,10 @@
 #include<fstream>
 
 
-char sn_V_file[100] = "data/new_real_data/New_mapping_By_groups.txt";
-char sn_E_file[100] = "data/new_real_data/SN_Gwo_edges.txt";
-char rn_V_file[100] = "data/new_real_data/RN_cali_vertices.txt";
-char rn_E_file[100] = "data/new_real_data/RN_cali_edges.txt";
+char sn_V_file[100] = "data/200K_Gow_Cali/New_mapping_By_groups.txt";
+char sn_E_file[100] = "data/200K_Gow_Cali/SN_Gwo_edges.txt";
+char rn_V_file[100] = "data/200K_Gow_Cali/RN_cali_vertices.txt";
+char rn_E_file[100] = "data/200K_Gow_Cali/RN_cali_edges.txt";
 
 
 int set_parameters(char filename[]) {
@@ -48,7 +48,7 @@ int set_parameters(char filename[]) {
 
 #define No_SN_piv				4
 #define No_RN_piv				4
-#define No_CKINs				1
+#define No_CKINs				3
 
 
 
@@ -75,6 +75,7 @@ rn_vertices* rn_vrtx = new rn_vertices[No_rn_V];
 
 
 std::list<int>* snGraph = new std::list<int>[No_sn_V];
+std::list<int>* snGraph_fnl = new std::list<int>[No_sn_V];
 std::list<int>* rnGraph = new std::list<int>[No_rn_V];
 
 SN_edges* snEdges = new SN_edges[No_sn_E];
@@ -113,6 +114,8 @@ struct pair_hash {
 };
 //////////////
 std::unordered_map<pair, int, pair_hash> hash_edge;
+
+std::unordered_map<pair, bool, pair_hash> f_edges;
 
 std::unordered_map<pair, SN_edges, pair_hash> sn_edge_info;
 std::unordered_map<pair, RN_edges, pair_hash> rn_edge_info;

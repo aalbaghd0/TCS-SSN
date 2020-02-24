@@ -576,11 +576,12 @@ long double Refine_rn_Dij_to_all_vertices(int src, double sigma) {
 			}
 		}
 	}
-	hp->~Heap();
 
 	std::clock_t c_end = std::clock();
 	long double time_elapsed_s = (c_end - c_start) / 1000.0;
-	std::cout << "CPU time used for Refinment " << time_elapsed_s << " s\n";
+
+	hp->~Heap();
+	//std::cout << "CPU time used for Refinment " << time_elapsed_s << " s\n";
 
 	/*
 	this is a printing function

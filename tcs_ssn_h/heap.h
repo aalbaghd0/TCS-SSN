@@ -2,7 +2,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
-#define MAX_HEAP_SIZE 2000000
+#define MAX_HEAP_SIZE 1000000
 
 class HeapEntry;
 class Heap;

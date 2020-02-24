@@ -30,13 +30,20 @@ bool IndexKeywordbasedPruning (int q, int it, std::bitset<No_K> tt);
 bool KeywordbasedPruning(int v, std::bitset<No_K> k_set);
 bool StructuralCohesivenessPruning(int v, int truss_val);
 bool InfluenceScorePruning(int q, int v, int Qtopic[], int SizeQtopic, int theta);
-void Refine(int q, int NoOfHops, double sigma, std::unordered_set<int> S, long double time_elapsed_s);
-void GreedyBaseLine(int q, int noOfHops, double sigma, int truss_val, double theta, int Qtopic[], std::bitset<No_K> k_set, int SizeQtopic);
+void Refine(int q, int NoOfHops, double sigma, int truss_val,std::unordered_set<int> S, long double time_elapsed_s);
+std::unordered_set<int> GreedyBaseLine(int q, int noOfHops, double sigma, int truss_val, double theta, int Qtopic[], std::bitset<No_K> k_set, int SizeQtopic, long double &time);
+int intersect(int a, int b);
 
 
 
 void indexTrav() {
 	// here we set the query topics set, they are just an index 0, 1, 2, ..
+	int max = 0;
+	for (int i = 0; i < No_sn_V; i++) {
+		if (max < snGraph[i].size())
+			max = i;
+	}
+	std::cerr << "the vertex with maximun degree: " << max << std::endl;
 	
 	while (TRUE) {
 		int noOfHops;
@@ -84,12 +91,6 @@ void indexTrav() {
 		hp->init(2);
 
 		std::unordered_set<int> S;
-
-		//int treeHeight = getTreeHight();
-		//int* queryNode = new int[treeHeight];
-
-		std::unordered_map<pair, int, pair_hash> queryNodeLevel;
-		queryNodeLevel = get_queryNode(q);
 
 		int root = 0;
 
@@ -172,13 +173,16 @@ void indexTrav() {
 
 		std::cerr << "\n---------------------------------------------------------------\n";
 
-
-		Refine(q, noOfHops, sigma, S, time_elapsed_s);
-		GreedyBaseLine(q, noOfHops, sigma, truss_val, theta, Qtopic, k_set, SizeQtopic);
+		//S.clear();
+		long double time;
+		
+		Refine(q, noOfHops, sigma, truss_val, S, time_elapsed_s);
+		GreedyBaseLine(q, noOfHops, sigma, truss_val, theta, Qtopic, k_set, SizeQtopic, time);
 
 		S.clear();
 		hp->~Heap();
 		delete[] Qtopic;
+		check_hash_rn_dist.clear();
 
 	}
 }
@@ -554,7 +558,7 @@ bool IndexKeywordbasedPruning(int q, int theNode, std::bitset<No_K> k_set) {
 }
 
 
-void Refine(int q, int noOfHops, double sigma, std::unordered_set<int> S, long double treeTime) {
+void Refine(int q, int noOfHops, double sigma, int truss_val, std::unordered_set<int> S, long double treeTime) {
 	// get the maximum subgraph using BFS
 
 	bool *pruned = new bool [No_sn_V];
@@ -569,17 +573,27 @@ void Refine(int q, int noOfHops, double sigma, std::unordered_set<int> S, long d
 		pruned[*it] = false;
 	}
 
-	std::unordered_set<int> finalSet;
- 
-	Heap* hp = new Heap();
-	hp->init(2);
-	HeapEntry* he = new HeapEntry();
-	he->son1 = q;
-	he->key = 0;
-	hp->insert(he);
-	delete he;
+	
+	
+	// we clean the social network graph by removing pruned vertices
+	for (int i = 0; i < No_sn_V; ++i) {
+		if (pruned[i] == false) {
+			for (std::list<int>::iterator it = snGraph[i].begin(); it != snGraph[i].end(); it++) {
+				if (pruned[*it] == false) {
+					if (!f_edges[std::make_pair(i, *it)] && !f_edges[std::make_pair(*it, i)]) {
 
-	finalSet.insert(q);
+					snGraph_fnl[*it].push_back(i);
+					snGraph_fnl[i].push_back(*it);
+					f_edges[std::make_pair(i, *it)] = true;
+					f_edges[std::make_pair(*it, i)] = true;
+
+					}
+				}
+			}
+		}
+	}
+
+	std::unordered_set<int> finalSet;
 
 	int cand, cand2;
 	double weight;
@@ -589,41 +603,86 @@ void Refine(int q, int noOfHops, double sigma, std::unordered_set<int> S, long d
 	int pos = sn_vrtx[q].ckins[0];
 	//start recording the time
 	
+	int test = 0;
 
-	long double rnTime = Refine_rn_Dij_to_all_vertices(pos, sigma);
+	// do BFS to get the road network distance starting from the query vertex
+	//long double rnTime = Refine_rn_Dij_to_all_vertices(pos, sigma);
 
+	std::clock_t c_del_1_s, c_del_1_e;
+	long double del1 = 0.0, del2 = 0.0, del3 = 0.0, del4 = 0.0, del5 = 0.0;
+
+	int counter = 0;
 	std::clock_t c_start = std::clock();
-	while (hp->used > 0) {
-		
-		HeapEntry* he = new HeapEntry();
-		hp->remove(he);
-		
-		cand = he->son1;
-		weight = he->key;
-		delete he;
 
-		for (std::list<int>::iterator it = snGraph[cand].begin(); it != snGraph[cand].end(); ++it) {
-			if (!pruned[*it]) {
+	while (test != -1) {
+		counter++;
+		c_del_1_s = std::clock();
+		test = -1;
+		std::memset(dist, 0, sizeof(dist[0]) * No_sn_V);
+		Heap* hp = new Heap();
+		hp->init(2);
+		HeapEntry* he = new HeapEntry();
+		he->son1 = q;
+		he->key = 0;
+		hp->insert(he);
+		delete he;
+		finalSet.clear();
+		c_del_1_e = std::clock();
+		del4 = del4 + ((c_del_1_e - c_del_1_s));
+
+		finalSet.insert(q);
+
+		while (hp->used > 0) {
+
+			c_del_1_s = std::clock();
+			HeapEntry* he = new HeapEntry();
+			hp->remove(he);
+			cand = he->son1;
+			weight = he->key;
+			delete he;
+			c_del_1_e = std::clock();
+			del3 = del3 + ((c_del_1_e - c_del_1_s));
+
+			for (std::list<int>::iterator it = snGraph_fnl[cand].begin(); it != snGraph_fnl[cand].end(); ++it) {
+				
 				if (!visited[*it]) {
 					visited[*it] = true;
+
+					c_del_1_s = std::clock();
+					int posDist = sn_vrtx[*it].ckins[0];
 					HeapEntry* he = new HeapEntry();
+					std::cerr << "rn_dist_for_users(q, *it) < sigma: " << rn_dist_for_users(q, *it) << std::endl;
+					c_del_1_e = std::clock();
+					del5 = del5 + ((c_del_1_e - c_del_1_s));
+					
 					he->son1 = *it;
 					he->key = weight + 1;
 
-					int posDist = sn_vrtx[*it].ckins[0];
-
+					
+		
 					// social distance pruning
-					if (noOfHops >= he->key) {
-						if (check_hash_rn_dist[std::make_pair(pos, posDist)] && hash_rn_dist[std::make_pair(pos, posDist)] < sigma) {
-							hp->insert(he);
-							finalSet.insert(*it);
-						}
+					if (noOfHops >= he->key
+						&& rn_dist_for_users(q, *it) < sigma) {
+						
+						hp->insert(he);
+						finalSet.insert(*it);
+					}
+					if(intersect(cand, *it) < truss_val -2 ){
+						c_del_1_s = std::clock();
+						snGraph_fnl[*it].remove(cand);
+						snGraph_fnl[cand].erase(it);
+						test = 1;
+						c_del_1_e = std::clock();
+						del1 = del1 + ((c_del_1_e - c_del_1_s));
 					}
 					delete he;
 				}
 			}
-			
 		}
+		c_del_1_s = std::clock();
+		hp->~Heap();
+		c_del_1_e = std::clock();
+		del2 = del2 + ((c_del_1_e - c_del_1_s));
 	}
 
 	std::clock_t c_end = std::clock();
@@ -631,15 +690,33 @@ void Refine(int q, int noOfHops, double sigma, std::unordered_set<int> S, long d
 
 	std::cerr << "\n**********************************************************\n";
 	std::cout << "CPU time used for Refinment " << time_elapsed_ms << " s\n";
-	std::cerr << "the Total CPU Time: "  <<time_elapsed_ms + treeTime + rnTime << "s\n";
+	std::cerr << "the Total CPU Time: "  <<time_elapsed_ms + treeTime - (del1/ 1000.0) - (del2/1000.0) - (del3 / 1000.0) - (del4 / 1000.0) - (del5 / 1000.0) << "s\n";
 	std::cerr << "the final set size:: " << finalSet.size() << std::endl;
+	std::cerr << "No Of times we refine " << counter << std::endl;
+
 	std::cerr << "\n**********************************************************\n";
 	 
-	hp->~Heap();
+	
 	delete[] visited;
 	delete[] pruned;
+	f_edges.clear();
+	
 }
 
+
+
+
+int intersect(int a, int b) {
+	//std::cerr << "the edge truss: " << snEdges[ hash_edge[std::make_pair(a, b)] ].sup << std::endl;
+	double rslt = 0.0;
+	std::unordered_set<int> intersect;
+	set_intersection(sn_vrtx[a].nbrs_set.begin(), sn_vrtx[a].nbrs_set.end(),
+		sn_vrtx[b].nbrs_set.begin(), sn_vrtx[b].nbrs_set.end(),
+		std::inserter(intersect, intersect.begin()));
+
+	rslt = intersect.size();
+	return rslt;
+}
 
 /*
 ///////////////////////////////////////////////////////////////////////
@@ -648,6 +725,178 @@ void Refine(int q, int noOfHops, double sigma, std::unordered_set<int> S, long d
 
 ///////////////////////////////////////////////////////////////////////
 */
+bool KeywordbasedPruning_GREEDY(int v, std::bitset<No_K> kk_set) {
+	bool val = true;;
+	for (int i = 0; i < No_K; i++) {
+		if (kk_set[i] == sn_vrtx[v].key[i])
+			val = false;
+	}
+	return val;
+}
+std::unordered_set<int> GreedyBaseLine(int q, int noOfHops, double sigma, int truss_val, double theta, int Qtopic[], std::bitset<No_K> k_set, int SizeQtopic, long double &time) {
+
+	// filter by social network
+	// filter by road network
+	// filter by
+
+	// get the maximum subgraph using BFS
+	std::list<int>* snGraph_copy = new std::list<int>[No_sn_V];
+	for (int i = 0; i < No_sn_V; i++) {
+		for (std::list<int>::iterator it = snGraph[i].begin(); it != snGraph[i].end(); it++) {
+			snGraph_copy[i].push_back(*it);
+		}
+	}
+
+
+	bool* pruned = new bool[No_sn_V];
+	bool* visited = new bool[No_sn_V];
+
+	for (int i = 0; i < No_sn_V; ++i) {
+		pruned[i] = false;
+		visited[i] = false;
+	}
+
+	std::unordered_set<int> finalSet;
+
+	std::unordered_set<int> remainingEdges;
+	
+
+	int cand, cand2;
+	double weight;
+
+	int* dist = new int[No_sn_V];
+
+	int pos = sn_vrtx[q].ckins[0];
+	//start recording the time
+
+	long double del1= 0.0;
+	std::clock_t c_s, c_e;
+
+	long double rnTime = Refine_rn_Dij_to_all_vertices(pos, sigma);
+	std::clock_t c_start = std::clock();
+	int test = 0;
+	while (test != -1) {
+		test = -1;
+		Heap* hp = new Heap();
+		hp->init(2);
+		HeapEntry* he = new HeapEntry();
+		he->son1 = q;
+		he->key = 0;
+		hp->insert(he);
+		delete he;
+		finalSet.clear();
+		finalSet.insert(q);
+		remainingEdges.clear();
+	
+		while (hp->used > 0) {
+
+			c_s = std::clock();
+			HeapEntry* he = new HeapEntry();
+			hp->remove(he);
+
+			cand = he->son1;
+			weight = he->key;
+			delete he;
+			c_e = std::clock();
+			del1 = c_e - c_s;
+
+			for (std::list<int>::iterator it = snGraph_copy[cand].begin(); it != snGraph_copy[cand].end(); it++) {
+					if (!visited[*it]) {
+						visited[*it] = true;
+						HeapEntry* he = new HeapEntry();
+						he->son1 = *it;
+						he->key = weight + 1;
+
+						int posDist = sn_vrtx[*it].ckins[0];
+
+						// social distance pruning
+						if (noOfHops >= he->key) {
+
+							// structural pruning
+							//if (!intersect(*it, truss_val)) {
+								// topic based pruning
+								//if (!InfluenceScorePruning(q, *it, Qtopic, SizeQtopic, theta)) {
+									// keyword based pruning
+							if (!KeywordbasedPruning_GREEDY(*it, k_set)) {
+								//spatial distance pruning
+								if (rn_dist_for_users(q, *it) < sigma
+									//check_hash_rn_dist[std::make_pair(pos, posDist)] && hash_rn_dist[std::make_pair(pos, posDist)] < sigma
+									) {
+									remainingEdges.insert(hash_edge[std::make_pair(cand, *it)]);
+									hp->insert(he);
+									finalSet.insert(*it);
+								}
+								//}
+							//}
+							}
+						}
+						delete he;
+					}
+			}
+		}
+		for (std::unordered_set<int>::iterator it2 = remainingEdges.begin(); it2 != remainingEdges.end(); it2++) {
+			int from, to;
+			from = snEdges[*it2].from;
+			to = snEdges[*it2].to;
+			if (intersect(from, to) < truss_val - 2) {
+				snGraph_copy[to].remove(from);
+				snGraph_copy[from].remove(to);
+				test = 1;
+			}
+		}
+		
+		std::cerr << "finalSet.size(): " << finalSet.size() << std::endl;
+		
+		for (std::unordered_set<int>::iterator it2 = finalSet.begin(); it2 != finalSet.end(); it2++) {
+			for (std::unordered_set<int>::iterator it3 = finalSet.begin(); it3 != finalSet.end(); it3++) {
+				if (*it2 != *it3 && !pruned[*it3] && !pruned[*it2]) {
+					double dist = rn_dist_for_users(*it2, *it3);
+					if (dist > sigma) {
+						finalSet.erase(*it3);
+						pruned[*it3] = true;
+					}
+				}
+
+			}
+		}
+			hp->~Heap();
+	}
+
+	std::clock_t c_end = std::clock();
+	long double time_elapsed_ms = (c_end - c_start) / 1000.0;
+	time = time_elapsed_ms + rnTime;
+	std::cerr << "\n**********************************************************\n";
+	std::cout << "CPU time used for GREEDY Baseline " << time - (del1 / 1000.0) << " s\n";
+	std::cerr << "the final set size:: " << finalSet.size() << std::endl;
+	std::cerr << "\n**********************************************************\n";
+
+	
+	delete[] visited;
+	delete[] pruned;
+
+	return finalSet;
+}
+
+
+#endif // !INDEX_TRAV
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+///////////////////////////////////////////////////////////////////////
+
+					THE GREEDY BASE ALGORITHM
+
+///////////////////////////////////////////////////////////////////////
 
 
 void GreedyBaseLine(int q, int noOfHops, double sigma, int truss_val, double theta, int Qtopic[], std::bitset<No_K> k_set, int SizeQtopic) {
@@ -717,9 +966,9 @@ void GreedyBaseLine(int q, int noOfHops, double sigma, int truss_val, double the
 								// topic based pruning
 								if (!InfluenceScorePruning(q, *it, Qtopic, SizeQtopic, theta)) {
 									// keyword based pruning
-									if(!KeywordbasedPruning(*it, k_set))
+									if (!KeywordbasedPruning(*it, k_set))
 
-									hp->insert(he);
+										hp->insert(he);
 									finalSet.insert(*it);
 								}
 							}
@@ -745,5 +994,5 @@ void GreedyBaseLine(int q, int noOfHops, double sigma, int truss_val, double the
 	delete[] pruned;
 
 }
-#endif // !INDEX_TRAV
 
+*/

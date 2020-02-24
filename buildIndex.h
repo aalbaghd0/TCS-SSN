@@ -1126,7 +1126,7 @@ void setParentOfNodes() {
 */
 void get_socialNetwork_connected(){
 
-	std::unordered_set<int>* sett = new std::unordered_set<int>[100000];
+	std::unordered_set<int>* sett = new std::unordered_set<int>[1000000];
 	int* havingSet = new int[No_sn_V];
 	bool* check_havingSet = new bool[No_sn_V];
 	int setCou = 0;
@@ -1135,6 +1135,7 @@ void get_socialNetwork_connected(){
 		check_havingSet[i] = false;
 
 	for (int i = 0; i < No_sn_V; ++i) {
+		std::cerr << i << std::endl;
 		if ( !check_havingSet[i]) { // if the vrtx have no group
 
 			Heap* hp = new Heap();
@@ -1575,10 +1576,10 @@ void mapping_social_to_road(char *social, char *road, char *outFile, char *file_
 	std::ofstream out_;
 	out_.open(outFile);
 
-	int no_sn_vertices = 40000;
+	int no_sn_vertices = 196588;
 	int no_rn_vertices = 21048;
 	int no_sn_edges = 198001;
-	int no_rn_edges = 21693;
+	int no_rn_edges = 351453;
 	
 
 	rn_vertecies* rn_v = new rn_vertecies[no_rn_vertices];
