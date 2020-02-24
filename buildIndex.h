@@ -1126,7 +1126,7 @@ void setParentOfNodes() {
 */
 void get_socialNetwork_connected(){
 
-	std::unordered_set<int>* sett = new std::unordered_set<int>[1000000];
+	std::unordered_set<int>* sett = new std::unordered_set<int>[200000];
 	int* havingSet = new int[No_sn_V];
 	bool* check_havingSet = new bool[No_sn_V];
 	int setCou = 0;
@@ -1159,7 +1159,7 @@ void get_socialNetwork_connected(){
 				havingSet[vr] = setCou;
 				check_havingSet[vr] = true;
 				
-				for (std::list<int>::iterator it = snGraph[vr].begin(); it != snGraph[vr].end(); ++it) {
+				for (std::list<int>::iterator it = snGraph[vr].begin(); it != snGraph[vr].end(); it++) {
 					
 					if (!check_havingSet[*it]) { // we put it into the heap if it was not explored before
 						HeapEntry* he = new HeapEntry();
