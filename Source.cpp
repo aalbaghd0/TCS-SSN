@@ -87,8 +87,8 @@ void main() {
 	//get_socialNetwork_connected();
 	//get_roadNetwork_connected();
 	
-	//find_road_network_pivots();
-	//find_social_network_pivots();
+	find_road_network_pivots();
+	find_social_network_pivots();
 
 	
 	
